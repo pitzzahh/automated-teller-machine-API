@@ -23,6 +23,7 @@ import static com.github.pitzzahh.utilities.classes.TextColors.*;
  */
 public class Atm {
     private static final ClientService CLIENT_SERVICE = new ClientService();
+    @SuppressWarnings("InfiniteLoopStatement")
     public static void main(String[] args)  {
         final Scanner scanner = new Scanner(System.in);
         CLIENT_SERVICE.setDataSource().accept(ClientService.getDataSource());
@@ -36,7 +37,6 @@ public class Atm {
                 System.out.println(RED_BOLD_BRIGHT +  runtimeException.getMessage() + RESET);
             }
         }
-
     }
 
     /**
