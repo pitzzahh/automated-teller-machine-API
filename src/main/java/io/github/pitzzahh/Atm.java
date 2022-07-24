@@ -23,6 +23,7 @@ import static com.github.pitzzahh.utilities.classes.TextColors.*;
  */
 public class Atm {
     private static final ClientService CLIENT_SERVICE = new ClientService();
+    @SuppressWarnings("InfiniteLoopStatement")
     public static void main(String[] args)  {
         final Scanner scanner = new Scanner(System.in);
         CLIENT_SERVICE.setDataSource().accept(ClientService.getDataSource());
@@ -36,14 +37,13 @@ public class Atm {
                 System.out.println(RED_BOLD_BRIGHT +  runtimeException.getMessage() + RESET);
             }
         }
-
     }
 
     /**
      * The automated teller machine that handles most of the process.
      */
     static class Machine {
-        private static final String $a = "?cl0m0#sq3s/q"; // @dm1n1$tr4t0r
+        private static final String $adm = "?cl0m0#sq3s/q";
         private static String $an;
         /**
          * Searches the {@code Hashtable<String, Client>}, checks if the account number exists.
@@ -116,7 +116,7 @@ public class Atm {
 
             /**
              * method for asking for user details.
-             * @param scanner the scanner needed for keynoard input.
+             * @param scanner the scanner needed for keyboard input.
              * @return a {@code Client} object.
              * @throws IllegalArgumentException if any of the input is not valid.
              */
@@ -207,7 +207,7 @@ public class Atm {
                 System.out.println(RED_BOLD_BRIGHT + "ENTER ACCOUNT NUMBER TO REMOVE: ");
                 System.out.print(PURPLE_BOLD + ">>>: " + RESET);
                 $an = scanner.nextLine().trim();
-                return CLIENT_SERVICE.removeClientByAccountNumber().apply(SecurityUtil.encrypt($an));
+                return CLIENT_SERVICE.removeClientByAccountNumber().apply($an);
             }
 
             /**
@@ -322,7 +322,7 @@ public class Atm {
         System.out.println(YELLOW_BRIGHT + "ENTER YOUR ACCOUNT NUMBER" + RESET);
         System.out.print(RED_BOLD_BRIGHT + ">>>: " + RESET);
         var input = scanner.nextLine().trim();
-        if (input.equals(SecurityUtil.decrypt(Machine.$a))) return Role.ADMIN;
+        if (input.equals(SecurityUtil.decrypt(Machine.$adm))) return Role.ADMIN;
         if (Validator.isDecimalNumber().test(input)) throw new IllegalArgumentException("\nACCOUNT NUMBER IS A WHOLE NUMBER\n");
         if (Validator.isWholeNumber().negate().test(input)) throw new IllegalArgumentException("\nACCOUNT NUMBER IS A NUMBER\n");
         var result = Machine.searchAccount(input);

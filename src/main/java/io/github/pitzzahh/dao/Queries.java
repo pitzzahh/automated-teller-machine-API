@@ -11,7 +11,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import static com.github.pitzzahh.utilities.classes.enums.Status.*;
 
 // TODO: create a test for this.
-// TODO: implement updateClientAttemptsByAccountNumberQuery() and updateClientSavingsByAccountNumberQuery()
 public class Queries {
 
     public static Supplier<List<Optional<Client>>> getAllClientsQuery(JdbcTemplate jdbc) {
@@ -20,13 +19,13 @@ public class Queries {
 
     public static Optional<Client> getClientByAccountNumberQuery(String $an, JdbcTemplate jdbc) {
         try {
-            return jdbc.queryForObject("SELECT * FROM clients WHERE account_number = ?", new Object[]{SecurityUtil.encrypt($an)}, new ClientMapper());
+            return jdbc.queryForObject("SELECT * FROM clients WHERE account_number = ?", new ClientMapper(), SecurityUtil.encrypt($an));
         } catch (EmptyResultDataAccessException ignored) {}
         return Optional.empty();
     }
 
     public static Status removeClientByAccountNumberQuery(String $an, JdbcTemplate jdbc) {
-        return jdbc.update("DELETE FROM clients WHERE account_number = ?", $an) > 0 ? SUCCESS : ERROR;
+        return jdbc.update("DELETE FROM clients WHERE account_number = ?", SecurityUtil.encrypt($an)) > 0 ? SUCCESS : ERROR;
     }
 
     public static Status updateClientAttemptsByAccountNumberQuery(String an, String at, JdbcTemplate jdbc) {
