@@ -1,6 +1,6 @@
 package io.github.pitzzahh.dao;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.sql.DataSource;
 import java.util.function.BiFunction;
@@ -17,7 +17,7 @@ public interface ClientDAO {
 
     Consumer<DataSource> setDataSource();
 
-    Supplier<List<Optional<Client>>> getAllClients();
+    Supplier<Map<String, Client>> getAllClients();
 
     Function<String, Optional<Client>> getClientByAccountNumber();
 

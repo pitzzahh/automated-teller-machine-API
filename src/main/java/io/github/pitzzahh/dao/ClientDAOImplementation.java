@@ -1,12 +1,12 @@
 package io.github.pitzzahh.dao;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.sql.DataSource;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.BiFunction;
 import io.github.pitzzahh.entity.Client;
 import static io.github.pitzzahh.dao.Queries.*;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -29,7 +29,7 @@ public class ClientDAOImplementation implements ClientDAO {
     }
 
     @Override
-    public Supplier<List<Optional<Client>>> getAllClients() {
+    public Supplier<Map<String, Client>> getAllClients() {
         return getAllClientsQuery(jdbcTemplate);
     }
 

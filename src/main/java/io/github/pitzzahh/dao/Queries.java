@@ -1,7 +1,9 @@
 package io.github.pitzzahh.dao;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import io.github.pitzzahh.entity.Client;
 import io.github.pitzzahh.mapper.ClientMapper;
 import com.github.pitzzahh.utilities.SecurityUtil;
@@ -13,13 +15,13 @@ import static com.github.pitzzahh.utilities.classes.enums.Status.*;
 // TODO: create a test for this.
 public class Queries {
 
-    public static Supplier<List<Optional<Client>>> getAllClientsQuery(JdbcTemplate jdbc) {
-        return () -> jdbc.query("SELECT * FROM clients", new ClientMapper());
+    public static Supplier<Map<String, Client>> getAllClientsQuery(JdbcTemplate jdbc) {
+        return () -> jdbc.query("SELECT * FROM clients", new ClientMapper()).stream().collect(Collectors.toMap(Client::accountNumber, Function.identity()));
     }
 
     public static Optional<Client> getClientByAccountNumberQuery(String $an, JdbcTemplate jdbc) {
         try {
-            return jdbc.queryForObject("SELECT * FROM clients WHERE account_number = ?", new ClientMapper(), SecurityUtil.encrypt($an));
+            return Optional.ofNullable(jdbc.queryForObject("SELECT * FROM clients WHERE account_number = ?", new ClientMapper(), SecurityUtil.encrypt($an)));
         } catch (EmptyResultDataAccessException ignored) {}
         return Optional.empty();
     }

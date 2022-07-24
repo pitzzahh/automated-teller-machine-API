@@ -1,9 +1,6 @@
 package io.github.pitzzahh;
 
-import java.util.List;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 import java.time.LocalDate;
 import java.util.concurrent.TimeUnit;
 import io.github.pitzzahh.entity.Client;
@@ -23,6 +20,7 @@ import static com.github.pitzzahh.utilities.classes.TextColors.*;
  */
 public class Atm {
     private static final ClientService CLIENT_SERVICE = new ClientService();
+    private static Hashtable<String, Client> clients = new Hashtable<>();
 
     /**
      * main method.
@@ -30,8 +28,9 @@ public class Atm {
      */
     @SuppressWarnings("InfiniteLoopStatement")
     public static void main(String[] args)  {
-        final Scanner scanner = new Scanner(System.in);
+        final var scanner = new Scanner(System.in);
         CLIENT_SERVICE.setDataSource().accept(ClientService.getDataSource());
+        Machine.loadClients();
         for (;;)  {
             try {
                 switch (home(scanner)) {
@@ -47,7 +46,7 @@ public class Atm {
     /**
      * The automated teller machine that handles most of the process.
      */
-    static class Machine {
+    private static class Machine {
         private static final String $adm = "?cl0m0#sq3s/q";
         private static String $an;
         /**
@@ -56,10 +55,15 @@ public class Atm {
          * @return {@code true} if the account number exists.
          */
         private static boolean searchAccount(String n) {
-            return CLIENT_SERVICE.getAllClients().get().stream()
-                                             .anyMatch(client -> client.isPresent() && client.get().accountNumber().equals(n));
+            return clients
+                    .keySet()
+                    .stream()
+                    .anyMatch(number -> number.equals(n));
         }
 
+        private static void loadClients() {
+            clients.putAll(CLIENT_SERVICE.getAllClients().get());
+        }
         /**
          * class for Admin account.
          */
@@ -71,7 +75,7 @@ public class Atm {
              * @throws IllegalArgumentException if any of the input is not valid from the detail(scanner) method.
              */
             private static void admin(Scanner scanner) throws IllegalArgumentException {
-                String choice = "";
+                var choice = "";
                 do {
                     try {
                         System.out.println(RED_BOLD  + ": " + BLUE_BOLD_BRIGHT   + "1" + RED_BOLD + " : " + BLUE_BOLD_BRIGHT + "ADD CLIENT");
@@ -93,6 +97,8 @@ public class Atm {
                             }
                             default -> throw new IllegalStateException(String.format("\nINVALID INPUT: %s\n", choice));
                         }
+                        clients.clear();
+                        loadClients();
                     } catch (RuntimeException runtimeException) {
                         System.out.println(RED_BOLD_BRIGHT +  runtimeException.getMessage() + RESET);
                         System.out.print(YELLOW_BOLD_BRIGHT + "LOADING");
@@ -107,7 +113,7 @@ public class Atm {
              * @throws IllegalArgumentException if any of the input is not valid from the detail(scanner) method.
              */
             private static void createClient(Scanner scanner) throws IllegalArgumentException {
-                Client client = details(scanner);
+                var client = details(scanner);
                 CLIENT_SERVICE.saveClient().apply(
                         new Client(
                                 client.accountNumber(),
@@ -133,13 +139,13 @@ public class Atm {
              */
             protected static Client details(Scanner scanner) throws IllegalArgumentException {
 
-                String an = "";
-                String pin = "";
-                String firstName;
-                String lastName;
-                String gender = "";
-                String address;
-                String birthDate = "";
+                var an = "";
+                var pin = "";
+                var firstName = "";
+                var lastName = "";
+                var gender = "";
+                var address = "";
+                var birthDate = "";
 
                 do {
                     try {
@@ -191,10 +197,10 @@ public class Atm {
                     }
                 } while (Validator.isBirthDateValid().negate().test(birthDate));
 
-                List<String> b = Arrays.stream(birthDate.split("-")).toList();
-                int day = Integer.parseInt(b.get(2));
-                int month = Integer.parseInt(b.get(1));
-                int year = Integer.parseInt(b.get(0));
+                var b = Arrays.stream(birthDate.split("-")).toList();
+                var day = Integer.parseInt(b.get(2));
+                var month = Integer.parseInt(b.get(1));
+                var year = Integer.parseInt(b.get(0));
                 return new Client(
                         an,
                         pin,
@@ -218,6 +224,8 @@ public class Atm {
                 System.out.println(RED_BOLD_BRIGHT + ":ENTER ACCOUNT NUMBER TO REMOVE:");
                 System.out.print(PURPLE_BOLD + ">>>: " + RESET);
                 $an = scanner.nextLine().trim();
+                var isPresent = searchAccount($an);
+                clients.remove($an);
                 return CLIENT_SERVICE.removeClientByAccountNumber().apply($an);
             }
 
@@ -225,9 +233,8 @@ public class Atm {
              * Prints all the clients details.
              */
             private static void viewAllClients() {
-                CLIENT_SERVICE.getAllClients()
-                        .get()
-                        .forEach(client -> System.out.println(client.isPresent() ? client.get() : "ERROR 404"));
+                clients.entrySet()
+                        .forEach(client -> System.out.println(client.getValue()));
             }
         }
 
@@ -240,7 +247,7 @@ public class Atm {
              * Called when a client is logged in.
              */
             private static void client(Scanner scanner) {
-                String choice = "";
+                var choice = "";
                 do {
                     try {
                         viewClientDetails(Machine.$an);
@@ -259,6 +266,8 @@ public class Atm {
                             }
                             default -> throw new IllegalStateException(String.format("\nINVALID INPUT: %s\n", choice));
                         }
+                        clients.clear();
+                        loadClients();
                     } catch (RuntimeException | IllegalAccessException runtimeException) {
                         System.out.println(RED_BOLD_BRIGHT +  runtimeException.getMessage() + RESET);
                         System.out.print(YELLOW_BOLD_BRIGHT + "LOADING");
@@ -272,15 +281,15 @@ public class Atm {
              * @param scanner a {@code Scanner} object needed for user input.
              */
             public static void deposit(Scanner scanner) throws IllegalAccessException {
-                Optional<Client> client = CLIENT_SERVICE.getClientByAccountNumber().apply(Machine.$an);
-                int attempts = client.map(Client::attempts).orElse(0);
+                var client = clients.get(Machine.$an);
+                var attempts = client.attempts();
                 if (attempts == 0) throw new IllegalAccessException("\nACCOUNT IS LOCKED\nCANNOT PROCEED TRANSACTION\n");
-                boolean isLoggedIn = false;
+                var isLoggedIn = false;
                 while (attempts != 0) {
                     System.out.print(BLUE_BOLD_BRIGHT + "ENTER PIN: ");
                     String pin = scanner.nextLine().trim();
 
-                    if (!client.get().pin().equals(pin)) {
+                    if (!client.pin().equals(pin)) {
                         --attempts;
                         System.out.println(RED_BOLD_BRIGHT + "\nINVALID PIN\n" + RESET);
                     }
@@ -289,13 +298,13 @@ public class Atm {
                         break;
                     }
                     if (attempts == 0) {
-                        CLIENT_SERVICE.updateClientAttemptsByAccountNumber().apply(client.get().accountNumber(), "0");
+                        CLIENT_SERVICE.updateClientAttemptsByAccountNumber().apply(client.accountNumber(), "0");
                         throw new IllegalAccessException("\nACCOUNT LOCKED\nPLEASE CONTACT THE ADMINISTRATOR TO VERIFY YOUR IDENTITY AND UNLOCK YOUR ACCOUNT\n" + RESET);
                     }
                 }
 
                 if (isLoggedIn) {
-                    String cash = "";
+                    var cash = "";
                     do {
                         try {
                             System.out.println(PURPLE_BOLD_BRIGHT + "\tDEPOSIT\t");
@@ -305,7 +314,7 @@ public class Atm {
                             if (Validator.isWholeNumber().or(Validator.isDecimalNumber()).negate().test(cash)) throw new IllegalStateException("\nCASH SHOULD BE A NUMBER\n");
                             double cashToDeposit = Double.parseDouble(cash);
                             if (cashToDeposit < 100) throw new IllegalStateException("\nCASH AMOUNT TO DEPOSIT SHOULD NOT BE LESS THAN 100\n");
-                            Status status = CLIENT_SERVICE.updateClientSavingsByAccountNumber().apply(client.get().accountNumber(), client.get().savings() + cashToDeposit);
+                            Status status = CLIENT_SERVICE.updateClientSavingsByAccountNumber().apply(client.accountNumber(), client.savings() + cashToDeposit);
                             System.out.println(status == Status.SUCCESS ? BLUE_BOLD_BRIGHT + status.name() + RESET : RED_BOLD_BRIGHT + status.name() + RESET);
                             System.out.print(YELLOW_BOLD_BRIGHT + "LOADING");
                             dotLoading();
@@ -323,7 +332,7 @@ public class Atm {
              * Outputs the client details.
              */
             private static void viewClientDetails(String an) throws IllegalAccessException {
-                System.out.println(CLIENT_SERVICE.getClientByAccountNumber().apply(an).orElseThrow(() -> new IllegalAccessException(String.format("CANNOT FIND ACCOUNT: %s", an))));
+                System.out.println(clients.get(an));
             }
         }
     }
