@@ -91,10 +91,12 @@ public class Atm {
                                 System.out.print(RED_BOLD_BRIGHT + "LOGGING OUT");
                                 dotLoading();
                             }
-                            default -> throw new IllegalStateException("INVALID INPUT: " + choice);
+                            default -> throw new IllegalStateException(String.format("\nINVALID INPUT: %s\n", choice));
                         }
                     } catch (RuntimeException runtimeException) {
                         System.out.println(RED_BOLD_BRIGHT +  runtimeException.getMessage() + RESET);
+                        System.out.print(YELLOW_BOLD_BRIGHT + "LOADING");
+                        dotLoading();
                     }
                 } while (!choice.equals("4"));
             }
@@ -213,7 +215,7 @@ public class Atm {
              * @return a {@code Status} of removal.
              */
             public static Status removeClient(Scanner scanner) {
-                System.out.println(RED_BOLD_BRIGHT + "ENTER ACCOUNT NUMBER TO REMOVE: ");
+                System.out.println(RED_BOLD_BRIGHT + ":ENTER ACCOUNT NUMBER TO REMOVE:");
                 System.out.print(PURPLE_BOLD + ">>>: " + RESET);
                 $an = scanner.nextLine().trim();
                 return CLIENT_SERVICE.removeClientByAccountNumber().apply($an);
@@ -225,7 +227,7 @@ public class Atm {
             private static void viewAllClients() {
                 CLIENT_SERVICE.getAllClients()
                         .get()
-                        .forEach(client -> System.out.println(client.isPresent() ? client.get() : ""));
+                        .forEach(client -> System.out.println(client.isPresent() ? client.get() : "ERROR 404"));
             }
         }
 
@@ -255,10 +257,12 @@ public class Atm {
                                 System.out.print(RED_BOLD_BRIGHT + "LOGGING OUT");
                                 dotLoading();
                             }
-                            default -> throw new IllegalStateException("INVALID INPUT: " + choice);
+                            default -> throw new IllegalStateException(String.format("\nINVALID INPUT: %s\n", choice));
                         }
                     } catch (RuntimeException | IllegalAccessException runtimeException) {
                         System.out.println(RED_BOLD_BRIGHT +  runtimeException.getMessage() + RESET);
+                        System.out.print(YELLOW_BOLD_BRIGHT + "LOADING");
+                        dotLoading();
                     }
                 } while (!choice.equals("4"));
             }
@@ -270,7 +274,7 @@ public class Atm {
             public static void deposit(Scanner scanner) throws IllegalAccessException {
                 Optional<Client> client = CLIENT_SERVICE.getClientByAccountNumber().apply(Machine.$an);
                 int attempts = client.map(Client::attempts).orElse(0);
-                if (attempts == 0) throw new IllegalAccessException("ACCOUNT IS LOCKED\nCANNOT PROCEED TRANSACTION");
+                if (attempts == 0) throw new IllegalAccessException("\nACCOUNT IS LOCKED\nCANNOT PROCEED TRANSACTION\n");
                 boolean isLoggedIn = false;
                 while (attempts != 0) {
                     System.out.print(BLUE_BOLD_BRIGHT + "ENTER PIN: ");
@@ -285,8 +289,8 @@ public class Atm {
                         break;
                     }
                     if (attempts == 0) {
-                        System.out.println(RED_BOLD_BRIGHT + "ACCOUNT LOCKED\nPLEASE CONTACT THE ADMINISTRATOR TO VERIFY YOUR IDENTITY AND UNLOCK YOUR ACCOUNT" + RESET);
                         CLIENT_SERVICE.updateClientAttemptsByAccountNumber().apply(client.get().accountNumber(), "0");
+                        throw new IllegalAccessException("\nACCOUNT LOCKED\nPLEASE CONTACT THE ADMINISTRATOR TO VERIFY YOUR IDENTITY AND UNLOCK YOUR ACCOUNT\n" + RESET);
                     }
                 }
 
@@ -307,6 +311,8 @@ public class Atm {
                             dotLoading();
                         } catch (RuntimeException runtimeException) {
                             System.out.println(RED_BOLD_BRIGHT +  runtimeException.getMessage() + RESET);
+                            System.out.print(YELLOW_BOLD_BRIGHT + "LOADING");
+                            dotLoading();
                         }
                     } while (Validator.isWholeNumber().or(Validator.isDecimalNumber()).negate().test(cash));
 
