@@ -9,7 +9,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 public interface DatabaseConnection {
 
     /**
-     * Setup the datasource.
+     * Set up the datasource.
      * @see ClientService
      * @return the datasource.
      */
