@@ -19,7 +19,7 @@ public class ClientMapper implements RowMapper<Optional<Client>> {
      * @param resultSet the ResultSet to map (pre-initialized for the current row)
      * @param numberOfRow the number of the current row
      * @return {@code Optional<Client>} object.
-     * @throws SQLException if somethings went wrong.
+     * @throws SQLException if something is went wrong.
      */
     @Override
     public Optional<Client> mapRow(ResultSet resultSet, int numberOfRow) throws SQLException {
