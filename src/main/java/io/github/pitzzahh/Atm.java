@@ -23,6 +23,11 @@ import static com.github.pitzzahh.utilities.classes.TextColors.*;
  */
 public class Atm {
     private static final ClientService CLIENT_SERVICE = new ClientService();
+
+    /**
+     * main method.
+     * @param args arguments.
+     */
     @SuppressWarnings("InfiniteLoopStatement")
     public static void main(String[] args)  {
         final Scanner scanner = new Scanner(System.in);
@@ -54,7 +59,11 @@ public class Atm {
             return CLIENT_SERVICE.getAllClients().get().stream()
                                              .anyMatch(client -> client.isPresent() && client.get().accountNumber().equals(n));
         }
-        static class AdminAcc {
+
+        /**
+         * class for Admin account.
+         */
+        private static class AdminAcc {
             // TODO: add admin functions.
             /**
              * called then an admin is logged in.
@@ -80,7 +89,7 @@ public class Atm {
                             case "3" -> viewAllClients();
                             case "4" -> {
                                 System.out.print(RED_BOLD_BRIGHT + "LOGGING OUT");
-                                logout();
+                                dotLoading();
                             }
                             default -> throw new IllegalStateException("INVALID INPUT: " + choice);
                         }
@@ -220,7 +229,10 @@ public class Atm {
             }
         }
 
-        static class ClientAcc {
+        /**
+         * class for Client account.
+         */
+        private static class ClientAcc {
             // TODO: add client functions.
             /**
              * Called when a client is logged in.
@@ -241,7 +253,7 @@ public class Atm {
                             case "2", "3" -> {}
                             case "4" -> {
                                 System.out.print(RED_BOLD_BRIGHT + "LOGGING OUT");
-                                logout();
+                                dotLoading();
                             }
                             default -> throw new IllegalStateException("INVALID INPUT: " + choice);
                         }
@@ -292,7 +304,7 @@ public class Atm {
                             Status status = CLIENT_SERVICE.updateClientSavingsByAccountNumber().apply(client.get().accountNumber(), client.get().savings() + cashToDeposit);
                             System.out.println(status == Status.SUCCESS ? BLUE_BOLD_BRIGHT + status.name() + RESET : RED_BOLD_BRIGHT + status.name() + RESET);
                             System.out.print(YELLOW_BOLD_BRIGHT + "LOADING");
-                            logout();
+                            dotLoading();
                         } catch (RuntimeException runtimeException) {
                             System.out.println(RED_BOLD_BRIGHT +  runtimeException.getMessage() + RESET);
                         }
@@ -331,7 +343,10 @@ public class Atm {
         return Role.CLIENT;
     }
 
-    private static void logout() {
+    /**
+     * Creates a dot loading.
+     */
+    private static void dotLoading() {
         try {
             for (int i = 1; i <= 3; i++) {
                 System.out.print(".");
