@@ -12,7 +12,6 @@ import com.github.pitzzahh.utilities.classes.enums.Status;
 import org.springframework.dao.EmptyResultDataAccessException;
 import static com.github.pitzzahh.utilities.classes.enums.Status.*;
 
-// TODO: create a test for this.
 public class Queries {
 
     public static Supplier<Map<String, Client>> getAllClientsQuery(JdbcTemplate jdbc) {
