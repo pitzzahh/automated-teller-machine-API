@@ -391,13 +391,14 @@ public class Atm {
                             }
                             default -> throw new IllegalStateException(String.format("\nINVALID INPUT: %s\n", choice));
                         }
-                        clients.clear();
-                        loadClients();
                     } catch (RuntimeException | IllegalAccessException runtimeException) {
                         System.out.println(RED_BOLD_BRIGHT +  runtimeException.getMessage() + RESET);
                         System.out.print(YELLOW_BOLD_BRIGHT + "LOADING");
                         dotLoading();
                     }
+                    clients.clear();
+                    loadClients();
+                    if (searchLockedAccount($an)) break;
                 } while (!choice.equals("4"));
             }
 
@@ -422,7 +423,6 @@ public class Atm {
                         isLoggedIn = true;
                         break;
                     }
-                    System.out.println("attempts = " + attempts);
                     if (attempts == 0) {
                         CLIENT_SERVICE.updateClientAttemptsByAccountNumber().apply(client.accountNumber(), "0");
                         throw new IllegalAccessException("\nACCOUNT LOCKED\nPLEASE CONTACT THE ADMINISTRATOR TO VERIFY YOUR IDENTITY AND UNLOCK YOUR ACCOUNT\n" + RESET);
