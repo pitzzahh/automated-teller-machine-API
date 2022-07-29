@@ -5,7 +5,15 @@ import java.text.NumberFormat;
 import com.github.pitzzahh.utilities.classes.Person;
 import static com.github.pitzzahh.utilities.classes.TextColors.*;
 
-public record Client(String accountNumber, String pin, Person details, double savings, int attempts) {
+/**
+ * record used for making clients.
+ * @param accountNumber the account number, denoted by a 9 digit number.
+ * @param pin the pin for the account, denoted by a 6 digit number.
+ * @param details a {@code Person} object containing the details of the person with an account.
+ * @param savings the current savings in this account.
+ * @param isLocked {@code true} if the account is locked, otherwise false.
+ */
+public record Client(String accountNumber, String pin, Person details, double savings, boolean isLocked) {
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
     @Override
     public String toString() {
