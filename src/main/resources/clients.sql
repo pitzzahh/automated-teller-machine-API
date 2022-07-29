@@ -7,5 +7,5 @@ CREATE TABLE IF NOT EXISTS clients (
     address TEXT NOT NULL,
     date_of_birth DATE NOT NULL,
     savings TEXT NOT NULL,
-    attempts INT NOT NULL
+    isLocked BOOL NOT NULL
 );
