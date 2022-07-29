@@ -29,8 +29,8 @@ public class Queries {
         return jdbc.update("DELETE FROM clients WHERE account_number = ?", SecurityUtil.encrypt($an)) > 0 ? SUCCESS : ERROR;
     }
 
-    public static Status updateClientAttemptsByAccountNumberQuery(String an, String at, JdbcTemplate jdbc) {
-        return jdbc.update("UPDATE clients SET attempts = ? WHERE account_number = ?", Integer.parseInt(at), SecurityUtil.encrypt(an)) > 0 ? SUCCESS : ERROR;
+    public static Status updateClientStatusByAccountNumber(String an, boolean status, JdbcTemplate jdbc) {
+        return jdbc.update("UPDATE clients SET isLocked = ? WHERE account_number = ?", status, SecurityUtil.encrypt(an)) > 0 ? SUCCESS : ERROR;
 
     }
 
@@ -39,7 +39,7 @@ public class Queries {
     }
 
     public static Status saveClientQuery(Client client, JdbcTemplate jdbc) {
-        final String QUERY = "INSERT INTO clients (account_number, pin, first_name, last_name, gender, address, date_of_birth, savings, attempts) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        final String QUERY = "INSERT INTO clients (account_number, pin, first_name, last_name, gender, address, date_of_birth, savings, isLocked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         int result = jdbc.update(
                 QUERY,
                 SecurityUtil.encrypt(client.accountNumber()),
@@ -50,7 +50,7 @@ public class Queries {
                 SecurityUtil.encrypt(client.details().getAddress()),
                 client.details().getBirthDate(),
                 SecurityUtil.encrypt(String.valueOf(client.savings())),
-                client.attempts()
+                client.isLocked()
         );
         return result > 0 ? SUCCESS : ERROR;
     }
