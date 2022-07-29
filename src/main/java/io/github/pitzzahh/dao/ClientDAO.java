@@ -23,7 +23,7 @@ public interface ClientDAO {
 
     Function<String, Status> removeClientByAccountNumber();
 
-    BiFunction<String, String, Status> updateClientAttemptsByAccountNumber();
+    BiFunction<String, Boolean, Status> updateClientAttemptsByAccountNumber();
 
     BiFunction<String, Double, Status> updateClientSavingsByAccountNumber();
 
