@@ -48,8 +48,8 @@ public class ClientDAOImplementation implements ClientDAO {
      * @return a {@code Status}
      */
     @Override
-    public BiFunction<String, String, Status> updateClientAttemptsByAccountNumber() {
-        return (an, attempts) -> updateClientAttemptsByAccountNumberQuery(an, attempts, jdbcTemplate);
+    public BiFunction<String, Boolean, Status> updateClientAttemptsByAccountNumber() {
+        return (an, status) -> updateClientStatusByAccountNumber(an, status, jdbcTemplate);
     }
 
     /**
