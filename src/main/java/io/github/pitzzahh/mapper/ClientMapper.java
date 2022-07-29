@@ -33,7 +33,7 @@ public class ClientMapper implements RowMapper<Client> {
                         resultSet.getDate("date_of_birth").toLocalDate()
                 ),
                 Double.parseDouble(SecurityUtil.decrypt(resultSet.getString("savings"))),
-                resultSet.getInt("attempts")
+                resultSet.getBoolean("isLocked")
         );
     }
 }
