@@ -4,7 +4,7 @@ import com.github.pitzzahh.utilities.classes.enums.Gender;
 import static com.github.pitzzahh.utilities.classes.TextColors.*;
 
 /**
- * Class used for making locked accounts.
+ * record used for making locked accounts.
  * @param accountNumber the account number of a locked account.
  * @param name the name of the person with the locked account.
  * @param gender the gender of the person.
