@@ -6,6 +6,9 @@ import io.github.pitzzahh.entity.Loan;
 import org.springframework.jdbc.core.RowMapper;
 import com.github.pitzzahh.utilities.SecurityUtil;
 
+/**
+ * Used to map loans row from the database to a {@code Loan} object.
+ */
 public class LoanMapper implements RowMapper<Loan> {
 
     /**
