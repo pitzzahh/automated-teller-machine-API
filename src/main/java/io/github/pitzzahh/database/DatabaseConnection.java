@@ -1,6 +1,6 @@
 package io.github.pitzzahh.database;
 
-import io.github.pitzzahh.service.ClientService;
+import io.github.pitzzahh.service.AtmService;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
@@ -10,7 +10,7 @@ public interface DatabaseConnection {
 
     /**
      * Set up the datasource.
-     * @see ClientService
+     * @see AtmService
      * @return the datasource.
      */
     static DriverManagerDataSource getDataSource() {
