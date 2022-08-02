@@ -26,9 +26,11 @@ public class AtmService {
 
     public AtmService(AtmDAO atmDAO) {
         this.atmDAO = new AtmDAOImplementation();
-        this.atmDAO.setDataSource().accept(DatabaseConnection.getDataSource());
     }
 
+    public Consumer<DataSource> setDataSource() {
+        return atmDAO.setDataSource();
+    }
     /**
      * @return
      */
