@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS loans (
-    loan_number TEXT NOT NULL,
-    account_number TEXT NOT NULL PRIMARY KEY,
+    loan_number INT NOT NULL,
+    account_number TEXT NOT NULL,
     date_of_loan DATE NOT NULL,
     amount TEXT NOT NULL,
-    loan_count TEXT NOT NULL
+    pending TEXT NOT NULL
 );

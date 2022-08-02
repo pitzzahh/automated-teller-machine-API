@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.RowMapper;
 import com.github.pitzzahh.utilities.SecurityUtil;
 
 /**
- * Used to map loans row from the database to a {@code Loan} object.
+ * Used to map loan history row from the database to a {@code Loan} object.
  */
 public class LoanMapper implements RowMapper<Loan> {
 
@@ -21,11 +21,11 @@ public class LoanMapper implements RowMapper<Loan> {
     @Override
     public Loan mapRow(ResultSet resultSet, int numberOfRow) throws SQLException {
         return new Loan(
-                Integer.parseInt(SecurityUtil.decrypt(resultSet.getString("loan_number"))),
+                resultSet.getInt("loan_number"),
                 SecurityUtil.decrypt(resultSet.getString("account_number")),
                 resultSet.getDate("date_of_loan").toLocalDate(),
                 Double.parseDouble(SecurityUtil.decrypt(resultSet.getString("amount"))),
-                Integer.parseInt(SecurityUtil.decrypt(resultSet.getString("loan_count")))
+                Boolean.valueOf(SecurityUtil.decrypt(resultSet.getString("pending")))
         );
     }
 }
