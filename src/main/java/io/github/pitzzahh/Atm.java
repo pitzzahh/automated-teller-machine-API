@@ -12,6 +12,7 @@ import io.github.pitzzahh.service.AtmService;
 import com.github.pitzzahh.utilities.SecurityUtil;
 import static com.github.pitzzahh.utilities.Print.*;
 import com.github.pitzzahh.utilities.classes.Person;
+import io.github.pitzzahh.database.DatabaseConnection;
 import com.github.pitzzahh.utilities.classes.enums.Role;
 import com.github.pitzzahh.utilities.classes.enums.Gender;
 import com.github.pitzzahh.utilities.classes.enums.Status;
@@ -28,7 +29,8 @@ import static io.github.pitzzahh.Atm.Machine.AdminAcc.getAllLockedAccounts;
  */
 public class Atm {
     private static AtmDAO atmDAO;
-    private static final AtmService ATM_SERVICE = new AtmService(atmDAO);
+    private static AtmService ATM_SERVICE;
+    private static DatabaseConnection databaseConnection;
     private static final Hashtable<String, Client> CLIENTS = new Hashtable<>();
     private static final Hashtable<String, List<Loan>> LOANS = new Hashtable<>();
     private static final Hashtable<String, Message> MESSAGES = new Hashtable<>();
@@ -39,6 +41,17 @@ public class Atm {
      */
     @SuppressWarnings("InfiniteLoopStatement")
     public static void main(String[] args)  {
+        ATM_SERVICE = new AtmService(atmDAO);
+        databaseConnection = new DatabaseConnection();
+        ATM_SERVICE.setDataSource().accept(
+                databaseConnection
+                        .setDriverClassName("org.postgresql.Driver")
+                        .setUrl("jdbc:postgresql://localhost/atm")
+                        .setUsername("postgres")
+                        .setPassword("!Password123")
+                        .getDataSource()
+        );
+
         final var scanner = new Scanner(System.in);
         Machine.loadClients();
         Machine.loadClientLoans();
@@ -377,7 +390,39 @@ public class Atm {
                     println(PURPLE_BOLD + ":" + GREEN_BOLD_BRIGHT + " 3 " + PURPLE_BOLD_BRIGHT + ": " + GREEN_BOLD_BRIGHT + "BACK");
                     print(YELLOW_BOLD + ">>>: " + RESET);
                     choice = scanner.nextLine().trim();
+                    switch (choice) {
+                        case "1" -> {
+                            println(BLUE_BOLD_BRIGHT + "APPROVE LOAN" + RESET);
+                            var status = approveLoan(scanner);
+                            println(status == SUCCESS ? BLUE_BOLD_BRIGHT + "\nACCOUNT REOPENED SUCCESSFULLY\n" :
+                                    RED_BOLD_BRIGHT + "\nERROR REOPENING ACCOUNT\n" + RESET
+                            );
+                        }
+                        case "2" -> {
+                            println(YELLOW_BOLD_BRIGHT + "REMOVE LOAN" + RESET);
+                            var status = removeLoan(scanner);
+                            println(status == SUCCESS ? BLUE_BOLD_BRIGHT + "\nACCOUNT REMOVED SUCCESSFULLY\n" :
+                                    RED_BOLD_BRIGHT + "\nERROR REMOVING ACCOUNT\n" + RESET
+                            );
+                        }
+                        case "3" -> {
+                            print(RED_BOLD_BRIGHT + "PLEASE WAIT");
+                            dotLoading();
+                        }
+                        default -> throw new IllegalStateException(String.format("\nINVALID INPUT: %s\n", choice));
+                    }
+                    if (LOAN_REQUESTS.isEmpty()) break;
                 } while (false);
+            }
+
+            // TODO: implement
+            private static Status approveLoan(Scanner scanner) {
+                return CANNOT_PERFORM_OPERATION;
+            }
+
+            // TODO: implement
+            private static Status removeLoan(Scanner scanner) {
+                return CANNOT_PERFORM_OPERATION;
             }
 
             /**
@@ -476,12 +521,12 @@ public class Atm {
                     }
                     CLIENTS.clear();
                     loadClients();
-                    if (!choice.equals("4")) {
+                    if (!choice.equals("5")) {
                         pause();
                         println("");
                     }
                     if (searchLockedAccount($an)) break;
-                } while (!choice.equals("4"));
+                } while (!choice.equals("5"));
                 loadClientLoans();
             }
 
