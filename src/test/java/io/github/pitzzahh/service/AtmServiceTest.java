@@ -3,7 +3,6 @@ package io.github.pitzzahh.service;
 import java.util.Map;
 import java.time.Month;
 import java.time.LocalDate;
-
 import org.junit.jupiter.api.*;
 import io.github.pitzzahh.dao.AtmDAO;
 import io.github.pitzzahh.entity.Loan;
@@ -14,26 +13,37 @@ import io.github.pitzzahh.dao.AtmDAOImplementation;
 import com.github.pitzzahh.utilities.classes.Person;
 import com.github.pitzzahh.utilities.classes.enums.*;
 import io.github.pitzzahh.database.DatabaseConnection;
+import org.springframework.beans.factory.annotation.Autowired;
 
 class AtmServiceTest extends AtmDAOImplementation {
 
     private AtmDAO atmDAO;
     private AtmService atmService;
 
+    @Autowired
+    private DatabaseConnection databaseConnection;
+
     @BeforeEach
     void setUp() {
         atmService = new AtmService(atmDAO);
+        databaseConnection = new DatabaseConnection();
+        atmService.setDataSource()
+                .accept(databaseConnection
+                                .setDriverClassName("org.postgresql.Driver")
+                                .setUrl("jdbc:postgresql://localhost/atm")
+                                .setUsername("postgres")
+                                .setPassword("!Password123")
+                                .getDataSource()
+                );
     }
 
     @AfterEach
-    @Disabled
     void tearDown() {
         assertEquals(Status.ERROR, atmService.removeAllClients().get());
         assertEquals(Status.SUCCESS, atmService.removeAllLoans().get());
     }
 
-    @RepeatedTest(10)
-    @Disabled
+    @RepeatedTest(3)
     void shouldMakeALoan() {
         // given
         var client = makeClient();
@@ -46,6 +56,7 @@ class AtmServiceTest extends AtmDAOImplementation {
     }
 
     @Test
+    @Disabled
     void shouldMetTheLoan() {
         // given
         var loan = atmService.getAllLoans();
