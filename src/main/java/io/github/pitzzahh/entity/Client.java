@@ -15,6 +15,11 @@ import static com.github.pitzzahh.utilities.classes.TextColors.*;
  */
 public record Client(String accountNumber, String pin, Person details, double savings, boolean isLocked) {
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
+
+    public Client() {
+        this("", "", null, 0, false);
+    }
+
     @Override
     public String toString() {
         return "ACCOUNT NUMBER: " + BLUE_BOLD + this.accountNumber()                                                                                                    + "\n" +
