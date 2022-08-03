@@ -167,6 +167,8 @@ public class Atm {
                         }
                         CLIENTS.clear();
                         loadClients();
+                        LOANS.clear();
+                        loadClientLoans();
                         if (!choice.equals("6")) {
                             pause();
                             if (!choice.equals("3")) println("");
@@ -374,6 +376,7 @@ public class Atm {
                 } while (!choice.equals("3"));
             }
 
+            // TODO: add comment
             private static void manageAccountLoans(Scanner scanner) {
                 final var LOAN_REQUESTS = getAllLoanRequests();
                 if (LOAN_REQUESTS.isEmpty()) throw new IllegalStateException("\nTHERE ARE NO LOAN REQUESTS AVAILABLE\n");
@@ -384,7 +387,7 @@ public class Atm {
                             "║║║╠═╣║║║╠═╣║ ╦║╣   ╠═╣║  ║  ║ ║║ ║║║║ ║   ║  ║ ║╠═╣║║║╚═╗\n" +
                             "╩ ╩╩ ╩╝╚╝╩ ╩╚═╝╚═╝  ╩ ╩╚═╝╚═╝╚═╝╚═╝╝╚╝ ╩   ╩═╝╚═╝╩ ╩╝╚╝╚═╝\n");
                     println(RED_BOLD_BRIGHT + (LOAN_REQUESTS.size() > 1 ? "LIST OF LOANS" : "LOAN") +"\n");
-                    LOAN_REQUESTS.forEach(Print::println);
+                    LOAN_REQUESTS.stream().forEach(Print::println);
                     println(PURPLE_BOLD + ":" + BLUE_BOLD_BRIGHT  + " 1 " + PURPLE_BOLD_BRIGHT + ": " + BLUE_BOLD_BRIGHT + "APPROVE LOAN");
                     println(PURPLE_BOLD + ":" + RED_BOLD_BRIGHT   + " 2 " + PURPLE_BOLD_BRIGHT + ": " + RED_BOLD_BRIGHT + "REMOVE LOAN");
                     println(PURPLE_BOLD + ":" + GREEN_BOLD_BRIGHT + " 3 " + PURPLE_BOLD_BRIGHT + ": " + GREEN_BOLD_BRIGHT + "BACK");
@@ -393,14 +396,14 @@ public class Atm {
                     switch (choice) {
                         case "1" -> {
                             println(BLUE_BOLD_BRIGHT + "APPROVE LOAN" + RESET);
-                            var status = approveLoan(scanner);
-                            println(status == SUCCESS ? BLUE_BOLD_BRIGHT + "\nACCOUNT REOPENED SUCCESSFULLY\n" :
-                                    RED_BOLD_BRIGHT + "\nERROR REOPENING ACCOUNT\n" + RESET
+                            var status = approveLoan(scanner, LOAN_REQUESTS);
+                            println(status == SUCCESS ? BLUE_BOLD_BRIGHT + "\nLOAN APPROVED SUCCESSFULLY\n" :
+                                    RED_BOLD_BRIGHT + "\nERROR APPROVING LOAN ACCOUNT\n" + RESET
                             );
                         }
                         case "2" -> {
                             println(YELLOW_BOLD_BRIGHT + "REMOVE LOAN" + RESET);
-                            var status = removeLoan(scanner);
+                            var status = removeLoan(scanner, LOAN_REQUESTS);
                             println(status == SUCCESS ? BLUE_BOLD_BRIGHT + "\nACCOUNT REMOVED SUCCESSFULLY\n" :
                                     RED_BOLD_BRIGHT + "\nERROR REMOVING ACCOUNT\n" + RESET
                             );
@@ -415,14 +418,43 @@ public class Atm {
                 } while (false);
             }
 
-            // TODO: implement
-            private static Status approveLoan(Scanner scanner) {
-                return CANNOT_PERFORM_OPERATION;
+            /**
+             * Approves the loan
+             * @param scanner
+             * @param allLoans
+             * @return
+             */
+            // TODO: add comment
+            private static Status approveLoan(Scanner scanner, List<Loan> allLoans) {
+                var loan = new Loan();
+                if (allLoans.size() == 1) return ATM_SERVICE.approveLoan().apply(getApprovedLoan(allLoans.stream().findAny().get()));
+                else {
+                    println(YELLOW_BOLD_BRIGHT + ":ENTER LOAN NUMBER AND ACCOUNT NUMBER TO REOPEN SEPARATED BY SPACE:");
+                    println(CYAN_BACKGROUND + "example: 1 200263444");
+                    print(PURPLE_BOLD + ">>>: " + RESET);
+                    final var $s = scanner.nextLine().trim().split(" ");
+                    if (isWholeNumber().negate().test($s[0])) throw new IllegalStateException("LOAN NUMBER SHOULD BE A NUMBER");
+                    else if (isWholeNumber().negate().test($s[1])) throw new IllegalStateException("ACCOUNT NUMBER SHOULD BE A NUMBER");
+                    loan = allLoans
+                            .stream()
+                            .filter(e -> e.loanNumber() == Integer.parseInt($s[0]) && e.accountNumber().equals($s[1]))
+                            .findAny()
+                            .orElseThrow(() -> new IllegalStateException(String.format("\nOLOAN: %s DOES NOT EXIST\n", $an)));
+                }
+                return ATM_SERVICE.approveLoan().apply(getApprovedLoan(loan));
             }
 
             // TODO: implement
-            private static Status removeLoan(Scanner scanner) {
+            private static Status removeLoan(Scanner scanner, List<Loan> allLoans) {
                 return CANNOT_PERFORM_OPERATION;
+            }
+
+            private static Loan getApprovedLoan(Loan loan) {
+                return new Loan(
+                        loan.loanNumber(),
+                        loan.accountNumber(),
+                        false
+                );
             }
 
             /**
@@ -471,6 +503,7 @@ public class Atm {
                         .stream()
                         .map(Map.Entry::getValue)
                         .flatMap(Collection::stream)
+                        .filter(Loan::pending)
                         .collect(Collectors.toList());
             }
 
@@ -481,6 +514,7 @@ public class Atm {
             private static void checkIfThereAreClientsAvailable() throws IllegalStateException {
                 if (CLIENTS.isEmpty()) throw new IllegalStateException("\nTHERE ARE NO CLIENTS AVAILABLE\n");
             }
+
         }
 
         /**
