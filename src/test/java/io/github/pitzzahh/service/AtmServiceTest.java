@@ -3,6 +3,7 @@ package io.github.pitzzahh.service;
 import java.util.Map;
 import java.time.Month;
 import java.time.LocalDate;
+import java.util.Collection;
 import org.junit.jupiter.api.*;
 import io.github.pitzzahh.dao.AtmDAO;
 import io.github.pitzzahh.entity.Loan;
@@ -19,8 +20,6 @@ class AtmServiceTest extends AtmDAOImplementation {
 
     private AtmDAO atmDAO;
     private AtmService atmService;
-
-    @Autowired
     private DatabaseConnection databaseConnection;
 
     @BeforeEach
@@ -38,12 +37,14 @@ class AtmServiceTest extends AtmDAOImplementation {
     }
 
     @AfterEach
+    @Disabled
     void tearDown() {
-        assertEquals(Status.ERROR, atmService.removeAllClients().get());
-        assertEquals(Status.SUCCESS, atmService.removeAllLoans().get());
+//        assertEquals(Status.ERROR, atmService.removeAllClients().get());
+//        assertEquals(Status.SUCCESS, atmService.removeAllLoans().get());
     }
 
     @RepeatedTest(3)
+    @Disabled
     void shouldMakeALoan() {
         // given
         var client = makeClient();
@@ -64,6 +65,28 @@ class AtmServiceTest extends AtmDAOImplementation {
         loan.get().entrySet().stream().map(Map.Entry::getValue).forEach(Print::println);
     }
 
+    @Test
+    void shouldApproveLoan() {
+
+        var loan = atmService
+                .getAllLoans()
+                .get()
+                .entrySet()
+                .stream()
+                .map(Map.Entry::getValue)
+                .flatMap(Collection::stream)
+                .findAny()
+                .get();
+
+        var l = new Loan(
+                loan.loanNumber(),
+                loan.accountNumber(),
+                false
+        );
+
+        var result = atmService.approveLoan().apply(l);
+        assertEquals(Status.SUCCESS, result);
+    }
     private static Client makeClient() {
         return new Client(
                 "200263444",
