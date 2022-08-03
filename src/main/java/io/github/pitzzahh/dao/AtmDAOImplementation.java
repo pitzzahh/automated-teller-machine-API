@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 import java.util.function.BiFunction;
 import io.github.pitzzahh.entity.Loan;
 import io.github.pitzzahh.entity.Client;
-import io.github.pitzzahh.entity.Request;
 import org.springframework.jdbc.core.JdbcTemplate;
 import static io.github.pitzzahh.database.Queries.*;
 import com.github.pitzzahh.utilities.classes.enums.Status;
@@ -129,16 +128,16 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     // TODO: implement
-    public Function<Request, Status> approveLoan() {
-        return request -> approveLoanQuery(request, jdbcTemplate);
+    public Function<Loan, Status> approveLoan() {
+        return loan -> approveLoanQuery(loan, jdbcTemplate);
     }
 
     /**
      * @return
      */
     @Override
-    public Function<Request, Status> removeLoan() {
-        return request -> removeLoanQuery(request, jdbcTemplate);
+    public Function<Loan, Status> removeLoan() {
+        return loan -> removeLoanQuery(loan, jdbcTemplate);
     }
 
     /**
