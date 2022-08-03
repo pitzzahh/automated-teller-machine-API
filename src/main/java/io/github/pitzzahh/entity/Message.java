@@ -5,4 +5,4 @@ package io.github.pitzzahh.entity;
  * @param request the loan request.
  * @param message the message
  */
-public record Message(Request request, String message) { }
+public record Message(Loan request, String message) { }
