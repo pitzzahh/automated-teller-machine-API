@@ -4,9 +4,8 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.function.Function;
-import io.github.pitzzahh.entity.Client;
 import io.github.pitzzahh.entity.Loan;
-import io.github.pitzzahh.entity.Request;
+import io.github.pitzzahh.entity.Client;
 import io.github.pitzzahh.mapper.LoanMapper;
 import io.github.pitzzahh.mapper.ClientMapper;
 import com.github.pitzzahh.utilities.SecurityUtil;
@@ -89,22 +88,22 @@ public class Queries {
         return result >= 1 ? result + 1 : 1;
     }
 
-    public static Status approveLoanQuery(Request request, JdbcTemplate db) {
+    public static Status approveLoanQuery(Loan loan, JdbcTemplate db) {
         final var QUERY = "UPDATE loans SET pending = ? WHERE loan_number = ? AND account_number = ?";
         return db.update(
                 QUERY,
-                SecurityUtil.encrypt(Boolean.TRUE.toString()),
-                request.loan_number(),
-                request.accountNumber()
+                SecurityUtil.encrypt(Boolean.FALSE.toString()),
+                loan.loanNumber(),
+                SecurityUtil.encrypt(loan.accountNumber())
         ) > 0 ? SUCCESS : ERROR;
     }
 
-    public static Status removeLoanQuery(Request request, JdbcTemplate db) {
+    public static Status removeLoanQuery(Loan loan, JdbcTemplate db) {
         final var QUERY = "DELETE FROM loans WHERE loan_number = ? AND account_number = ? AND pending = ?";
         return db.update(
                 QUERY,
-                request.loan_number(),
-                request.accountNumber(),
+                loan.loanNumber(),
+                loan.accountNumber(),
                 SecurityUtil.encrypt(Boolean.TRUE.toString())
         ) > 0 ? SUCCESS : ERROR;
     }
