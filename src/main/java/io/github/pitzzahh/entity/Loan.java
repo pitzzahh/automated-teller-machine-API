@@ -1,5 +1,6 @@
 package io.github.pitzzahh.entity;
 
+import java.text.NumberFormat;
 import java.time.LocalDate;
 
 /**
@@ -10,6 +11,8 @@ import java.time.LocalDate;
  * @param loanCount the count on how many times the account made a loan.
  */
 public record Loan(int loanNumber, String accountNumber, LocalDate dateOfLoan, double amount, boolean pending) {
+
+    private static final NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
 
     public Loan(String accountNumber, LocalDate dateOfLoan, double amount, boolean pending) {
         this(0, accountNumber, dateOfLoan, amount, pending);
@@ -29,10 +32,10 @@ public record Loan(int loanNumber, String accountNumber, LocalDate dateOfLoan, d
 
     @Override
     public String toString() {
-        return "\nLOAN NUMBER : " + loanNumber    + "\n" +
-               "ACCOUNT NUMBER: " + accountNumber + "\n" +
-               "DATE OF LOAN  : " + dateOfLoan    + "\n" +
-               "AMOUNT        : " + amount        + "\n" +
-               "PENDING       : " + pending       + "\n";
+        return "LOAN NUMBER : " + loanNumber                     + "\n" +
+               "ACCOUNT NUMBER: " + accountNumber                + "\n" +
+               "DATE OF LOAN  : " + dateOfLoan                   + "\n" +
+               "AMOUNT        : " + NUMBER_FORMAT.format(amount) + "\n" +
+               "PENDING       : " + pending                      + "\n";
     }
 }
