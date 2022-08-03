@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import java.util.function.BiFunction;
 import io.github.pitzzahh.entity.Loan;
 import io.github.pitzzahh.entity.Client;
+import io.github.pitzzahh.entity.Message;
 import com.github.pitzzahh.utilities.classes.enums.Status;
 
 /**
@@ -49,4 +50,8 @@ public interface AtmDAO {
     Function<Loan, Status> removeLoan();
 
     Supplier<Status> removeAllLoans();
+
+    Function<Message, Status> addMessage();
+
+    BiFunction<Integer, String, Message> getMessage();
 }
