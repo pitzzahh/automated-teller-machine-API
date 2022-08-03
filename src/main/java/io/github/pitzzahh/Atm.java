@@ -28,6 +28,7 @@ import static io.github.pitzzahh.Atm.Machine.AdminAcc.getAllLockedAccounts;
  * @author pitzzahh
  */
 public class Atm {
+
     private static AtmDAO atmDAO;
     private static AtmService ATM_SERVICE;
     private static DatabaseConnection databaseConnection;
@@ -52,14 +53,14 @@ public class Atm {
                         .getDataSource()
         );
 
-        final var scanner = new Scanner(System.in);
+        final var SCANNER = new Scanner(System.in);
         Machine.loadClients();
         Machine.loadClientLoans();
         for (;;)  {
             try {
-                switch (home(scanner)) {
-                    case ADMIN -> Machine.AdminAcc.admin(scanner);
-                    case CLIENT -> Machine.ClientAcc.client(scanner);
+                switch (home(SCANNER)) {
+                    case ADMIN -> Machine.AdminAcc.admin(SCANNER);
+                    case CLIENT -> Machine.ClientAcc.client(SCANNER);
                 }
             } catch (RuntimeException | IllegalAccessException runtimeException) {
                 println(RED_BOLD_BRIGHT +  runtimeException.getMessage() + RESET);
@@ -377,6 +378,11 @@ public class Atm {
             }
 
             // TODO: add comment
+
+            /**
+             *  Manages account loans.
+             * @param scanner the scanner needed for keyboard input.
+             */
             private static void manageAccountLoans(Scanner scanner) {
                 final var LOAN_REQUESTS = getAllLoanRequests();
                 if (LOAN_REQUESTS.isEmpty()) throw new IllegalStateException("\nTHERE ARE NO LOAN REQUESTS AVAILABLE\n");
@@ -386,7 +392,7 @@ public class Atm {
                             "╔╦╗╔═╗╔╗╔╔═╗╔═╗╔═╗  ╔═╗╔═╗╔═╗╔═╗╦ ╦╔╗╔╔╦╗  ╦  ╔═╗╔═╗╔╗╔╔═╗\n" +
                             "║║║╠═╣║║║╠═╣║ ╦║╣   ╠═╣║  ║  ║ ║║ ║║║║ ║   ║  ║ ║╠═╣║║║╚═╗\n" +
                             "╩ ╩╩ ╩╝╚╝╩ ╩╚═╝╚═╝  ╩ ╩╚═╝╚═╝╚═╝╚═╝╝╚╝ ╩   ╩═╝╚═╝╩ ╩╝╚╝╚═╝\n");
-                    println(RED_BOLD_BRIGHT + (LOAN_REQUESTS.size() > 1 ? "LIST OF LOANS" : "LOAN") +"\n");
+                    println(RED_BOLD_BRIGHT + (LOAN_REQUESTS.size() > 1 ? "LIST OF LOANS" : "LOAN"));
                     LOAN_REQUESTS.stream().forEach(Print::println);
                     println(PURPLE_BOLD + ":" + BLUE_BOLD_BRIGHT  + " 1 " + PURPLE_BOLD_BRIGHT + ": " + BLUE_BOLD_BRIGHT + "APPROVE LOAN");
                     println(PURPLE_BOLD + ":" + RED_BOLD_BRIGHT   + " 2 " + PURPLE_BOLD_BRIGHT + ": " + RED_BOLD_BRIGHT + "REMOVE LOAN");
@@ -419,18 +425,18 @@ public class Atm {
             }
 
             /**
-             * Approves the loan
-             * @param scanner
-             * @param allLoans
-             * @return
+             * Approves a loan
+             * @param scanner the scanner needed for keyboard input.
+             * @param allLoans the {@code List<Loan>}.
+             * @return a {@code Status}
              */
-            // TODO: add comment
             private static Status approveLoan(Scanner scanner, List<Loan> allLoans) {
                 var loan = new Loan();
-                if (allLoans.size() == 1) return ATM_SERVICE.approveLoan().apply(getApprovedLoan(allLoans.stream().findAny().get()));
+                Client client;
+                if (allLoans.size() == 1) return ATM_SERVICE.approveLoan().apply(mapLoan(allLoans.stream().findAny().get()));
                 else {
                     println(YELLOW_BOLD_BRIGHT + ":ENTER LOAN NUMBER AND ACCOUNT NUMBER TO REOPEN SEPARATED BY SPACE:");
-                    println(CYAN_BACKGROUND + "example: 1 200263444");
+                    println(GREEN_BOLD + "example: " + YELLOW_BOLD_BRIGHT + CYAN_BACKGROUND + "1" + RESET + " " + YELLOW_BOLD_BRIGHT + CYAN_BACKGROUND +"200263444" + RESET);
                     print(PURPLE_BOLD + ">>>: " + RESET);
                     final var $s = scanner.nextLine().trim().split(" ");
                     if (isWholeNumber().negate().test($s[0])) throw new IllegalStateException("LOAN NUMBER SHOULD BE A NUMBER");
@@ -440,8 +446,10 @@ public class Atm {
                             .filter(e -> e.loanNumber() == Integer.parseInt($s[0]) && e.accountNumber().equals($s[1]))
                             .findAny()
                             .orElseThrow(() -> new IllegalStateException(String.format("\nOLOAN: %s DOES NOT EXIST\n", $an)));
+                    client = CLIENTS.get(loan.accountNumber());
                 }
-                return ATM_SERVICE.approveLoan().apply(getApprovedLoan(loan));
+                var status = ATM_SERVICE.updateClientSavingsByAccountNumber().apply(loan.accountNumber(), client.savings() + loan.amount());
+                return status == SUCCESS ? ATM_SERVICE.approveLoan().apply(mapLoan(loan)) : CANNOT_PERFORM_OPERATION;
             }
 
             // TODO: implement
@@ -449,7 +457,7 @@ public class Atm {
                 return CANNOT_PERFORM_OPERATION;
             }
 
-            private static Loan getApprovedLoan(Loan loan) {
+            private static Loan mapLoan(Loan loan) {
                 return new Loan(
                         loan.loanNumber(),
                         loan.accountNumber(),
@@ -676,8 +684,10 @@ public class Atm {
             private static void viewClientDetails(String an) {
                 println(CLIENTS.get(an));
             }
+
         }
 
+        // TODO: implement
         protected static class Messages {
 
             private static void loadMessages() {
