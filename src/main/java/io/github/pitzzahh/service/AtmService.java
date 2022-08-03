@@ -1,19 +1,17 @@
 package io.github.pitzzahh.service;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 import javax.sql.DataSource;
+import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.BiFunction;
 import io.github.pitzzahh.dao.AtmDAO;
-import io.github.pitzzahh.database.DatabaseConnection;
 import io.github.pitzzahh.entity.Loan;
 import io.github.pitzzahh.entity.Client;
-import io.github.pitzzahh.entity.Request;
 import io.github.pitzzahh.dao.AtmDAOImplementation;
 import com.github.pitzzahh.utilities.classes.enums.Status;
 
@@ -114,14 +112,14 @@ public class AtmService {
     /**
      * @return
      */
-    public Function<Request, Status> approveLoan() {
+    public Function<Loan, Status> approveLoan() {
         return atmDAO.approveLoan();
     }
 
     /**
      * @return
      */
-    public Function<Request, Status> removeLoan() {
+    public Function<Loan, Status> removeLoan() {
         return atmDAO.removeLoan();
     }
 
