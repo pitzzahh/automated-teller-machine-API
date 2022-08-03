@@ -2,6 +2,7 @@ package io.github.pitzzahh.entity;
 
 import java.util.Arrays;
 import java.text.NumberFormat;
+import java.util.stream.Collectors;
 import com.github.pitzzahh.utilities.classes.Person;
 import static com.github.pitzzahh.utilities.classes.TextColors.*;
 
@@ -27,7 +28,7 @@ public record Client(String accountNumber, String pin, Person details, double sa
                "FIRST NAME    : " + PURPLE_BOLD + this.details().getFirstName()                                                                                         + "\n" +
                "LAST NAME     : " + GREEN_BOLD + this.details().getLastName()                                                                                           + "\n" +
                "AGE           : " + YELLOW_BOLD + this.details().getAge()                                                                                               + "\n" +
-               "GENDER        : " + BLUE_BOLD + Arrays.stream(this.details().getGender().name().split("_")).reduce("", (total, current) -> total.concat(current + " ")) + "\n" +
+               "GENDER        : " + BLUE_BOLD + Arrays.stream(this.details().getGender().name().split("_")).collect(Collectors.joining(" "))                            + "\n" +
                "ADDRESS       : " + RED_BOLD + this.details().getAddress()                                                                                              + "\n" +
                "BIRTH DATE    : " + PURPLE_BOLD + this.details().getBirthDate().toString() + RESET                                                                      + "\n" +
                "SAVINGS       : " + YELLOW_BOLD_BRIGHT + "₱ " + GREEN_BOLD + NUMBER_FORMAT.format(this.savings()) + RESET                                               + "\n";
