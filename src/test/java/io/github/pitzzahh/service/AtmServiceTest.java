@@ -14,7 +14,6 @@ import io.github.pitzzahh.dao.AtmDAOImplementation;
 import com.github.pitzzahh.utilities.classes.Person;
 import com.github.pitzzahh.utilities.classes.enums.*;
 import io.github.pitzzahh.database.DatabaseConnection;
-import org.springframework.beans.factory.annotation.Autowired;
 
 class AtmServiceTest extends AtmDAOImplementation {
 
@@ -36,13 +35,6 @@ class AtmServiceTest extends AtmDAOImplementation {
                 );
     }
 
-    @AfterEach
-    @Disabled
-    void tearDown() {
-//        assertEquals(Status.ERROR, atmService.removeAllClients().get());
-//        assertEquals(Status.SUCCESS, atmService.removeAllLoans().get());
-    }
-
     @RepeatedTest(3)
     @Disabled
     void shouldMakeALoan() {
@@ -57,15 +49,19 @@ class AtmServiceTest extends AtmDAOImplementation {
     }
 
     @Test
-    @Disabled
     void shouldMetTheLoan() {
         // given
         var loan = atmService.getAllLoans();
         // when
-        loan.get().entrySet().stream().map(Map.Entry::getValue).forEach(Print::println);
+        loan.get().entrySet()
+                .stream()
+                .map(Map.Entry::getValue)
+                .flatMap(Collection::stream)
+                .forEach(Print::println);
     }
 
     @Test
+    @Disabled
     void shouldApproveLoan() {
 
         var loan = atmService
@@ -87,6 +83,23 @@ class AtmServiceTest extends AtmDAOImplementation {
         var result = atmService.approveLoan().apply(l);
         assertEquals(Status.SUCCESS, result);
     }
+
+    @Test
+    @Disabled
+    void shouldApproveAllLoans() {
+        var loans = atmService
+                .getAllLoans()
+                .get()
+                .entrySet()
+                .stream()
+                .map(Map.Entry::getValue)
+                .flatMap(Collection::stream)
+                .toList();
+
+        loans.forEach(l -> atmService.approveLoan().apply(l));
+
+    }
+
     private static Client makeClient() {
         return new Client(
                 "200263444",
