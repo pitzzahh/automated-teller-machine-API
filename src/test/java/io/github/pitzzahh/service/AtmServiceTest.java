@@ -1,8 +1,7 @@
 package io.github.pitzzahh.service;
 
+import java.time.*;
 import java.util.Map;
-import java.time.Month;
-import java.time.LocalDate;
 import java.util.Collection;
 import org.junit.jupiter.api.*;
 import io.github.pitzzahh.dao.AtmDAO;
@@ -10,20 +9,45 @@ import io.github.pitzzahh.entity.Loan;
 import io.github.pitzzahh.entity.Client;
 import com.github.pitzzahh.utilities.Print;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
+
 import io.github.pitzzahh.dao.AtmDAOImplementation;
 import com.github.pitzzahh.utilities.classes.Person;
 import com.github.pitzzahh.utilities.classes.enums.*;
 import io.github.pitzzahh.database.DatabaseConnection;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 class AtmServiceTest extends AtmDAOImplementation {
 
     private AtmDAO atmDAO;
+
+    @Mock
+    private Clock clock;
+
     private AtmService atmService;
+
     private DatabaseConnection databaseConnection;
+
+    private ZonedDateTime NOW = ZonedDateTime.of(
+            2022,
+            6,
+            15,
+            12,
+            30,
+            30,
+            0,
+            ZoneId.of("GMT")
+    );
 
     @BeforeEach
     void setUp() {
-        atmService = new AtmService(atmDAO);
+        MockitoAnnotations.openMocks(this);
+
+        when(clock.getZone()).thenReturn(NOW.getZone());
+        when(clock.instant()).thenReturn(NOW.toInstant());
+
+        atmService = new AtmService(atmDAO, clock);
         databaseConnection = new DatabaseConnection();
         atmService.setDataSource()
                 .accept(databaseConnection

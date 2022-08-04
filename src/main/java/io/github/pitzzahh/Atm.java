@@ -1,6 +1,7 @@
 package io.github.pitzzahh;
 
 import java.util.*;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.regex.Pattern;
 import io.github.pitzzahh.entity.*;
@@ -33,6 +34,7 @@ import static io.github.pitzzahh.Atm.Machine.AdminAcc.getAllLockedAccounts;
 public class Atm {
 
     private static AtmDAO atmDAO;
+    private static Clock clock;
     private static AtmService ATM_SERVICE;
     private static DatabaseConnection databaseConnection;
     private static final Hashtable<String, Client> CLIENTS = new Hashtable<>();
@@ -45,7 +47,7 @@ public class Atm {
      */
     @SuppressWarnings("InfiniteLoopStatement")
     public static void main(String[] args)  {
-        ATM_SERVICE = new AtmService(atmDAO);
+        ATM_SERVICE = new AtmService(atmDAO, clock);
         databaseConnection = new DatabaseConnection();
         ATM_SERVICE.setDataSource().accept(
                 databaseConnection
@@ -630,7 +632,7 @@ public class Atm {
                         else if (transaction == LOAN) status = ATM_SERVICE.requestLoan().apply(
                                 new Loan(
                                         client.accountNumber(),
-                                        LocalDate.now(),
+                                        LocalDate.now(clock),
                                         cashToProcess,
                                         true
                                 ));
