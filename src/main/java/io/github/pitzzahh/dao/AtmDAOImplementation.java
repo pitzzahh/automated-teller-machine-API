@@ -1,20 +1,22 @@
 package io.github.pitzzahh.dao;
 
-import java.util.Map;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import javax.sql.DataSource;
-import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 import io.github.pitzzahh.entity.Loan;
 import io.github.pitzzahh.entity.Client;
 import io.github.pitzzahh.entity.Message;
+import io.github.pitzzahh.mapper.LoanMapper;
+import io.github.pitzzahh.mapper.ClientMapper;
+import com.github.pitzzahh.utilities.SecurityUtil;
 import org.springframework.jdbc.core.JdbcTemplate;
-import static io.github.pitzzahh.database.Queries.*;
 import com.github.pitzzahh.utilities.classes.enums.Status;
+import static com.github.pitzzahh.utilities.classes.enums.Status.ERROR;
+import static com.github.pitzzahh.utilities.classes.enums.Status.SUCCESS;
 
 /**
  * Implementation of the {@link AtmDAO}.
@@ -22,29 +24,32 @@ import com.github.pitzzahh.utilities.classes.enums.Status;
 public class AtmDAOImplementation implements AtmDAO {
 
     private DataSource dataSource;
-    private JdbcTemplate jdbcTemplate;
+    private JdbcTemplate db;
 
     @Override
     public Consumer<DataSource> setDataSource() {
         return source -> {
             this.dataSource = source;
-            this.jdbcTemplate = new JdbcTemplate(dataSource);
+            this.db = new JdbcTemplate(dataSource);
         };
     }
 
     @Override
     public Supplier<Map<String, Client>> getAllClients() {
-        return getAllClientsQuery(jdbcTemplate);
+        return () -> db.query("SELECT * FROM clients", new ClientMapper())
+                .stream()
+                .collect(Collectors.toMap(Client::accountNumber, Function.identity()));
     }
 
     @Override
     public Function<String, Optional<Client>> getClientByAccountNumber() {
-        return an -> getClientByAccountNumberQuery(an, jdbcTemplate);
+        final var QUERY = "SELECT * FROM clients WHERE account_number = ?";
+        return an -> Optional.ofNullable(Objects.requireNonNull(db.queryForObject(QUERY, new ClientMapper(), SecurityUtil.encrypt(an))));
     }
 
     @Override
     public Function<String, Status> removeClientByAccountNumber() {
-        return an -> removeClientByAccountNumberQuery(an, jdbcTemplate);
+        return an -> db.update("DELETE FROM clients WHERE account_number = ?", SecurityUtil.encrypt(an)) > 0 ? SUCCESS : ERROR;
     }
 
     /**
@@ -52,7 +57,7 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public Supplier<Status> removeAllClients() {
-        return () -> removeAllClientsQuery(jdbcTemplate);
+        return () -> db.update("DELETE FROM clients") > 0 ? SUCCESS : ERROR;
     }
 
     /**
@@ -61,7 +66,8 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public BiFunction<String, Boolean, Status> updateClientAttemptsByAccountNumber() {
-        return (an, status) -> updateClientStatusByAccountNumber(an, status, jdbcTemplate);
+        final var QUERY = "UPDATE clients SET isLocked = ? WHERE account_number = ?";
+        return (an, status) -> db.update(QUERY, status, SecurityUtil.encrypt(an)) > 0 ? SUCCESS : ERROR;
     }
 
     /**
@@ -70,7 +76,12 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public BiFunction<String, Double, Status> updateClientSavingsByAccountNumber() {
-        return (an, newSavings) -> updateClientSavingsByAccountNumberQuery(an, newSavings, jdbcTemplate);
+        final var QUERY = "UPDATE clients SET savings = ? WHERE account_number = ?";
+        return (an, newSavings) -> db.update(
+                QUERY,
+                SecurityUtil.encrypt(String.valueOf(newSavings)),
+                SecurityUtil.encrypt(an)
+        ) > 0 ? SUCCESS : ERROR;
     }
 
     /**
@@ -79,7 +90,20 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public Function<Client, Status> saveClient() {
-        return client -> saveClientQuery(client, jdbcTemplate);
+        final var QUERY = "INSERT INTO clients (account_number, pin, first_name, last_name, gender, address, date_of_birth, savings, isLocked)" +
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        return client -> db.update(
+                QUERY,
+                SecurityUtil.encrypt(client.accountNumber()),
+                SecurityUtil.encrypt(client.pin()),
+                SecurityUtil.encrypt(client.details().getFirstName()),
+                SecurityUtil.encrypt(client.details().getLastName()),
+                client.details().getGender().toString(),
+                SecurityUtil.encrypt(client.details().getAddress()),
+                client.details().getBirthDate(),
+                SecurityUtil.encrypt(String.valueOf(client.savings())),
+                client.isLocked()
+        ) > 0 ? SUCCESS : ERROR;
     }
 
     /**
@@ -97,15 +121,25 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public Function<Loan, Status> requestLoan() {
-        return loan -> requestLoanQuery(loan, jdbcTemplate);
+        final var QUERY = "INSERT INTO loans(loan_number, account_number, date_of_loan, amount, pending) VALUES(?, ?, ?, ?, ?)";
+        return loan ->  db.update(
+                QUERY,
+                getLoanCount().apply(loan.accountNumber()),
+                SecurityUtil.encrypt(loan.accountNumber()),
+                loan.dateOfLoan(),
+                SecurityUtil.encrypt(String.valueOf(loan.amount())),
+                SecurityUtil.encrypt(String.valueOf(loan.pending()))
+        ) > 0 ? SUCCESS : ERROR;
     }
 
     /**
      * @return
      */
     @Override
-    public  Supplier<Map<String, List<Loan>>> getAllLoans() {
-        return getAllLoansQuery(jdbcTemplate);
+    public Supplier<Map<String, List<Loan>>> getAllLoans() {
+        return () -> db.query("SELECT * FROM loans", new LoanMapper())
+                .stream()
+                .collect(Collectors.groupingBy(Loan::accountNumber));
     }
 
     /**
@@ -113,7 +147,16 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public BiFunction<Integer, String, Optional<Loan>> getLoanByLoanNumberAndAccountNumber() {
-        return (loanNumber, accountNumber) -> getLoanByLoanNumberAndAccountNumberQuery(loanNumber, accountNumber, jdbcTemplate);
+        final var QUERY = "SELECT * FROM loans WHERE loan_number = ? AND account_number = ?";
+        return (loanNumber, accountNumber) -> Optional.ofNullable(
+                Objects.requireNonNull(
+                        db.queryForObject(
+                                QUERY,
+                                new LoanMapper(),
+                                loanNumber,
+                                SecurityUtil.encrypt(accountNumber))
+                )
+        );
     }
 
     /**
@@ -121,7 +164,13 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public Function<String, Integer> getLoanCount() {
-        return accountNumber -> getLoanCountQuery(accountNumber, jdbcTemplate);
+        final var QUERY = "SELECT MAX(loan_number) FROM loans WHERE account_number = ?";
+        return accountNumber ->  Optional.ofNullable(
+                    db.queryForObject(
+                            QUERY,
+                            Integer.class,
+                            SecurityUtil.encrypt(accountNumber))
+        ).orElse(0) >= 1 ? + 1 : 1;
     }
 
     /**
@@ -129,7 +178,13 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public Function<Loan, Status> approveLoan() {
-        return loan -> approveLoanQuery(loan, jdbcTemplate);
+        final var QUERY = "UPDATE loans SET pending = ? WHERE loan_number = ? AND account_number = ?";
+        return loan -> db.update(
+                QUERY,
+                SecurityUtil.encrypt(Boolean.FALSE.toString()),
+                loan.loanNumber(),
+                SecurityUtil.encrypt(loan.accountNumber())
+        ) > 0 ? SUCCESS : ERROR;
     }
 
     /**
@@ -137,7 +192,13 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public Function<Loan, Status> removeLoan() {
-        return loan -> removeLoanQuery(loan, jdbcTemplate);
+        final var QUERY = "DELETE FROM loans WHERE loan_number = ? AND account_number = ? AND pending = ?";
+        return loan -> db.update(
+                QUERY,
+                loan.loanNumber(),
+                loan.accountNumber(),
+                SecurityUtil.encrypt(Boolean.TRUE.toString())
+        ) > 0 ? SUCCESS : ERROR;
     }
 
     /**
@@ -145,7 +206,7 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public Supplier<Status> removeAllLoans() {
-        return () -> removeAllLoansQuery(jdbcTemplate);
+        return () ->  db.update("DELETE FROM loans") > 0 ? SUCCESS : ERROR;
     }
 
     /**
