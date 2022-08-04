@@ -8,12 +8,10 @@ import io.github.pitzzahh.dao.AtmDAOImplementation;
 import io.github.pitzzahh.database.DatabaseConnection;
 import io.github.pitzzahh.service.AtmService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.Collection;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -58,14 +56,13 @@ class ClientTest extends AtmDAOImplementation {
     }
 
     @Test
-    void b_shouldGetClient() {
-        var client = atmService.getAllClients()
+    void shouldPrintAllClients() {
+        atmService.getAllClients()
                 .get()
                 .entrySet()
                 .stream()
                 .map(Map.Entry::getValue)
-                .toList();
-        client.forEach(System.out::println);
-
+                .toList()
+                .forEach(System.out::println);
     }
 }
