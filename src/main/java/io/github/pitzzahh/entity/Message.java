@@ -1,11 +1,7 @@
 package io.github.pitzzahh.entity;
 
-import java.sql.Date;
-import java.time.ZoneId;
-import java.util.Calendar;
 import java.util.Currency;
 import java.text.NumberFormat;
-import java.time.LocalDateTime;
 import java.time.format.FormatStyle;
 import java.time.format.DateTimeFormatter;
 import static com.github.pitzzahh.utilities.classes.TextColors.*;
@@ -22,10 +18,6 @@ public record Message(Loan loan, Client client) {
     @Override
     public String toString() {
 
-        var cal = Calendar.getInstance();
-        cal.setTime(Date.valueOf(loan.dateOfLoan()));
-        cal.add(Calendar.MONTH, 2);
-
         return String.format(CYAN_BOLD +
                 "Dear %s,                                                                                " + "\n\n" + CYAN_BOLD +
                 "    We have received your loan request of %s, on %s."                                     + "\n"   + CYAN_BOLD +
@@ -37,7 +29,7 @@ public record Message(Loan loan, Client client) {
                 YELLOW_BOLD + client.details().getFirstName().concat(" " + client.details().getLastName()) + RESET,
                 PURPLE_BOLD + Currency.getInstance("PHP").getSymbol().concat(NUMBER_FORMAT.format(loan.amount())) + RESET,
                 BLUE_BOLD + loan.dateOfLoan().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))  +RESET,
-                RED_BOLD_BRIGHT + LocalDateTime.ofInstant(cal.getTime().toInstant(), ZoneId.of("GMT")).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)) + RESET
+                RED_BOLD_BRIGHT + loan.dateOfLoan().plusMonths(2).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)) + RESET
         );
     }
 }
