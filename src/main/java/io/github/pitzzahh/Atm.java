@@ -2,8 +2,10 @@ package io.github.pitzzahh;
 
 import java.util.*;
 import java.time.LocalDate;
+import java.util.regex.Pattern;
 import io.github.pitzzahh.entity.*;
 import java.util.stream.Collectors;
+import java.util.function.Predicate;
 import static java.lang.System.exit;
 import java.util.concurrent.TimeUnit;
 import io.github.pitzzahh.dao.AtmDAO;
@@ -20,6 +22,7 @@ import static com.github.pitzzahh.utilities.classes.TextColors.*;
 import static com.github.pitzzahh.utilities.classes.enums.Role.*;
 import static com.github.pitzzahh.utilities.classes.enums.Status.*;
 import static com.github.pitzzahh.utilities.validation.Validator.*;
+import static io.github.pitzzahh.Atm.Machine.Validator.isValidFormat;
 import static io.github.pitzzahh.Atm.Machine.AdminAcc.getAllLockedAccounts;
 
 /**
@@ -325,7 +328,7 @@ public class Atm {
                 CLIENTS.entrySet()
                         .stream()
                         .map(Map.Entry::getValue)
-                        .forEachOrdered(Print::println);
+                        .forEach(Print::println);
             }
 
             /**
@@ -384,7 +387,7 @@ public class Atm {
              * @param scanner the scanner needed for keyboard input.
              */
             private static void manageAccountLoans(Scanner scanner) {
-                final var LOAN_REQUESTS = getAllLoanRequests();
+                var LOAN_REQUESTS = getAllLoanRequests();
                 if (LOAN_REQUESTS.isEmpty()) throw new IllegalStateException("\nTHERE ARE NO LOAN REQUESTS AVAILABLE\n");
                 String choice = "";
                 do {
@@ -420,8 +423,11 @@ public class Atm {
                         }
                         default -> throw new IllegalStateException(String.format("\nINVALID INPUT: %s\n", choice));
                     }
+                    LOANS.clear();
+                    loadClientLoans();
+                    LOAN_REQUESTS = getAllLoanRequests();
                     if (LOAN_REQUESTS.isEmpty()) break;
-                } while (false);
+                } while (!choice.equals("3"));
             }
 
             /**
@@ -432,20 +438,23 @@ public class Atm {
              */
             private static Status approveLoan(Scanner scanner, List<Loan> allLoans) {
                 var loan = new Loan();
-                Client client;
-                if (allLoans.size() == 1) return ATM_SERVICE.approveLoan().apply(mapLoan(allLoans.stream().findAny().get()));
+                var client = new Client();
+                if (allLoans.size() == 1) return ATM_SERVICE.approveLoan().apply(mapLoan(allLoans.stream().findFirst().get()));
                 else {
                     println(YELLOW_BOLD_BRIGHT + ":ENTER LOAN NUMBER AND ACCOUNT NUMBER TO REOPEN SEPARATED BY SPACE:");
                     println(GREEN_BOLD + "example: " + YELLOW_BOLD_BRIGHT + CYAN_BACKGROUND + "1" + RESET + " " + YELLOW_BOLD_BRIGHT + CYAN_BACKGROUND +"200263444" + RESET);
                     print(PURPLE_BOLD + ">>>: " + RESET);
                     final var $s = scanner.nextLine().trim().split(" ");
-                    if (isWholeNumber().negate().test($s[0])) throw new IllegalStateException("LOAN NUMBER SHOULD BE A NUMBER");
-                    else if (isWholeNumber().negate().test($s[1])) throw new IllegalStateException("ACCOUNT NUMBER SHOULD BE A NUMBER");
+                    if (isValidFormat().negate().test($s[0]+" "+$s[1])) throw new IllegalStateException("\nINVALID FORMAT\nPLEASE FOLLOW THE EXAMPLE\n");
+                    else if (isWholeNumber().negate().test($s[0])) throw new IllegalStateException("\nLOAN NUMBER SHOULD BE A NUMBER\n");
+                    else if (isWholeNumber().negate().test($s[1])) throw new IllegalStateException("\nACCOUNT NUMBER SHOULD BE A NUMBER\n");
+
                     loan = allLoans
                             .stream()
                             .filter(e -> e.loanNumber() == Integer.parseInt($s[0]) && e.accountNumber().equals($s[1]))
                             .findAny()
-                            .orElseThrow(() -> new IllegalStateException(String.format("\nOLOAN: %s DOES NOT EXIST\n", $an)));
+                            .orElseThrow(() -> new IllegalStateException(String.format("\nLOAN %s WITH ACCOUNT NUMBER: %s DOES NOT EXIST\n", $s[0], $s[1])));
+
                     client = CLIENTS.get(loan.accountNumber());
                 }
                 var status = ATM_SERVICE.updateClientSavingsByAccountNumber().apply(loan.accountNumber(), client.savings() + loan.amount());
@@ -687,10 +696,23 @@ public class Atm {
 
         }
 
-        // TODO: implement
+        /**
+         * class used for managing client messages.
+         */
         protected static class Messages {
 
             private static void loadMessages() {
+
+            }
+        }
+
+        /**
+         * interface for custom input validator.
+         */
+        protected static interface Validator extends Predicate<String> {
+
+            static Validator isValidFormat() {
+                return input -> Pattern.compile("^\\d{1,2}\\s\\d{9}$").matcher(input).matches();
             }
         }
     }
