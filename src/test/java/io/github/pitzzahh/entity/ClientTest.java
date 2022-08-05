@@ -1,32 +1,28 @@
 package io.github.pitzzahh.entity;
 
-import com.github.pitzzahh.utilities.classes.Person;
 import com.github.pitzzahh.utilities.classes.enums.Gender;
 import com.github.pitzzahh.utilities.classes.enums.Status;
-import io.github.pitzzahh.dao.AtmDAO;
-import io.github.pitzzahh.dao.AtmDAOImplementation;
 import io.github.pitzzahh.database.DatabaseConnection;
+import com.github.pitzzahh.utilities.classes.Person;
+import io.github.pitzzahh.dao.AtmDAOImplementation;
+import static org.junit.jupiter.api.Assertions.*;
 import io.github.pitzzahh.service.AtmService;
 import org.junit.jupiter.api.BeforeEach;
+import io.github.pitzzahh.dao.AtmDAO;
 import org.junit.jupiter.api.Test;
-
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ClientTest extends AtmDAOImplementation {
 
     private AtmDAO atmDAO;
     private AtmService atmService;
     private DatabaseConnection databaseConnection;
-    private Clock clock;
 
     @BeforeEach
     void setUp() {
-        atmService = new AtmService(atmDAO, clock);
+        atmService = new AtmService(atmDAO);
         databaseConnection = new DatabaseConnection();
         atmService.setDataSource()
                 .accept(databaseConnection
