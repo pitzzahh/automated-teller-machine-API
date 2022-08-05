@@ -44,6 +44,14 @@ public class AtmService {
     }
 
     /**
+     *
+     * @return
+     */
+    public Function<String, Double> getClientSavingsByAccountNumber() {
+        return atmDAO.getClientSavingsByAccountNumber();
+    }
+
+    /**
      * @return
      */
     public Function<String, Status> removeClientByAccountNumber() {
