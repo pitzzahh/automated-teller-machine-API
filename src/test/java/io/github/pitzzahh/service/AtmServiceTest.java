@@ -29,16 +29,7 @@ class AtmServiceTest extends AtmDAOImplementation {
 
     private DatabaseConnection databaseConnection;
 
-    private ZonedDateTime NOW = ZonedDateTime.of(
-            2022,
-            6,
-            15,
-            12,
-            30,
-            30,
-            0,
-            ZoneId.of("GMT")
-    );
+    private ZonedDateTime NOW = ZonedDateTime.now();
 
     @BeforeEach
     void setUp() {
@@ -64,7 +55,15 @@ class AtmServiceTest extends AtmDAOImplementation {
 //        assertEquals(Status.SUCCESS, atmService.removeAllLoans().get());
     }
 
+    @Test
+    void shouldGetSavingsByAccountNumber() {
+        var client = makeClient();
+        var savings = atmService.getClientSavingsByAccountNumber().apply(client.accountNumber());
+        System.out.println("savings = " + savings);
+    }
+
     @RepeatedTest(3)
+    @Disabled
     void shouldMakeALoan() {
         // given
         var client = makeClient();
