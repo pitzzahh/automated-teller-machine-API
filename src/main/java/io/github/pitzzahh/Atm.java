@@ -440,7 +440,7 @@ public class Atm {
             private static Status approveLoan(Scanner scanner, List<Loan> allLoans) {
                 var loan = new Loan();
                 var client = new Client();
-                if (allLoans.size() == 1) return ATM_SERVICE.approveLoan().apply(mapLoan(allLoans.stream().findFirst().get()));
+                if (allLoans.size() == 1) return ATM_SERVICE.approveLoan().apply(mapLoan(getAllLoanRequests().stream().findAny().get()));
                 else {
                     println(YELLOW_BOLD_BRIGHT + ":ENTER LOAN NUMBER AND ACCOUNT NUMBER TO REOPEN SEPARATED BY SPACE:");
                     println(GREEN_BOLD + "example: " + YELLOW_BOLD_BRIGHT + CYAN_BACKGROUND + "1" + RESET + " " + YELLOW_BOLD_BRIGHT + CYAN_BACKGROUND +"200263444" + RESET);
@@ -547,7 +547,6 @@ public class Atm {
                 var choice = "";
                 do {
                     try {
-                        viewClientDetails($an);
                         println(BLUE_BOLD + ": " + BLUE_BOLD_BRIGHT   + "1" + BLUE_BOLD + " : " + BLUE_BOLD_BRIGHT   + "DEPOSIT");
                         println(BLUE_BOLD + ": " + YELLOW_BOLD_BRIGHT + "2" + BLUE_BOLD + " : " + YELLOW_BOLD_BRIGHT + "WITHDRAW");
                         println(BLUE_BOLD + ": " + RED                + "3" + BLUE_BOLD + " : " + RED                + "LOAN");
@@ -686,13 +685,6 @@ public class Atm {
                     }
                 }
                 return isLoggedIn;
-            }
-
-            /**
-             * Outputs the client details.
-             */
-            private static void viewClientDetails(String an) {
-                println(CLIENTS.get(an));
             }
 
         }
