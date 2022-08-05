@@ -26,6 +26,12 @@ public class AtmDAOImplementation implements AtmDAO {
     private DataSource dataSource;
     private JdbcTemplate db;
 
+    /**
+     * Function that accepts a {@code DataSource} object.
+     * Object needed to connect to the database.
+     * @see Consumer
+     * @see DataSource
+     */
     @Override
     public Consumer<DataSource> setDataSource() {
         return source -> {
@@ -34,6 +40,15 @@ public class AtmDAOImplementation implements AtmDAO {
         };
     }
 
+    /**
+     * Function that suppplies a {@code Map<String, Client>}.
+     * <p>{@code String} - the key, the key is the account number of the client</p>
+     * <p>{@code Client} - the value, the value is the client object</p>
+     * @return a {@code Client} object
+     * @see Map
+     * @see Supplier
+     * @see Client
+     */
     @Override
     public Supplier<Map<String, Client>> getAllClients() {
         return () -> db.query("SELECT * FROM clients", new ClientMapper())
@@ -41,6 +56,16 @@ public class AtmDAOImplementation implements AtmDAO {
                 .collect(Collectors.toMap(Client::accountNumber, Function.identity()));
     }
 
+    /**
+     * Function that returns a {@code Optional<Client>} object based on the {@code String}
+     * that contains the account number.
+     * <p>T - a {@code String} containing the account number to be search from the database.</p>
+     * <p>R - a {@code Optional<Client>} containing the result if the client is found or not.</p>
+     * @return a {@code Optional<Client>} object.
+     * @see Function
+     * @see Optional
+     * @see Client
+     */
     @Override
     public Function<String, Optional<Client>> getClientByAccountNumber() {
         final var QUERY = "SELECT * FROM clients WHERE account_number = ?";
@@ -51,6 +76,7 @@ public class AtmDAOImplementation implements AtmDAO {
      * Function that accepts a {@code String} containing the account number.
      * The account number will be used to search for the clients savings.
      * @return a {@code Double} containing the savings of the client with the account number.
+     * @see Function
      */
     @Override
     public Function<String, Double> getClientSavingsByAccountNumber() {
@@ -66,13 +92,24 @@ public class AtmDAOImplementation implements AtmDAO {
         );
     }
 
+    /**
+     * Function that removes a client in the database using the account number.
+     * <p>T - a {@code String} the account number of the client needed in order to remove the client.</p>
+     * <p>R - the {@code Status} of the operation if {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @return a {@code Status} of the operation wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @see Function
+     * @see Status
+     */
     @Override
     public Function<String, Status> removeClientByAccountNumber() {
         return an -> db.update("DELETE FROM clients WHERE account_number = ?", SecurityUtil.encrypt(an)) > 0 ? SUCCESS : ERROR;
     }
 
     /**
-     * @return
+     * Function that removes all the clients in the database.
+     * @return a {@code Status} of the operation wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @see Supplier
+     * @see Status
      */
     @Override
     public Supplier<Status> removeAllClients() {
@@ -80,18 +117,26 @@ public class AtmDAOImplementation implements AtmDAO {
     }
 
     /**
-     * Updates the clients pin attempts.
-     * @return a {@code Status}
+     * Function that accepts two values. A {@code String} and a {@code Boolean}.
+     * <p>First parameter is a {@code String} contains the account number of the client.</p>
+     * <p>Second parameter is a {@code Boolean}, {@code true} if the client account should be locked, default is false.</p>
+     * @return a {@code Status} of the operation wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @see BiFunction
+     * @see Status
      */
     @Override
-    public BiFunction<String, Boolean, Status> updateClientAttemptsByAccountNumber() {
+    public BiFunction<String, Boolean, Status> updateClientStatusByAccountNumber() {
         final var QUERY = "UPDATE clients SET isLocked = ? WHERE account_number = ?";
         return (an, status) -> db.update(QUERY, status, SecurityUtil.encrypt(an)) > 0 ? SUCCESS : ERROR;
     }
 
     /**
-     * Updates the clients savings.
-     * @return a {@code Status}
+     * Function that accepts two values. A {@code String} and a {@code Double}.
+     * <p>First parameter is a {@code String} contains the account number of the client.</p>
+     * <p>Second parameter is a {@code Double}, the new savings balance of the client.</p>
+     * @return a {@code Status} of the operation wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @see BiFunction
+     * @see Status
      */
     @Override
     public BiFunction<String, Double, Status> updateClientSavingsByAccountNumber() {
@@ -104,8 +149,12 @@ public class AtmDAOImplementation implements AtmDAO {
     }
 
     /**
-     * Saves a client.
-     * @return
+     * Function that save a client to the database. The function takes a {@code Client} object,
+     * the object to be saved in the database table.
+     * @return a {@code Status} of the operation wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @see Function
+     * @see Client
+     * @see Status
      */
     @Override
     public Function<Client, Status> saveClient() {
@@ -126,7 +175,12 @@ public class AtmDAOImplementation implements AtmDAO {
     }
 
     /**
-     * @return
+     * Function that saves a {@code Collection<Client} to the database table.
+     * @return a {@code Status} of the operation wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @see Function
+     * @see Collection
+     * @see Client
+     * @see Status
      */
     @Override
     // TODO: implement
@@ -134,10 +188,6 @@ public class AtmDAOImplementation implements AtmDAO {
         return null;
     }
 
-    /**
-     * Makes a loan
-     * @return a {@code Status}
-     */
     @Override
     public Function<Loan, Status> requestLoan() {
         final var QUERY = "INSERT INTO loans(loan_number, account_number, date_of_loan, amount, pending) VALUES(?, ?, ?, ?, ?)";
@@ -151,9 +201,6 @@ public class AtmDAOImplementation implements AtmDAO {
         ) > 0 ? SUCCESS : ERROR;
     }
 
-    /**
-     * @return
-     */
     @Override
     public Supplier<Map<String, List<Loan>>> getAllLoans() {
         return () -> db.query("SELECT * FROM loans", new LoanMapper())
@@ -161,9 +208,6 @@ public class AtmDAOImplementation implements AtmDAO {
                 .collect(Collectors.groupingBy(Loan::accountNumber));
     }
 
-    /**
-     * @return
-     */
     @Override
     public BiFunction<Integer, String, Optional<Loan>> getLoanByLoanNumberAndAccountNumber() {
         final var QUERY = "SELECT * FROM loans WHERE loan_number = ? AND account_number = ?";
@@ -178,9 +222,6 @@ public class AtmDAOImplementation implements AtmDAO {
         );
     }
 
-    /**
-     * @return
-     */
     @Override
     public Function<String, Integer> getLoanCount() {
         final var QUERY = "SELECT MAX(loan_number) FROM loans WHERE account_number = ?";
@@ -195,9 +236,6 @@ public class AtmDAOImplementation implements AtmDAO {
         };
     }
 
-    /**
-     * @return
-     */
     @Override
     public Function<Loan, Status> approveLoan() {
         final var QUERY = "UPDATE loans SET pending = ? WHERE loan_number = ? AND account_number = ?";
@@ -209,9 +247,6 @@ public class AtmDAOImplementation implements AtmDAO {
         ) > 0 ? SUCCESS : ERROR;
     }
 
-    /**
-     * @return
-     */
     @Override
     public Function<Loan, Status> removeLoan() {
         final var QUERY = "DELETE FROM loans WHERE loan_number = ? AND account_number = ? AND pending = ?";
@@ -223,26 +258,17 @@ public class AtmDAOImplementation implements AtmDAO {
         ) > 0 ? SUCCESS : ERROR;
     }
 
-    /**
-     * @return
-     */
     @Override
     public Supplier<Status> removeAllLoans() {
         return () ->  db.update("DELETE FROM loans") > 0 ? SUCCESS : ERROR;
     }
 
-    /**
-     * @return
-     */
     @Override
     // TODO: implement
     public Function<Message, Status> addMessage() {
         return null;
     }
 
-    /**
-     * @return
-     */
     @Override
     // TODO: implement
     public BiFunction<Integer, String, Message> getMessage() {
