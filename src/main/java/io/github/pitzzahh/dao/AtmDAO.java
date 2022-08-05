@@ -19,11 +19,22 @@ import com.github.pitzzahh.utilities.classes.enums.Status;
  */
 public interface AtmDAO {
 
+    /**
+     * Function that accepts a {@code DataSource} object
+     * @return
+     */
     Consumer<DataSource> setDataSource();
 
     Supplier<Map<String, Client>> getAllClients();
 
     Function<String, Optional<Client>> getClientByAccountNumber();
+
+    /**
+     * Function that accepts a {@code String} containing the account number.
+     * The account number will be used to search for the clients savings.
+     * @return a {@code Double} containing the savings of the client with the account number.
+     */
+    Function<String, Double> getClientSavingsByAccountNumber();
 
     Function<String, Status> removeClientByAccountNumber();
 

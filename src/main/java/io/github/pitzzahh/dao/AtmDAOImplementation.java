@@ -3,10 +3,10 @@ package io.github.pitzzahh.dao;
 import java.util.*;
 import javax.sql.DataSource;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 import io.github.pitzzahh.entity.Loan;
 import io.github.pitzzahh.entity.Client;
 import io.github.pitzzahh.entity.Message;
@@ -45,6 +45,25 @@ public class AtmDAOImplementation implements AtmDAO {
     public Function<String, Optional<Client>> getClientByAccountNumber() {
         final var QUERY = "SELECT * FROM clients WHERE account_number = ?";
         return an -> Optional.ofNullable(Objects.requireNonNull(db.queryForObject(QUERY, new ClientMapper(), SecurityUtil.encrypt(an))));
+    }
+
+    /**
+     * Function that accepts a {@code String} containing the account number.
+     * The account number will be used to search for the clients savings.
+     * @return a {@code Double} containing the savings of the client with the account number.
+     */
+    @Override
+    public Function<String, Double> getClientSavingsByAccountNumber() {
+        final var QUERY = "SELECT savings FROM clients WHERE account_number = ?";
+        return accountNumber -> Double.parseDouble(
+                SecurityUtil.decrypt(
+                        db.queryForObject(
+                                QUERY,
+                                String.class,
+                                SecurityUtil.encrypt(accountNumber)
+                        )
+                )
+        );
     }
 
     @Override
