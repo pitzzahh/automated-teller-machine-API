@@ -10,6 +10,7 @@ import io.github.pitzzahh.service.AtmService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Map;
@@ -21,10 +22,11 @@ class ClientTest extends AtmDAOImplementation {
     private AtmDAO atmDAO;
     private AtmService atmService;
     private DatabaseConnection databaseConnection;
+    private Clock clock;
 
     @BeforeEach
     void setUp() {
-        atmService = new AtmService(atmDAO);
+        atmService = new AtmService(atmDAO, clock);
         databaseConnection = new DatabaseConnection();
         atmService.setDataSource()
                 .accept(databaseConnection
