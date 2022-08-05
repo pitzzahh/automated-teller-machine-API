@@ -165,12 +165,15 @@ public class AtmDAOImplementation implements AtmDAO {
     @Override
     public Function<String, Integer> getLoanCount() {
         final var QUERY = "SELECT MAX(loan_number) FROM loans WHERE account_number = ?";
-        return accountNumber ->  Optional.ofNullable(
+        return accountNumber ->  {
+            var result = Optional.ofNullable(
                     db.queryForObject(
                             QUERY,
                             Integer.class,
                             SecurityUtil.encrypt(accountNumber))
-        ).orElse(0) >= 1 ? + 1 : 1;
+            ).orElse(0);
+            return result >= 1 ? result + 1 : 1;
+        };
     }
 
     /**
