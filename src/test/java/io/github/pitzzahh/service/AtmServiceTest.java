@@ -47,7 +47,7 @@ class AtmServiceTest extends AtmDAOImplementation {
         when(clock.getZone()).thenReturn(NOW.getZone());
         when(clock.instant()).thenReturn(NOW.toInstant());
 
-        atmService = new AtmService(atmDAO, clock);
+        atmService = new AtmService(atmDAO);
         databaseConnection = new DatabaseConnection();
         atmService.setDataSource()
                 .accept(databaseConnection
@@ -59,20 +59,24 @@ class AtmServiceTest extends AtmDAOImplementation {
                 );
     }
 
+    @AfterEach
+    void tearDown() {
+//        assertEquals(Status.SUCCESS, atmService.removeAllLoans().get());
+    }
+
     @RepeatedTest(3)
-    @Disabled
     void shouldMakeALoan() {
         // given
         var client = makeClient();
         var loan = makeLoan(client);
         // when
         var result = atmService.requestLoan().apply(loan);
-
         // then
         assertEquals(Status.SUCCESS, result);
     }
 
     @Test
+    @Disabled
     void shouldMetTheLoan() {
         // given
         var loan = atmService.getAllLoans();
@@ -124,7 +128,7 @@ class AtmServiceTest extends AtmDAOImplementation {
 
     }
 
-    private static Client makeClient() {
+    private Client makeClient() {
         return new Client(
                 "200263444",
                 "555555",
@@ -140,10 +144,10 @@ class AtmServiceTest extends AtmDAOImplementation {
         );
     }
 
-    private static Loan makeLoan(Client client) {
+    private Loan makeLoan(Client client) {
         return new Loan(
                 client.accountNumber(),
-                LocalDate.now(),
+                LocalDate.now(clock),
                 10_000,
                 true
         );

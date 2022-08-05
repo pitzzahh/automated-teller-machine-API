@@ -1,6 +1,5 @@
 package io.github.pitzzahh.service;
 
-import java.time.Clock;
 import java.util.Map;
 import java.util.List;
 import java.util.Optional;
@@ -22,11 +21,9 @@ import com.github.pitzzahh.utilities.classes.enums.Status;
 public class AtmService {
 
     private AtmDAO atmDAO;
-    private Clock clock;
 
-    public AtmService(AtmDAO atmDAO, Clock clock) {
+    public AtmService(AtmDAO atmDAO) {
         this.atmDAO = new AtmDAOImplementation();
-        this.clock = clock;
     }
 
     public Consumer<DataSource> setDataSource() {
