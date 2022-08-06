@@ -12,10 +12,14 @@ import java.util.function.BiFunction;
 import io.github.pitzzahh.entity.Loan;
 import io.github.pitzzahh.entity.Client;
 import io.github.pitzzahh.entity.Message;
+import io.github.pitzzahh.service.AtmService;
 import com.github.pitzzahh.utilities.classes.enums.Status;
 
 /**
- * interface used to access the database.
+ * interface used to access the database. Implemented by {@code AtmDAOImplementation}.
+ * Used in {@code AtmService}
+ * @see AtmDAOImplementation
+ * @see AtmService
  */
 public interface AtmDAO {
 
@@ -116,21 +120,92 @@ public interface AtmDAO {
      */
     Function<Collection<Client>, Status> saveAllClient();
 
+    /**
+     * Function that submits a loan request.
+     * The Function takes a {@code Loan} object containing the loan information.
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @see Function
+     * @see Loan
+     * @see Status
+     */
     Function<Loan, Status> requestLoan();
 
+    /**
+     * Function that returns a key value pair, a Map<K,V> in particular.
+     * <p>K - is a {@code String} containing the key, the key is the account number of the client who requested a loan.</p>
+     * <p>V - is a {@code String} containing the value, the value is all the loans that the account requested. It is a {@code List<Loan>}</p>
+     * @return a {@code Map<String, List<Loan>>} a key value pair containing all the loans from the table in the database.
+     * @see Supplier
+     * @see Map
+     * @see List
+     * @see Loan
+     */
     Supplier<Map<String, List<Loan>>> getAllLoans();
 
+    /**
+     * Function that gets the loan of a client using loan number and account number.
+     * The function takes an {@code Integer} and a {@code String}, the integer containing the loan number,
+     * and the string containing the account number.
+     * @return an {@code Optional<Loan>} wether the loan exist or not.
+     * @see BiFunction
+     * @see Optional
+     * @see Loan
+     */
     BiFunction<Integer, String, Optional<Loan>> getLoanByLoanNumberAndAccountNumber();
 
+    /**
+     * Function that gets the latest loan count of a client and returns the count.
+     * The function takes a {@code String} containing the account number that holds a loan.
+     * @return a {@code Integer} containing the loan count of a client.
+     * @see Function
+     */
     Function<String, Integer> getLoanCount();
 
+    /**
+     * Function that approves a loan request.
+     * The function takes a {@code Loan} object containing the loan information to be approved.
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @see Function
+     * @see Loan
+     * @see Status
+     */
     Function<Loan, Status> approveLoan();
 
+    /**
+     * Function that removes a loan.
+     * The function takes a {@code Loan} object containing the loan information to be removed.
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @see Function
+     * @see Loan
+     * @see Status
+     */
     Function<Loan, Status> removeLoan();
 
+    /**
+     * Function that removes all the loans from the database.
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @see Supplier
+     * @see Status
+     */
     Supplier<Status> removeAllLoans();
 
+    /**
+     * Function that add a message of the loan requst of a client to the database.
+     * The function takes a {@code Message} object containing the message information.
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @see Function
+     * @see Message
+     * @see Status
+     */
     Function<Message, Status> addMessage();
 
-    BiFunction<Integer, String, Message> getMessage();
+    /**
+     * Function that gets the message of the loan requst of a client to the database.
+     * The Function takes an {@code Integer} and a {@code String}.
+     * The {@code Integer} contains the loan number of the requested loan.
+     * The {@code String} contains the account number of the client.
+     * @return a {@code String} object containg the message of the loan.
+     * @see BiFunction
+     */
+    BiFunction<Integer, String, String> getMessage();
 }
