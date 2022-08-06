@@ -145,8 +145,8 @@ public class AtmService {
      * @see Client
      * @see Status
      */
-    public Function<Collection<Client>, Status> saveAllClient() {
-        return atmDAO.saveAllClient();
+    public Function<Collection<Client>, Status> saveAllClients() {
+        return atmDAO.saveAllClients();
     }
 
     /**

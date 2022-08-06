@@ -182,9 +182,29 @@ public class AtmDAOImplementation implements AtmDAO {
      * @see Status
      */
     @Override
-    // TODO: implement
-    public Function<Collection<Client>, Status> saveAllClient() {
-        return null;
+    public Function<Collection<Client>, Status> saveAllClients() {
+        final var QUERY = "INSERT INTO clients (account_number, pin, first_name, last_name, gender, address, date_of_birth, savings, isLocked)" +
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        return clients -> {
+            clients.stream()
+                    .forEach(
+                        client -> {
+                            db.update(
+                                    QUERY,
+                                    SecurityUtil.encrypt(client.accountNumber()),
+                                    SecurityUtil.encrypt(client.pin()),
+                                    SecurityUtil.encrypt(client.details().getFirstName()),
+                                    SecurityUtil.encrypt(client.details().getLastName()),
+                                    client.details().getGender().toString(),
+                                    SecurityUtil.encrypt(client.details().getAddress()),
+                                    client.details().getBirthDate(),
+                                    SecurityUtil.encrypt(String.valueOf(client.savings())),
+                                    client.isLocked()
+                            );
+                        }
+                    );
+            return SUCCESS;
+        };
     }
 
     /**
@@ -326,9 +346,8 @@ public class AtmDAOImplementation implements AtmDAO {
      * @see Status
      */
     @Override
-    // TODO: test
     public Function<Message, Status> addMessage() {
-        final var QUERY = "INSERT INTO messages(loan_number, accunt_number, message) VALEUS(?, ?, ?)";
+        final var QUERY = "INSERT INTO messages(loan_number, account_number, message) VALUES(?, ?, ?)";
         return message -> db.update(
                 QUERY,
                 message.loan().loanNumber(),
@@ -347,6 +366,7 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     // TODO: test
+    // TODO: fix bug
     public BiFunction<Integer, String, String> getMessage() {
         final var QUERY = "SELECT message FROM messages WHERE loan_number = ? AND account_number = ?";
         return (loanNumber, accountNumber) -> SecurityUtil.decrypt(
@@ -355,7 +375,7 @@ public class AtmDAOImplementation implements AtmDAO {
                         String.class,
                         loanNumber,
                         SecurityUtil.encrypt(accountNumber)
-                )
+                ).toString()
         );
     }
 }
