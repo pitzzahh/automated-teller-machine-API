@@ -326,9 +326,15 @@ public class AtmDAOImplementation implements AtmDAO {
      * @see Status
      */
     @Override
-    // TODO: implement
+    // TODO: test
     public Function<Message, Status> addMessage() {
-        return null;
+        final var QUERY = "INSERT INTO messages(loan_number, accunt_number, message) VALEUS(?, ?, ?)";
+        return message -> db.update(
+                QUERY,
+                message.loan().loanNumber(),
+                SecurityUtil.encrypt(message.loan().accountNumber()),
+                SecurityUtil.encrypt(message.toString())
+        ) > 0 ? SUCCESS : ERROR;
     }
 
     /**
@@ -340,9 +346,16 @@ public class AtmDAOImplementation implements AtmDAO {
      * @see BiFunction
      */
     @Override
-    // TODO: implement
+    // TODO: test
     public BiFunction<Integer, String, String> getMessage() {
-        return null;
+        final var QUERY = "SELECT message FROM messages WHERE loan_number = ? AND account_number = ?";
+        return (loanNumber, accountNumber) -> SecurityUtil.decrypt(
+                db.queryForObject(
+                        QUERY,
+                        String.class,
+                        loanNumber,
+                        SecurityUtil.encrypt(accountNumber)
+                )
+        );
     }
-
 }
