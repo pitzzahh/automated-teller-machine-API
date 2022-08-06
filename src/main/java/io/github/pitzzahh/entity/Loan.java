@@ -60,7 +60,7 @@ public record Loan(int loanNumber, String accountNumber, LocalDate dateOfLoan, d
 
     @Override
     public String toString() {
-        return "LOAN NUMBER : " + loanNumber                     + "\n" +
+        return "LOAN NUMBER   : " + loanNumber                   + "\n" +
                "ACCOUNT NUMBER: " + accountNumber                + "\n" +
                "DATE OF LOAN  : " + dateOfLoan                   + "\n" +
                "AMOUNT        : " + NUMBER_FORMAT.format(amount) + "\n";
