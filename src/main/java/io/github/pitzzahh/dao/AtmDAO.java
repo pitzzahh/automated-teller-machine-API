@@ -118,7 +118,7 @@ public interface AtmDAO {
      * @see Client
      * @see Status
      */
-    Function<Collection<Client>, Status> saveAllClient();
+    Function<Collection<Client>, Status> saveAllClients();
 
     /**
      * Function that submits a loan request.
