@@ -18,8 +18,16 @@ import io.github.pitzzahh.entity.Message;
  */
 public class AtmService {
 
+    /**
+     * {@code AtmDAO} dependency.
+     */
     private AtmDAO atmDAO;
 
+    /**
+     * Dependency ibjection object.
+     * @param atmDAO the {@code AtmDAO} dependency to be injected.
+     * @see AtmDAO
+     */
     public AtmService(AtmDAO atmDAO) {
         this.atmDAO = new AtmDAOImplementation();
     }

@@ -13,6 +13,9 @@ import static com.github.pitzzahh.utilities.classes.TextColors.*;
  */
 public record Message(Loan loan, Client client) {
 
+    /**
+     * {@code NumberFormat} object for formatting numbers.
+     */
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
 
     @Override
