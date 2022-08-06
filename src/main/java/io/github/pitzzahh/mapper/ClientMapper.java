@@ -9,15 +9,15 @@ import com.github.pitzzahh.utilities.classes.Person;
 import com.github.pitzzahh.utilities.classes.enums.Gender;
 
 /**
- * Class used to map data from the table to a {@code Optional<Product>} object
+ * Class used to map data from the table to a {@code Client} object
  */
 public class ClientMapper implements RowMapper<Client> {
 
     /**
-     * maps the data from the table to a {@code Optional<Product>} object.
+     * maps the data from the table to a {@code Client} object.
      * @param resultSet the ResultSet to map (pre-initialized for the current row)
      * @param numberOfRow the number of the current row
-     * @return {@code Optional<Client>} object.
+     * @return {@code Client} object.
      * @throws SQLException if something is went wrong.
      */
     @Override
