@@ -15,8 +15,15 @@ import static com.github.pitzzahh.utilities.classes.TextColors.*;
  * @param isLocked {@code true} if the account is locked, otherwise false.
  */
 public record Client(String accountNumber, String pin, Person details, double savings, boolean isLocked) {
+
+    /**
+     * {@code NumberFormat} object for formatting numbers.
+     */
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
 
+    /**
+     * Empty client object.
+     */
     public Client() {
         this("", "", null, 0, false);
     }
