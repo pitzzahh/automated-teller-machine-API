@@ -1,6 +1,7 @@
 package io.github.pitzzahh.service;
 
 import java.time.*;
+import java.util.List;
 import java.util.Map;
 import java.util.Collection;
 import org.junit.jupiter.api.*;
@@ -9,21 +10,14 @@ import io.github.pitzzahh.entity.Loan;
 import io.github.pitzzahh.entity.Client;
 import com.github.pitzzahh.utilities.Print;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
-
 import io.github.pitzzahh.dao.AtmDAOImplementation;
 import com.github.pitzzahh.utilities.classes.Person;
 import com.github.pitzzahh.utilities.classes.enums.*;
 import io.github.pitzzahh.database.DatabaseConnection;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 class AtmServiceTest extends AtmDAOImplementation {
 
     private AtmDAO atmDAO;
-
-    @Mock
-    private Clock clock;
 
     private AtmService atmService;
 
@@ -33,10 +27,6 @@ class AtmServiceTest extends AtmDAOImplementation {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
-        when(clock.getZone()).thenReturn(NOW.getZone());
-        when(clock.instant()).thenReturn(NOW.toInstant());
 
         atmService = new AtmService(atmDAO);
         databaseConnection = new DatabaseConnection();
@@ -56,18 +46,70 @@ class AtmServiceTest extends AtmDAOImplementation {
     }
 
     @Test
+    @Disabled
+    void shouldSaveAllClients() {
+        var clients = List.of(
+                new Client(
+                        "200263444",
+                        "555555",
+                        Person.builder()
+                                .firstName("Peter John")
+                                .lastName("Arao")
+                                .gender(Gender.MALE)
+                                .address("Earth")
+                                .birthDate(LocalDate.of(2002, Month.AUGUST, 24))
+                                .build(),
+                        5_000_000,
+                        false
+                ),
+                new Client(
+                        "143143143",
+                        "143143",
+                        Person.builder()
+                                .firstName("Zamira Alexis")
+                                .lastName("Morozuk")
+                                .gender(Gender.FEMALE)
+                                .address("Earth")
+                                .birthDate(LocalDate.of(2009, Month.APRIL, 29))
+                                .build(),
+                        5_000_000,
+                        false
+                )
+        );
+        var result = atmService.saveAllClients().apply(clients);
+        assertEquals(Status.SUCCESS, result);
+    }
+
+    @Test
+    void shouldGetLoanMessage() {
+        // given
+        var loanNumber = 1;
+        var accountNumber = "143143143";
+        // when
+        var result = atmService.getMessage().apply(loanNumber, accountNumber)
+                .entrySet()
+                .stream()
+                .map(Map.Entry::getValue)
+                .flatMap(Collection::stream)
+                .toList();
+        // then
+        result.forEach(System.out::println);
+    }
+
+    @Test
+    @Disabled
     void shouldGetSavingsByAccountNumber() {
-        var client = makeClient();
+        var client = makeZamira();
         var savings = atmService.getClientSavingsByAccountNumber().apply(client.accountNumber());
         System.out.println("savings = " + savings);
     }
 
-    @RepeatedTest(3)
+    @Test
     @Disabled
     void shouldMakeALoan() {
         // given
-        var client = makeClient();
-        var loan = makeLoan(client);
+        var client = makePeter();
+        var loan = makeLoan(client, 10_000);
         // when
         var result = atmService.requestLoan().apply(loan);
         // then
@@ -127,10 +169,10 @@ class AtmServiceTest extends AtmDAOImplementation {
 
     }
 
-    private Client makeClient() {
+    private Client makePeter() {
         return new Client(
                 "200263444",
-                "555555",
+                "143143143",
                 Person.builder()
                         .firstName("Peter John")
                         .lastName("Arao")
@@ -143,11 +185,27 @@ class AtmServiceTest extends AtmDAOImplementation {
         );
     }
 
-    private Loan makeLoan(Client client) {
+    private Client makeZamira() {
+        return new Client(
+                "143143143",
+                "143143",
+                Person.builder()
+                        .firstName("Zamira Alexis")
+                        .lastName("Morozuk")
+                        .gender(Gender.FEMALE)
+                        .address("Earth")
+                        .birthDate(LocalDate.of(2009, Month.APRIL, 29))
+                        .build(),
+                5_000_000,
+                false
+        );
+    }
+
+    private Loan makeLoan(Client client, double amount) {
         return new Loan(
                 client.accountNumber(),
-                LocalDate.now(clock),
-                10_000,
+                LocalDate.now(),
+                amount,
                 true
         );
     }
