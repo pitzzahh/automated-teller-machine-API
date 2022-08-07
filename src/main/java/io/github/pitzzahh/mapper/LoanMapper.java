@@ -25,7 +25,8 @@ public class LoanMapper implements RowMapper<Loan> {
                 SecurityUtil.decrypt(resultSet.getString("account_number")),
                 resultSet.getDate("date_of_loan").toLocalDate(),
                 Double.parseDouble(SecurityUtil.decrypt(resultSet.getString("amount"))),
-                Boolean.valueOf(SecurityUtil.decrypt(resultSet.getString("pending")))
+                Boolean.valueOf(SecurityUtil.decrypt(resultSet.getString("pending"))),
+                Boolean.valueOf(SecurityUtil.decrypt(resultSet.getString("is_declined")))
         );
     }
 }

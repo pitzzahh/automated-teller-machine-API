@@ -11,7 +11,7 @@ import java.time.LocalDate;
  * @param amount the amount that was loan.
  * @param pending if the loan is not yet resolved.
  */
-public record Loan(int loanNumber, String accountNumber, LocalDate dateOfLoan, double amount, boolean pending) {
+public record Loan(int loanNumber, String accountNumber, LocalDate dateOfLoan, double amount, boolean pending, boolean isDeclined) {
 
     /**
      * {@code NumberFormat} object for formatting numbers.
@@ -26,7 +26,7 @@ public record Loan(int loanNumber, String accountNumber, LocalDate dateOfLoan, d
      * @param loanCount the count on how many times the account made a loan.
      */
     public Loan(String accountNumber, LocalDate dateOfLoan, double amount, boolean pending) {
-        this(0, accountNumber, dateOfLoan, amount, pending);
+        this(0, accountNumber, dateOfLoan, amount, pending, false);
     }
 
     /**
@@ -37,7 +37,7 @@ public record Loan(int loanNumber, String accountNumber, LocalDate dateOfLoan, d
      * @param pending if the loan is not yet resolved.
      */
     public Loan(int loanNumber, String accountNumber, double amount, boolean pending) {
-        this(loanNumber, accountNumber, null, amount, pending);
+        this(loanNumber, accountNumber, null, amount, pending, false);
     }
 
     /**
@@ -47,7 +47,7 @@ public record Loan(int loanNumber, String accountNumber, LocalDate dateOfLoan, d
      * @param pending if the loan is not yet resolved.
      */
     public Loan(int loanNumber, String accountNumber, boolean pending) {
-        this(loanNumber, accountNumber, null, 0, pending);
+        this(loanNumber, accountNumber, null, 0, pending, false);
     }
 
     /**
@@ -55,7 +55,7 @@ public record Loan(int loanNumber, String accountNumber, LocalDate dateOfLoan, d
      * Empty {@code Loan} object.
      */
     public Loan() {
-        this(0, "0", null, 0, false);
+        this(0, "0", null, 0, false, false);
     }
 
     @Override
