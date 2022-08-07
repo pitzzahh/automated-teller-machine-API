@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 import java.util.function.BiFunction;
 import io.github.pitzzahh.entity.Loan;
 import io.github.pitzzahh.entity.Client;
-import io.github.pitzzahh.entity.Message;
 import io.github.pitzzahh.service.AtmService;
 import com.github.pitzzahh.utilities.classes.enums.Status;
 
@@ -190,16 +189,6 @@ public interface AtmDAO {
     Supplier<Status> removeAllLoans();
 
     /**
-     * Function that add a message of the loan requst of a client to the database.
-     * The function takes a {@code Message} object containing the message information.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
-     * @see Function
-     * @see Message
-     * @see Status
-     */
-    Function<Message, Status> addMessage();
-
-    /**
      * Function that gets the message of the loan requst of a client to the database.
      * The Function takes an {@code Integer} and a {@code String}.
      * The {@code Integer} contains the loan number of the requested loan.
@@ -207,5 +196,5 @@ public interface AtmDAO {
      * @return a {@code String} object containg the message of the loan.
      * @see BiFunction
      */
-    BiFunction<Integer, String, String> getMessage();
+    BiFunction<Integer, String, Map<String, List<String>>> getMessage();
 }
