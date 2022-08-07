@@ -217,18 +217,19 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public Function<Loan, Status> requestLoan() {
-        final var QUERY = "INSERT INTO loans(loan_number, account_number, date_of_loan, amount, pending) VALUES(?, ?, ?, ?, ?)";
+        final var QUERY = "INSERT INTO loans(loan_number, account_number, date_of_loan, amount, pending, is_declined) VALUES(?, ?, ?, ?, ?, ?)";
         return loan ->  db.update(
                 QUERY,
                 getLoanCount().apply(loan.accountNumber()),
                 SecurityUtil.encrypt(loan.accountNumber()),
                 loan.dateOfLoan(),
                 SecurityUtil.encrypt(String.valueOf(loan.amount())),
-                SecurityUtil.encrypt(String.valueOf(loan.pending()))
+                SecurityUtil.encrypt(String.valueOf(loan.pending())),
+                SecurityUtil.encrypt(String.valueOf(loan.isDeclined()))
         ) > 0 ? SUCCESS : ERROR;
     }
 
-    /**
+    /**s
      * Function that returns a key value pair, a Map<K,V> in particular.
      * <p>K - is a {@code String} containing the key, the key is the account number of the client who requested a loan.</p>
      * <p>V - is a {@code String} containing the value, the value is all the loans that the account requested. It is a {@code List<Loan>}</p>
@@ -338,25 +339,6 @@ public class AtmDAOImplementation implements AtmDAO {
     }
 
     /**
-     * Function that add a message to a database.
-     * The function takes a {@code Message} object containing the message information.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
-     * @see Function
-     * @see Message
-     * @see Status
-     */
-    @Override
-    public Function<Message, Status> addMessage() {
-        final var QUERY = "INSERT INTO messages(loan_number, account_number, message) VALUES(?, ?, ?)";
-        return message -> db.update(
-                QUERY,
-                message.loan().loanNumber(),
-                SecurityUtil.encrypt(message.loan().accountNumber()),
-                SecurityUtil.encrypt(message.toString())
-        ) > 0 ? SUCCESS : ERROR;
-    }
-
-    /**
      * Function that gets the message of the loan requst of a client to the database.
      * The Function takes an {@code Integer} and a {@code String}.
      * The {@code Integer} contains the loan number of the requested loan.
@@ -365,17 +347,53 @@ public class AtmDAOImplementation implements AtmDAO {
      * @see BiFunction
      */
     @Override
-    // TODO: test
-    // TODO: fix bug
-    public BiFunction<Integer, String, String> getMessage() {
-        final var QUERY = "SELECT message FROM messages WHERE loan_number = ? AND account_number = ?";
-        return (loanNumber, accountNumber) -> SecurityUtil.decrypt(
-                db.queryForObject(
-                        QUERY,
-                        String.class,
-                        loanNumber,
-                        SecurityUtil.encrypt(accountNumber)
-                ).toString()
-        );
+    public BiFunction<Integer, String, Map<String, List<String>>> getMessage() {
+        return (loanNumber, accountNumber) -> {
+            var clients = getAllClients().get()
+                    .entrySet()
+                    .stream()
+                    .map(Map.Entry::getValue)
+                    .toList();
+            if (!clients.stream().anyMatch(a -> a.accountNumber().equals(accountNumber)))
+                throw new IllegalStateException(String.format("\nACCOUNT WITH ACCOUNT NUMBER %S DOES NOT EXIST\n", accountNumber));
+            var loans = getAllLoans().get()
+                    .entrySet()
+                    .stream()
+                    .map(Map.Entry::getValue)
+                    .flatMap(Collection::stream)
+                    .toList();
+            if (!loans.stream().anyMatch(l -> l.loanNumber() == loanNumber))
+                throw new IllegalStateException(String.format("\nLOAN %d WITH ACCOUNT NUMBER %s DOES NOT EXIST\n", loanNumber, accountNumber));
+
+            // don't do this
+            var allMessages = new HashMap<String, List<String>>();
+            var messages = new ArrayList<Message>();
+
+            for (var i = 0; i < loans.size(); i++) {
+                var l = loans.get(i);
+                messages.add(
+                        new Message(
+                                l,
+                                clients.stream()
+                                        .filter(a -> a.accountNumber().equals(l.accountNumber()))
+                                        .findAny()
+                                        .get()
+                        )
+                );
+
+            }
+            var messageContent = new ArrayList<String>();
+            for (var message : messages) {
+                if (allMessages.containsKey(message.loan().accountNumber())) {
+                    messageContent.add(message.toString());
+                }
+                else {
+                    messageContent = new ArrayList<String>();
+                    messageContent.add(message.toString());
+                }
+                allMessages.put(message.loan().accountNumber(), messageContent);
+            }
+            return allMessages;
+        };
     }
 }
