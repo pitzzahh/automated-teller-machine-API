@@ -11,7 +11,6 @@ import io.github.pitzzahh.entity.Loan;
 import io.github.pitzzahh.entity.Client;
 import io.github.pitzzahh.dao.AtmDAOImplementation;
 import com.github.pitzzahh.utilities.classes.enums.Status;
-import io.github.pitzzahh.entity.Message;
 
 /**
  * The service for overall functionality..
@@ -233,18 +232,6 @@ public class AtmService {
     }
 
     /**
-     * Function that add a message to a database.
-     * The function takes a {@code Message} object containing the message information.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
-     * @see Function
-     * @see Message
-     * @see Status
-     */
-    public Function<Message, Status> addMessage() {
-        return atmDAO.addMessage();
-    }
-
-    /**
      * Function that gets the message of the loan requst of a client to the database.
      * The Function takes an {@code Integer} and a {@code String}.
      * The {@code Integer} contains the loan number of the requested loan.
@@ -252,7 +239,7 @@ public class AtmService {
      * @return a {@code String} object containg the message of the loan.
      * @see BiFunction
      */
-    public BiFunction<Integer, String, String> getMessage() {
+    public BiFunction<Integer, String, Map<String, List<String>>> getMessage() {
         return atmDAO.getMessage();
     }
 }
