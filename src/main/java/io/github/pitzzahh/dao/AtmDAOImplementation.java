@@ -340,60 +340,49 @@ public class AtmDAOImplementation implements AtmDAO {
 
     /**
      * Function that gets the message of the loan requst of a client to the database.
-     * The Function takes an {@code Integer} and a {@code String}.
-     * The {@code Integer} contains the loan number of the requested loan.
+     * The Function takes a {@code String}.
      * The {@code String} contains the account number of the client.
-     * @return a {@code String} object containg the message of the loan.
-     * @see BiFunction
+     * @return a {@code Message} object containg the message of the loan.
+     * @see Function
+     * @see Map
+     * @see List
+     * @see Message
      */
     @Override
-    public BiFunction<Integer, String, Map<String, List<String>>> getMessage() {
-        return (loanNumber, accountNumber) -> {
+    public Function<String, Map<String, List<Message>>> getMessage() {
+        return accountNumber -> {
             var clients = getAllClients().get()
                     .entrySet()
                     .stream()
                     .map(Map.Entry::getValue)
                     .toList();
             if (!clients.stream().anyMatch(a -> a.accountNumber().equals(accountNumber)))
-                throw new IllegalStateException(String.format("\nACCOUNT WITH ACCOUNT NUMBER %S DOES NOT EXIST\n", accountNumber));
+                throw new IllegalStateException(String.format("\nLOAN MESSAGES WITH ACCOUNT NUMBER %S DOES NOT EXIST\n", accountNumber));
             var loans = getAllLoans().get()
                     .entrySet()
                     .stream()
                     .map(Map.Entry::getValue)
                     .flatMap(Collection::stream)
                     .toList();
-            if (!loans.stream().anyMatch(l -> l.loanNumber() == loanNumber))
-                throw new IllegalStateException(String.format("\nLOAN %d WITH ACCOUNT NUMBER %s DOES NOT EXIST\n", loanNumber, accountNumber));
 
-            // don't do this
-            var allMessages = new HashMap<String, List<String>>();
-            var messages = new ArrayList<Message>();
-
-            for (var i = 0; i < loans.size(); i++) {
-                var l = loans.get(i);
-                messages.add(
-                        new Message(
+            var messages = loans.stream()
+                    .map(l -> new Message(
                                 l,
                                 clients.stream()
-                                        .filter(a -> a.accountNumber().equals(l.accountNumber()))
-                                        .findAny()
-                                        .get()
-                        )
-                );
+                                    .filter(a -> a.accountNumber().equals(l.accountNumber()))
+                                    .findAny()
+                                    .get()
+                            )
+                    )
+                    .collect(Collectors.toList());
 
-            }
-            var messageContent = new ArrayList<String>();
-            for (var message : messages) {
-                if (allMessages.containsKey(message.loan().accountNumber())) {
-                    messageContent.add(message.toString());
-                }
-                else {
-                    messageContent = new ArrayList<String>();
-                    messageContent.add(message.toString());
-                }
-                allMessages.put(message.loan().accountNumber(), messageContent);
-            }
-            return allMessages;
+            return messages.stream()
+                    .collect(Collectors.groupingBy(message -> message.loan().accountNumber()))
+                    .entrySet()
+                    .stream()
+                    .map(Map.Entry::getValue)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.groupingBy(e -> e.loan().accountNumber(), Collectors.toList()));
         };
     }
 }
