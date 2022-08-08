@@ -4,5 +4,5 @@ CREATE TABLE IF NOT EXISTS loans (
     date_of_loan DATE NOT NULL,
     amount TEXT NOT NULL,
     pending TEXT NOT NULL,
-    is_declined TEXT NOT NULL
+    declined TEXT NOT NULL
 );
