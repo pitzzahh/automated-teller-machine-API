@@ -454,10 +454,12 @@ public class Atm {
                 var client = new Client();
                 var status = CANNOT_PERFORM_OPERATION;
                 if (allLoans.size() == 1 && transaction == APPROVE) {
+                    loan = allLoans.get(0);
+                    client = CLIENTS.get(loan.accountNumber());
                     status = ATM_SERVICE.updateClientSavingsByAccountNumber().apply(loan.accountNumber(), client.savings() + loan.amount());
-                    return ATM_SERVICE.approveLoan().apply(mapLoan(getAllLoanRequests().get(0)));
+                    return status == SUCCESS ? ATM_SERVICE.approveLoan().apply(mapLoan(loan)) : status;
                 }
-                if (allLoans.size() == 1 && transaction == DECLINE) return ATM_SERVICE.declineLoan().apply(mapLoan(getAllLoanRequests().get(0)));
+                if (allLoans.size() == 1 && transaction == DECLINE) return ATM_SERVICE.declineLoan().apply(mapLoan(allLoans.get(0)));
                 else {
                     println(CYAN_BOLD_BRIGHT + String.format("%s %s %s LOAN REQUEST" + RESET,
                             (transaction == APPROVE ? BLUE_BOLD : RED_BOLD),
