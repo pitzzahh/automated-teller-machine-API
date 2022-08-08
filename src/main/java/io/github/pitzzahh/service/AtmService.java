@@ -211,6 +211,18 @@ public class AtmService {
     }
 
     /**
+     * Function that declines a loan request.
+     * The function takes a {@code Loan} object containing the loan information to be approved.
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @see Function
+     * @see Loan
+     * @see Status
+     */
+    public Function<Loan, Status> declineLoan() {
+        return atmDAO.declineLoan();
+    }
+
+    /**
      * Function that removes a loan.
      * The function takes a {@code Loan} object containing the loan information to be removed.
      * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>

@@ -217,7 +217,7 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public Function<Loan, Status> requestLoan() {
-        final var QUERY = "INSERT INTO loans(loan_number, account_number, date_of_loan, amount, pending, is_declined) VALUES(?, ?, ?, ?, ?, ?)";
+        final var QUERY = "INSERT INTO loans(loan_number, account_number, date_of_loan, amount, pending, declined) VALUES(?, ?, ?, ?, ?, ?)";
         return loan ->  db.update(
                 QUERY,
                 getLoanCount().apply(loan.accountNumber()),
@@ -309,6 +309,25 @@ public class AtmDAOImplementation implements AtmDAO {
     }
 
     /**
+     * Function that declines a loan request.
+     * The function takes a {@code Loan} object containing the loan information to be approved.
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @see Function
+     * @see Loan
+     * @see Status
+     */
+    @Override
+    public Function<Loan, Status> declineLoan() {
+        final var QUERY = "UPDATE loans SET declined = ? WHERE loan_number = ? AND account_number = ?";
+        return loan -> db.update(
+                QUERY,
+                SecurityUtil.encrypt(Boolean.TRUE.toString()),
+                loan.loanNumber(),
+                SecurityUtil.encrypt(loan.accountNumber())
+        ) > 0 ? SUCCESS : ERROR;
+    }
+
+    /**
      * Function that removes a loan.
      * The function takes a {@code Loan} object containing the loan information to be removed.
      * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
@@ -369,7 +388,7 @@ public class AtmDAOImplementation implements AtmDAO {
                     .stream()
                     .map(Map.Entry::getValue)
                     .flatMap(Collection::stream)
-                    .filter(l -> l.pending() == false)
+                    .filter(l -> l.pending() == false || l.isDeclined())
                     .map(loan -> new Message(loan, clients.stream()
                                             .filter(a -> a.accountNumber().equals(loan.accountNumber()))
                                             .findAny()
