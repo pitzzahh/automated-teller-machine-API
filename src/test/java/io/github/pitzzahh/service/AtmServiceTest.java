@@ -83,12 +83,12 @@ class AtmServiceTest extends AtmDAOImplementation {
     @Test
     void shouldGetLoanMessage() {
         // given
-        var loanNumber = 1;
         var accountNumber = "143143143";
         // when
-        var result = atmService.getMessage().apply(loanNumber, accountNumber)
+        var result = atmService.getMessage().apply(accountNumber)
                 .entrySet()
                 .stream()
+                .filter(e -> e.getKey().equals(accountNumber))
                 .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
                 .toList();
