@@ -369,6 +369,7 @@ public class AtmDAOImplementation implements AtmDAO {
                     .stream()
                     .map(Map.Entry::getValue)
                     .flatMap(Collection::stream)
+                    .filter(l -> l.pending() == false)
                     .map(loan -> new Message(loan, clients.stream()
                                             .filter(a -> a.accountNumber().equals(loan.accountNumber()))
                                             .findAny()
