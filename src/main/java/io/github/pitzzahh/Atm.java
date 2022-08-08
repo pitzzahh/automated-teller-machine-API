@@ -397,7 +397,7 @@ public class Atm {
                             "╔╦╗╔═╗╔╗╔╔═╗╔═╗╔═╗  ╔═╗╔═╗╔═╗╔═╗╦ ╦╔╗╔╔╦╗  ╦  ╔═╗╔═╗╔╗╔╔═╗\n" +
                             "║║║╠═╣║║║╠═╣║ ╦║╣   ╠═╣║  ║  ║ ║║ ║║║║ ║   ║  ║ ║╠═╣║║║╚═╗\n" +
                             "╩ ╩╩ ╩╝╚╝╩ ╩╚═╝╚═╝  ╩ ╩╚═╝╚═╝╚═╝╚═╝╝╚╝ ╩   ╩═╝╚═╝╩ ╩╝╚╝╚═╝\n");
-                    println(RED_BOLD_BRIGHT + (LOAN_REQUESTS.size() > 1 ? "LIST OF LOANS" : "LOAN"));
+                    println(RED_BOLD_BRIGHT + (LOAN_REQUESTS.size() > 1 ? "LIST OF LOANS" : "LOAN") + "\n");
                     LOAN_REQUESTS.stream().forEach(Print::println);
                     println(PURPLE_BOLD + ":" + BLUE_BOLD_BRIGHT  + " 1 " + PURPLE_BOLD_BRIGHT + ": " + BLUE_BOLD_BRIGHT + "APPROVE LOAN");
                     println(PURPLE_BOLD + ":" + RED_BOLD_BRIGHT   + " 2 " + PURPLE_BOLD_BRIGHT + ": " + RED_BOLD_BRIGHT + "REMOVE LOAN");
@@ -576,7 +576,7 @@ public class Atm {
                     }
                     CLIENTS.clear();
                     loadClients();
-                    if (!choice.equals("5")) {
+                    if (!choice.equals("6")) {
                         pause();
                         println("");
                     }
@@ -669,7 +669,15 @@ public class Atm {
 
             // TODO: implement and add comment
             private static void viewMessages(Scanner scanner) {
-
+                println(PURPLE_BOLD_BRIGHT + "MESSAGES" + RESET);
+                ATM_SERVICE.getMessage().apply($an)
+                        .entrySet()
+                        .stream()
+                        .filter(e -> e.getKey().equals($an))
+                        .map(Map.Entry::getValue)
+                        .flatMap(Collection::stream)
+                        .toList()
+                        .forEach(Print::println);
             }
             /**
              * Used to check the pin of the account before proceeding with a transaction.
