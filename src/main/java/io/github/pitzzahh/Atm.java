@@ -147,11 +147,11 @@ public class Atm {
                                 "╠═╣ ║║ ║║║ ║ ║║║\n" +
                                 "╩ ╩ ╩╝ ╩ ╩ ╩ ╝╚╝\n" + RESET
                         );
-                        println(RED_BOLD  + ": " + BLUE_BOLD_BRIGHT   + "1" + RED_BOLD + " : " + BLUE_BOLD_BRIGHT + "ADD CLIENT");
+                        println(RED_BOLD  + ": " + BLUE_BOLD_BRIGHT   + "1" + RED_BOLD + " : " + BLUE_BOLD_BRIGHT   + "ADD CLIENT");
                         println(RED_BOLD  + ": " + YELLOW_BOLD_BRIGHT + "2" + RED_BOLD + " : " + YELLOW_BOLD_BRIGHT + "REMOVE CLIENT");
-                        println(RED_BOLD  + ": " + GREEN_BOLD_BRIGHT  + "3" + RED_BOLD + " : " + GREEN_BOLD_BRIGHT + "VIEW CLIENTS");
+                        println(RED_BOLD  + ": " + GREEN_BOLD_BRIGHT  + "3" + RED_BOLD + " : " + GREEN_BOLD_BRIGHT  + "VIEW CLIENTS");
                         println(RED_BOLD  + ": " + PURPLE_BOLD_BRIGHT + "4" + RED_BOLD + " : " + PURPLE_BOLD_BRIGHT + "MANAGE LOCKED ACCOUNTS");
-                        println(RED_BOLD  + ": " + CYAN_BOLD_BRIGHT   + "5" + RED_BOLD + " : " + CYAN_BOLD_BRIGHT + "MANAGE ACCOUNT LOANS");
+                        println(RED_BOLD  + ": " + CYAN_BOLD_BRIGHT   + "5" + RED_BOLD + " : " + CYAN_BOLD_BRIGHT   + "MANAGE ACCOUNT LOANS");
                         println(RED_BOLD  + ": " + RED                + "6" + RED_BOLD + " : " + RED + "LOGOUT");
                         print(PURPLE_BOLD + ">>>: " + RESET);
                         choice = scanner.nextLine().trim();
@@ -402,7 +402,7 @@ public class Atm {
                     println(RED_BOLD_BRIGHT + (LOAN_REQUESTS.size() > 1 ? "LIST OF LOANS" : "LOAN") + "\n");
                     LOAN_REQUESTS.stream().forEach(Print::println);
                     println(PURPLE_BOLD + ":" + BLUE_BOLD_BRIGHT   + " 1 " + PURPLE_BOLD_BRIGHT + ": " + BLUE_BOLD_BRIGHT  + "APPROVE LOAN");
-                    println(PURPLE_BOLD + ":" + YELLOW_BOLD_BRIGHT + " 2 " + PURPLE_BOLD_BRIGHT + ": " + BLUE_BOLD_BRIGHT  + "DECLINE LOAN");
+                    println(PURPLE_BOLD + ":" + YELLOW_BOLD_BRIGHT + " 2 " + PURPLE_BOLD_BRIGHT + ": " + YELLOW_BOLD_BRIGHT  + "DECLINE LOAN");
                     println(PURPLE_BOLD + ":" + RED_BOLD_BRIGHT    + " 3 " + PURPLE_BOLD_BRIGHT + ": " + RED_BOLD_BRIGHT   + "REMOVE LOAN");
                     println(PURPLE_BOLD + ":" + GREEN_BOLD_BRIGHT  + " 4 " + PURPLE_BOLD_BRIGHT + ": " + GREEN_BOLD_BRIGHT + "BACK");
                     print(YELLOW_BOLD + ">>>: " + RESET);
@@ -452,10 +452,12 @@ public class Atm {
             private static Status process(Scanner scanner, List<Loan> allLoans, int transaction) {
                 var loan = new Loan();
                 var client = new Client();
-                if (allLoans.size() == 1 && transaction == APPROVE)
-                    return ATM_SERVICE.approveLoan().apply(mapLoan(getAllLoanRequests().stream().findAny().get()));
-                if (allLoans.size() == 1 && transaction == DECLINE)
-                    return ATM_SERVICE.declineLoan().apply(mapLoan(getAllLoanRequests().stream().findAny().get()));
+                var status = CANNOT_PERFORM_OPERATION;
+                if (allLoans.size() == 1 && transaction == APPROVE) {
+                    status = ATM_SERVICE.updateClientSavingsByAccountNumber().apply(loan.accountNumber(), client.savings() + loan.amount());
+                    return ATM_SERVICE.approveLoan().apply(mapLoan(getAllLoanRequests().get(0)));
+                }
+                if (allLoans.size() == 1 && transaction == DECLINE) return ATM_SERVICE.declineLoan().apply(mapLoan(getAllLoanRequests().get(0)));
                 else {
                     println(CYAN_BOLD_BRIGHT + String.format("%s %s %s LOAN REQUEST" + RESET,
                             (transaction == APPROVE ? BLUE_BOLD : RED_BOLD),
@@ -480,7 +482,7 @@ public class Atm {
 
                     client = CLIENTS.get(loan.accountNumber());
                 }
-                var status = CANNOT_PERFORM_OPERATION;
+
                 if (transaction == APPROVE) status = ATM_SERVICE.updateClientSavingsByAccountNumber().apply(loan.accountNumber(), client.savings() + loan.amount());
                 else return ATM_SERVICE.declineLoan().apply(mapLoan(loan));
                 return status == SUCCESS ? ATM_SERVICE.approveLoan().apply(mapLoan(loan)) : CANNOT_PERFORM_OPERATION;
