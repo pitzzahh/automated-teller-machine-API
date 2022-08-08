@@ -2,6 +2,7 @@ package io.github.pitzzahh;
 
 import java.util.*;
 import java.time.LocalDate;
+import java.text.NumberFormat;
 import java.util.regex.Pattern;
 import io.github.pitzzahh.entity.*;
 import java.util.stream.Collectors;
@@ -82,8 +83,9 @@ public class Atm {
         private static final String $adm = "QGRtMW4xJHRyNHQwcg==";
         private static String $an;
         private static final int DEPOSIT = 1;
-        private static final int WITHDRAW = 2;
-        private static final int LOAN = 3;
+        private static final int CHECK_BALANCE = 2;
+        private static final int WITHDRAW = 3;
+        private static final int LOAN = 4;
 
         /**
          * Searches the {@code Hashtable<String, Client>}, checks if the account number exists.
@@ -548,18 +550,20 @@ public class Atm {
                 do {
                     try {
                         println(BLUE_BOLD + ": " + BLUE_BOLD_BRIGHT   + "1" + BLUE_BOLD + " : " + BLUE_BOLD_BRIGHT   + "DEPOSIT");
-                        println(BLUE_BOLD + ": " + YELLOW_BOLD_BRIGHT + "2" + BLUE_BOLD + " : " + YELLOW_BOLD_BRIGHT + "WITHDRAW");
-                        println(BLUE_BOLD + ": " + RED                + "3" + BLUE_BOLD + " : " + RED                + "LOAN");
-                        println(BLUE_BOLD + ": " + CYAN_BOLD_BRIGHT   + "4" + BLUE_BOLD + " : " + CYAN_BOLD_BRIGHT   + "MESSAGES");
-                        println(BLUE_BOLD + ": " + RED_BOLD_BRIGHT    + "5" + BLUE_BOLD + " : " + RED_BOLD_BRIGHT    + "LOGOUT");
+                        println(BLUE_BOLD + ": " + PURPLE_BOLD_BRIGHT + "2" + BLUE_BOLD + " : " + PURPLE_BOLD_BRIGHT + "CHECK BALANCE");
+                        println(BLUE_BOLD + ": " + YELLOW_BOLD_BRIGHT + "3" + BLUE_BOLD + " : " + YELLOW_BOLD_BRIGHT + "WITHDRAW");
+                        println(BLUE_BOLD + ": " + RED                + "4" + BLUE_BOLD + " : " + RED                + "LOAN");
+                        println(BLUE_BOLD + ": " + CYAN_BOLD_BRIGHT   + "5" + BLUE_BOLD + " : " + CYAN_BOLD_BRIGHT   + "MESSAGES");
+                        println(BLUE_BOLD + ": " + RED_BOLD_BRIGHT    + "6" + BLUE_BOLD + " : " + RED_BOLD_BRIGHT    + "LOGOUT");
                         print(PURPLE_BOLD + ">>>: " + RESET);
                         choice = scanner.nextLine().trim();
                         switch (choice) {
                             case "1" -> process(scanner, DEPOSIT);
-                            case "2" -> process(scanner, WITHDRAW);
-                            case "3" -> process(scanner, LOAN);
-                            case "4" -> viewMessages(scanner);
-                            case "5" -> {
+                            case "2" -> process(scanner, CHECK_BALANCE);
+                            case "3" -> process(scanner, WITHDRAW);
+                            case "4" -> process(scanner, LOAN);
+                            case "5" -> viewMessages(scanner);
+                            case "6" -> {
                                 print(RED_BOLD_BRIGHT + "LOGGING OUT");
                                 dotLoading();
                             }
@@ -577,7 +581,7 @@ public class Atm {
                         println("");
                     }
                     if (searchLockedAccount($an)) break;
-                } while (!choice.equals("5"));
+                } while (!choice.equals("6"));
                 loadClientLoans();
             }
 
@@ -608,24 +612,31 @@ public class Atm {
                                         "╔╦╗╔═╗╔═╗╔═╗╔═╗╦╔╦╗\n" +
                                         " ║║║╣ ╠═╝║ ║╚═╗║ ║ \n" +
                                         "═╩╝╚═╝╩  ╚═╝╚═╝╩ ╩ \n" :
-                                        (transaction == WITHDRAW) ?
-                                                "╦ ╦╦╔╦╗╦ ╦╔╦╗╦═╗╔═╗╦ ╦\n" +
-                                                "║║║║ ║ ╠═╣ ║║╠╦╝╠═╣║║║\n" +
-                                                "╚╩╝╩ ╩ ╩ ╩═╩╝╩╚═╩ ╩╚╩╝\n" :
-                                                (transaction == LOAN) ?
-                                                        "╦  ╔═╗╔═╗╔╗╔\n" +
-                                                        "║  ║ ║╠═╣║║║\n" +
-                                                        "╩═╝╚═╝╩ ╩╝╚╝\n" :
-                                                        RED_BOLD_BRIGHT + "UNKNOWN PROCESSS"
+                                        (transaction == CHECK_BALANCE) ?
+                                                "╔═╗╦ ╦╔═╗╔═╗╦╔═  ╔╗ ╔═╗╦  ╔═╗╔╗╔╔═╗╔═╗\n" +
+                                                "║  ╠═╣║╣ ║  ╠╩╗  ╠╩╗╠═╣║  ╠═╣║║║║  ║╣ \n" +
+                                                "╚═╝╩ ╩╚═╝╚═╝╩ ╩  ╚═╝╩ ╩╩═╝╩ ╩╝╚╝╚═╝╚═╝\n" :
+                                            (transaction == WITHDRAW) ?
+                                                    "╦ ╦╦╔╦╗╦ ╦╔╦╗╦═╗╔═╗╦ ╦\n" +
+                                                    "║║║║ ║ ╠═╣ ║║╠╦╝╠═╣║║║\n" +
+                                                    "╚╩╝╩ ╩ ╩ ╩═╩╝╩╚═╩ ╩╚╩╝\n" :
+                                                    (transaction == LOAN) ?
+                                                            "╦  ╔═╗╔═╗╔╗╔\n" +
+                                                            "║  ║ ║╠═╣║║║\n" +
+                                                            "╩═╝╚═╝╩ ╩╝╚╝\n" :
+                                                            RED_BOLD_BRIGHT + "UNKNOWN PROCESSS"
                         );
-                        println(YELLOW_BOLD_BRIGHT + ": ENTER CASH AMOUNT : ");
-                        print(RED_BOLD_BRIGHT + ">>>:  " + RESET);
-                        cash = scanner.nextLine().trim();
-                        if (isWholeNumber().or(isDecimalNumber()).negate().test(cash)) throw new IllegalStateException("\nCASH SHOULD BE A NUMBER\n");
-                        cashToProcess = Double.parseDouble(cash);
+                        if (transaction != CHECK_BALANCE) {
+                            println(YELLOW_BOLD_BRIGHT + ": ENTER CASH AMOUNT : ");
+                            print(RED_BOLD_BRIGHT + ">>>:  " + RESET);
+                            cash = scanner.nextLine().trim();
+                            if (isWholeNumber().or(isDecimalNumber()).negate().test(cash)) throw new IllegalStateException("\nCASH SHOULD BE A NUMBER\n");
+                            cashToProcess = Double.parseDouble(cash);
+                        }
                         if ((cashToProcess < 100) && transaction == DEPOSIT) throw new IllegalStateException("\nCASH AMOUNT TO DEPOSIT SHOULD NOT BE LESS THAN 100\n");
                         if ((cashToProcess >= (80.0 / 100.0) * client.savings()) && transaction == WITHDRAW) throw new IllegalStateException("\nCASH TO WITHDRAW SHOULD NOT BE GREATER THAN 80% \nOR EQUAL TO CURRENT SAVINGS\n");
                         if (transaction == DEPOSIT) status = ATM_SERVICE.updateClientSavingsByAccountNumber().apply(client.accountNumber(), client.savings() + cashToProcess);
+                        if (transaction == CHECK_BALANCE) cashToProcess = ATM_SERVICE.getClientSavingsByAccountNumber().apply(client.accountNumber());
                         else if (transaction == WITHDRAW) status = ATM_SERVICE.updateClientSavingsByAccountNumber().apply($an, (client.savings() - cashToProcess));
                         else if (transaction == LOAN) status = ATM_SERVICE.requestLoan().apply(
                                 new Loan(
@@ -636,13 +647,18 @@ public class Atm {
                                 ));
                         var message = switch (transaction) {
                             case DEPOSIT -> status == SUCCESS ? BLUE_BOLD_BRIGHT + "CASH DEPOSITED SUCCESSFULLY" + RESET : RED_BOLD_BRIGHT + "ERROR DEPOSITING CASH" + RESET;
+                            case CHECK_BALANCE -> String.format(BLUE_BOLD_BRIGHT + "ACCOUNT BALANCE: %s %s %s", CYAN_BOLD_BRIGHT,
+                                    Currency.getInstance("PHP").getSymbol().concat(NumberFormat.getInstance().format(cashToProcess))
+                                    , RESET);
                             case WITHDRAW -> status == SUCCESS ? BLUE_BOLD_BRIGHT + "CASH WITHDRAWED SUCCESSFULLY" + RESET : RED_BOLD_BRIGHT + "ERROR WITHDRAWING CASH" + RESET;
                             case LOAN -> status == SUCCESS ? BLUE_BOLD_BRIGHT + "LOAN REQUEST HAS BEEN SENT\nA CONFIRMATION MESSAGE WILL BE SENT TO YOU SOON"  + RESET : RED_BOLD_BRIGHT + "ERROR LOANING CASH" + RESET;
                             default -> throw new IllegalStateException(String.format("UNKNOWN PROCESSS: %d", transaction));
                         };
                         println(message);
-                        print(YELLOW_BOLD_BRIGHT + "LOADING");
-                        dotLoading();
+                        if (transaction != CHECK_BALANCE) {
+                            print(YELLOW_BOLD_BRIGHT + "LOADING");
+                            dotLoading();
+                        }
                     } catch (RuntimeException runtimeException) {
                         println(RED_BOLD_BRIGHT + runtimeException.getMessage() + RESET);
                         print(YELLOW_BOLD_BRIGHT + "LOADING");
