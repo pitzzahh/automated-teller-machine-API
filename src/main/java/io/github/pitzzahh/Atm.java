@@ -86,6 +86,8 @@ public class Atm {
         private static final int CHECK_BALANCE = 2;
         private static final int WITHDRAW = 3;
         private static final int LOAN = 4;
+        private static final int APPROVE = 5;
+        private static final int DECLINE = 6;
 
         /**
          * Searches the {@code Hashtable<String, Client>}, checks if the account number exists.
@@ -399,27 +401,35 @@ public class Atm {
                             "╩ ╩╩ ╩╝╚╝╩ ╩╚═╝╚═╝  ╩ ╩╚═╝╚═╝╚═╝╚═╝╝╚╝ ╩   ╩═╝╚═╝╩ ╩╝╚╝╚═╝\n");
                     println(RED_BOLD_BRIGHT + (LOAN_REQUESTS.size() > 1 ? "LIST OF LOANS" : "LOAN") + "\n");
                     LOAN_REQUESTS.stream().forEach(Print::println);
-                    println(PURPLE_BOLD + ":" + BLUE_BOLD_BRIGHT  + " 1 " + PURPLE_BOLD_BRIGHT + ": " + BLUE_BOLD_BRIGHT + "APPROVE LOAN");
-                    println(PURPLE_BOLD + ":" + RED_BOLD_BRIGHT   + " 2 " + PURPLE_BOLD_BRIGHT + ": " + RED_BOLD_BRIGHT + "REMOVE LOAN");
-                    println(PURPLE_BOLD + ":" + GREEN_BOLD_BRIGHT + " 3 " + PURPLE_BOLD_BRIGHT + ": " + GREEN_BOLD_BRIGHT + "BACK");
+                    println(PURPLE_BOLD + ":" + BLUE_BOLD_BRIGHT   + " 1 " + PURPLE_BOLD_BRIGHT + ": " + BLUE_BOLD_BRIGHT  + "APPROVE LOAN");
+                    println(PURPLE_BOLD + ":" + YELLOW_BOLD_BRIGHT + " 2 " + PURPLE_BOLD_BRIGHT + ": " + BLUE_BOLD_BRIGHT  + "DECLINE LOAN");
+                    println(PURPLE_BOLD + ":" + RED_BOLD_BRIGHT    + " 3 " + PURPLE_BOLD_BRIGHT + ": " + RED_BOLD_BRIGHT   + "REMOVE LOAN");
+                    println(PURPLE_BOLD + ":" + GREEN_BOLD_BRIGHT  + " 4 " + PURPLE_BOLD_BRIGHT + ": " + GREEN_BOLD_BRIGHT + "BACK");
                     print(YELLOW_BOLD + ">>>: " + RESET);
                     choice = scanner.nextLine().trim();
                     switch (choice) {
                         case "1" -> {
                             println(BLUE_BOLD_BRIGHT + "APPROVE LOAN" + RESET);
-                            var status = approveLoan(scanner, LOAN_REQUESTS);
+                            var status = process(scanner, LOAN_REQUESTS, APPROVE);
                             println(status == SUCCESS ? BLUE_BOLD_BRIGHT + "\nLOAN APPROVED SUCCESSFULLY\n" :
-                                    RED_BOLD_BRIGHT + "\nERROR APPROVING LOAN ACCOUNT\n" + RESET
+                                    RED_BOLD_BRIGHT + "\nERROR APPROVING LOAN REQUEST\n" + RESET
                             );
                         }
                         case "2" -> {
-                            println(YELLOW_BOLD_BRIGHT + "REMOVE LOAN" + RESET);
-                            var status = removeLoan(scanner, LOAN_REQUESTS);
-                            println(status == SUCCESS ? BLUE_BOLD_BRIGHT + "\nACCOUNT REMOVED SUCCESSFULLY\n" :
-                                    RED_BOLD_BRIGHT + "\nERROR REMOVING ACCOUNT\n" + RESET
+                            println(YELLOW_BOLD_BRIGHT + "DECLINE LOAN" + RESET);
+                            var status = process(scanner, LOAN_REQUESTS, DECLINE);
+                            println(status == SUCCESS ? BLUE_BOLD_BRIGHT + "\nLOAN DECLINED SUCCESSFULLY\n" :
+                                    RED_BOLD_BRIGHT + "\nERROR DECLINING LOAN REQUEST\n" + RESET
                             );
                         }
                         case "3" -> {
+                            println(RED_BOLD_BRIGHT + "REMOVE LOAN" + RESET);
+                            var status = removeLoan(scanner, LOAN_REQUESTS);
+                            println(status == SUCCESS ? BLUE_BOLD_BRIGHT + "\nACCOUNT REMOVED SUCCESSFULLY\n" :
+                                    RED_BOLD_BRIGHT + "\nERROR REMOVING LOAN REQUEST\n" + RESET
+                            );
+                        }
+                        case "4" -> {
                             print(RED_BOLD_BRIGHT + "PLEASE WAIT");
                             dotLoading();
                         }
@@ -439,18 +449,28 @@ public class Atm {
              * @param allLoans the {@code List<Loan>}.
              * @return a {@code Status}
              */
-            private static Status approveLoan(Scanner scanner, List<Loan> allLoans) {
+            private static Status process(Scanner scanner, List<Loan> allLoans, int transaction) {
                 var loan = new Loan();
                 var client = new Client();
-                if (allLoans.size() == 1) return ATM_SERVICE.approveLoan().apply(mapLoan(getAllLoanRequests().stream().findAny().get()));
+                if (allLoans.size() == 1 && transaction == APPROVE)
+                    return ATM_SERVICE.approveLoan().apply(mapLoan(getAllLoanRequests().stream().findAny().get()));
+                if (allLoans.size() == 1 && transaction == DECLINE)
+                    return ATM_SERVICE.declineLoan().apply(mapLoan(getAllLoanRequests().stream().findAny().get()));
                 else {
-                    println(YELLOW_BOLD_BRIGHT + ":ENTER LOAN NUMBER AND ACCOUNT NUMBER TO REOPEN SEPARATED BY SPACE:");
-                    println(GREEN_BOLD + "example: " + YELLOW_BOLD_BRIGHT + CYAN_BACKGROUND + "1" + RESET + " " + YELLOW_BOLD_BRIGHT + CYAN_BACKGROUND +"200263444" + RESET);
+                    println(CYAN_BOLD_BRIGHT + String.format("%s %s %s LOAN REQUEST" + RESET,
+                            (transaction == APPROVE ? BLUE_BOLD : RED_BOLD),
+                            (transaction == APPROVE ? "APPROVE" : "DECLINE"),
+                            CYAN_BOLD_BRIGHT));
+                    println(YELLOW_BOLD_BRIGHT + ":ENTER LOAN NUMBER AND ACCOUNT NUMBER TO SEPARATED BY SPACE:");
+                    println(GREEN_BOLD + "example: " + YELLOW_BOLD_BRIGHT + CYAN_BACKGROUND + "1" + RESET + " " + YELLOW_BOLD_BRIGHT + CYAN_BACKGROUND + "200263444" + RESET);
                     print(PURPLE_BOLD + ">>>: " + RESET);
                     final var $s = scanner.nextLine().trim().split(" ");
-                    if (isValidFormat().negate().test($s[0]+" "+$s[1])) throw new IllegalStateException("\nINVALID FORMAT\nPLEASE FOLLOW THE EXAMPLE\n");
-                    else if (isWholeNumber().negate().test($s[0])) throw new IllegalStateException("\nLOAN NUMBER SHOULD BE A NUMBER\n");
-                    else if (isWholeNumber().negate().test($s[1])) throw new IllegalStateException("\nACCOUNT NUMBER SHOULD BE A NUMBER\n");
+                    if (isValidFormat().negate().test($s[0] + " " + $s[1]))
+                        throw new IllegalStateException("\nINVALID FORMAT\nPLEASE FOLLOW THE EXAMPLE\n");
+                    else if (isWholeNumber().negate().test($s[0]))
+                        throw new IllegalStateException("\nLOAN NUMBER SHOULD BE A NUMBER\n");
+                    else if (isWholeNumber().negate().test($s[1]))
+                        throw new IllegalStateException("\nACCOUNT NUMBER SHOULD BE A NUMBER\n");
 
                     loan = allLoans
                             .stream()
@@ -460,7 +480,9 @@ public class Atm {
 
                     client = CLIENTS.get(loan.accountNumber());
                 }
-                var status = ATM_SERVICE.updateClientSavingsByAccountNumber().apply(loan.accountNumber(), client.savings() + loan.amount());
+                var status = CANNOT_PERFORM_OPERATION;
+                if (transaction == APPROVE) status = ATM_SERVICE.updateClientSavingsByAccountNumber().apply(loan.accountNumber(), client.savings() + loan.amount());
+                else return ATM_SERVICE.declineLoan().apply(mapLoan(loan));
                 return status == SUCCESS ? ATM_SERVICE.approveLoan().apply(mapLoan(loan)) : CANNOT_PERFORM_OPERATION;
             }
 
