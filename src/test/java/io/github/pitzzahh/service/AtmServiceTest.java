@@ -14,6 +14,7 @@ import io.github.pitzzahh.dao.AtmDAOImplementation;
 import com.github.pitzzahh.utilities.classes.Person;
 import com.github.pitzzahh.utilities.classes.enums.*;
 import io.github.pitzzahh.database.DatabaseConnection;
+import org.junit.jupiter.api.function.Executable;
 
 class AtmServiceTest extends AtmDAOImplementation {
 
@@ -83,7 +84,7 @@ class AtmServiceTest extends AtmDAOImplementation {
     @Test
     void shouldGetLoanMessage() {
         // given
-        var accountNumber = "143143143";
+        var accountNumber = "200263444";
         // when
         var result = atmService.getMessage().apply(accountNumber)
                 .entrySet()
@@ -94,6 +95,28 @@ class AtmServiceTest extends AtmDAOImplementation {
                 .toList();
         // then
         result.forEach(System.out::println);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenGettingLoanMessageBecauseLoanMessageDoesNotExist() {
+        // given
+        var accountNumber = "123123123";
+        // then
+        assertThrows(IllegalStateException.class, new Executable() {
+            @Override
+            public void execute() throws IllegalStateException {
+                // when
+                var result = atmService.getMessage().apply(accountNumber)
+                        .entrySet()
+                        .stream()
+                        .filter(e -> e.getKey().equals(accountNumber))
+                        .map(Map.Entry::getValue)
+                        .flatMap(Collection::stream)
+                        .toList();
+                // then
+                result.forEach(System.out::println);
+            }
+        });
     }
 
     @Test
@@ -109,7 +132,7 @@ class AtmServiceTest extends AtmDAOImplementation {
     void shouldMakeALoan() {
         // given
         var client = makePeter();
-        var loan = makeLoan(client, 10_000);
+        var loan = makeLoan(client, 30_000);
         // when
         var result = atmService.requestLoan().apply(loan);
         // then
@@ -204,7 +227,7 @@ class AtmServiceTest extends AtmDAOImplementation {
     private Loan makeLoan(Client client, double amount) {
         return new Loan(
                 client.accountNumber(),
-                LocalDate.now(),
+                LocalDate.of(2022, Month.AUGUST, 6),
                 amount,
                 true
         );
