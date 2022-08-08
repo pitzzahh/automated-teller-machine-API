@@ -356,18 +356,21 @@ public class AtmDAOImplementation implements AtmDAO {
                     .stream()
                     .map(Map.Entry::getValue)
                     .toList();
-            if (!clients.stream().anyMatch(a -> a.accountNumber().equals(accountNumber)))
+            boolean doesMessageExists = getAllLoans()
+                    .get()
+                    .entrySet()
+                    .stream()
+                    .map(Map.Entry::getKey)
+                    .anyMatch(a -> a.equals(accountNumber));
+            if (!doesMessageExists)
                 throw new IllegalStateException(String.format("\nLOAN MESSAGES WITH ACCOUNT NUMBER %S DOES NOT EXIST\n", accountNumber));
-
             return getAllLoans().get()
                     .entrySet()
                     .stream()
                     .map(Map.Entry::getValue)
                     .flatMap(Collection::stream)
-                    .map(l -> new Message(
-                                    l,
-                                    clients.stream()
-                                            .filter(a -> a.accountNumber().equals(l.accountNumber()))
+                    .map(loan -> new Message(loan, clients.stream()
+                                            .filter(a -> a.accountNumber().equals(loan.accountNumber()))
                                             .findAny()
                                             .get()
                             )
