@@ -16,6 +16,7 @@ import com.github.pitzzahh.utilities.classes.enums.*;
 import io.github.pitzzahh.database.DatabaseConnection;
 import org.junit.jupiter.api.function.Executable;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AtmServiceTest extends AtmDAOImplementation {
 
     private AtmDAO atmDAO;
@@ -41,14 +42,9 @@ class AtmServiceTest extends AtmDAOImplementation {
                 );
     }
 
-    @AfterEach
-    void tearDown() {
-//        assertEquals(Status.SUCCESS, atmService.removeAllLoans().get());
-    }
-
     @Test
-    @Disabled
-    void shouldSaveAllClients() {
+    @Order(1)
+    void A_shouldSaveAllClients() {
         var clients = List.of(
                 new Client(
                         "200263444",
@@ -82,7 +78,104 @@ class AtmServiceTest extends AtmDAOImplementation {
     }
 
     @Test
-    void shouldGetLoanMessage() {
+    @Order(2)
+    void B_shouldPrintAllClientsBeforeLoanRequests() {
+        atmService.getAllClients()
+                .get()
+                .entrySet()
+                .stream()
+                .map(Map.Entry::getValue)
+                .forEach(Print::println);
+    }
+
+    @Test
+    @Order(3)
+    void C_shouldMakeALoan() {
+        // given
+        var client = makeZamira();
+        for (int i = 10_000; i <= 20_000; i += 10_000) {
+            var loan = makeLoan(client, i);
+            // when
+            var result = atmService.requestLoan().apply(loan);
+            // then
+            assertEquals(Status.SUCCESS, result);
+        }
+    }
+
+    @Test()
+    @Order(4)
+    void D_shouldMakeALoan() {
+        // given
+        var client = makePeter();
+        for (int i = 10_000; i <= 20_000; i += 10_000) {
+            var loan = makeLoan(client, i);
+            // when
+            var result = atmService.requestLoan().apply(loan);
+            // then
+            assertEquals(Status.SUCCESS, result);
+        }
+    }
+
+    @RepeatedTest(2)
+    @Order(5)
+    void E_shouldApproveLoan() {
+
+        var client = makeZamira();
+        var c = atmService.getClientByAccountNumber().apply(client.accountNumber()).get();
+        var loan = atmService.getAllLoans()
+                .get()
+                .entrySet()
+                .stream()
+                .map(Map.Entry::getValue)
+                .flatMap(Collection::stream)
+                .filter(l -> l.accountNumber().equals(c.accountNumber()) && l.pending())
+                .findAny()
+                .get();
+
+        var result = atmService.approveLoan().apply(loan, c);
+        assertEquals(Status.SUCCESS, result);
+    }
+
+    @RepeatedTest(2)
+    @Order(6)
+    void F_shouldApproveLoan() {
+
+        var client = makePeter();
+        var c = atmService.getClientByAccountNumber().apply(client.accountNumber()).get();
+        var loan = atmService.getAllLoans()
+                .get()
+                .entrySet()
+                .stream()
+                .map(Map.Entry::getValue)
+                .flatMap(Collection::stream)
+                .filter(l -> l.accountNumber().equals(c.accountNumber()) && l.pending())
+                .findAny()
+                .get();
+
+        var result = atmService.approveLoan().apply(loan, c);
+        assertEquals(Status.SUCCESS, result);
+    }
+
+    @Test
+    @Order(7)
+    void J_shouldGetLoanMessage() {
+        // given
+        var accountNumber = "143143143";
+        // when
+        var result = atmService.getMessage().apply(accountNumber)
+                .entrySet()
+                .stream()
+                .filter(e -> e.getKey().equals(accountNumber))
+                .map(Map.Entry::getValue)
+                .flatMap(Collection::stream)
+                .toList();
+        // then
+        result.forEach(Print::println);
+    }
+
+    @Test
+    @Order(8)
+    void K_shouldGetLoanMessage() {
         // given
         var accountNumber = "200263444";
         // when
@@ -94,10 +187,29 @@ class AtmServiceTest extends AtmDAOImplementation {
                 .flatMap(Collection::stream)
                 .toList();
         // then
-        result.forEach(System.out::println);
+        result.forEach(Print::println);
     }
 
     @Test
+    @Order(9)
+    void G_shouldPrintAllClientsAfterLoanRequests() {
+        atmService.getAllClients()
+                .get()
+                .entrySet()
+                .stream()
+                .map(Map.Entry::getValue)
+                .forEach(Print::println);
+    }
+
+    @Test
+    @Order(10)
+    void remove() {
+        assertEquals(Status.SUCCESS, atmService.removeAllClients().get());
+        assertEquals(Status.SUCCESS, atmService.removeAllLoans().get());
+    }
+
+    @Test
+    @Disabled
     void shouldThrowExceptionWhenGettingLoanMessageBecauseLoanMessageDoesNotExist() {
         // given
         var accountNumber = "123123123";
@@ -129,18 +241,6 @@ class AtmServiceTest extends AtmDAOImplementation {
 
     @Test
     @Disabled
-    void shouldMakeALoan() {
-        // given
-        var client = makePeter();
-        var loan = makeLoan(client, 30_000);
-        // when
-        var result = atmService.requestLoan().apply(loan);
-        // then
-        assertEquals(Status.SUCCESS, result);
-    }
-
-    @Test
-    @Disabled
     void shouldMetTheLoan() {
         // given
         var loan = atmService.getAllLoans();
@@ -150,46 +250,6 @@ class AtmServiceTest extends AtmDAOImplementation {
                 .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
                 .forEach(Print::println);
-    }
-
-    @Test
-    @Disabled
-    void shouldApproveLoan() {
-
-        var loan = atmService
-                .getAllLoans()
-                .get()
-                .entrySet()
-                .stream()
-                .map(Map.Entry::getValue)
-                .flatMap(Collection::stream)
-                .findAny()
-                .get();
-
-        var l = new Loan(
-                loan.loanNumber(),
-                loan.accountNumber(),
-                false
-        );
-
-        var result = atmService.approveLoan().apply(l);
-        assertEquals(Status.SUCCESS, result);
-    }
-
-    @Test
-    @Disabled
-    void shouldApproveAllLoans() {
-        var loans = atmService
-                .getAllLoans()
-                .get()
-                .entrySet()
-                .stream()
-                .map(Map.Entry::getValue)
-                .flatMap(Collection::stream)
-                .toList();
-
-        loans.forEach(l -> atmService.approveLoan().apply(l));
-
     }
 
     private Client makePeter() {
