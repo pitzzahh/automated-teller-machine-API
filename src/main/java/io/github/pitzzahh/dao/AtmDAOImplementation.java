@@ -7,12 +7,11 @@ import java.util.stream.Collectors;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.BiFunction;
-
-import com.github.pitzzahh.utilities.Print;
-import com.github.pitzzahh.utilities.Util;
 import io.github.pitzzahh.entity.Loan;
 import io.github.pitzzahh.entity.Client;
 import io.github.pitzzahh.entity.Message;
+import com.github.pitzzahh.utilities.Util;
+import com.github.pitzzahh.utilities.Print;
 import io.github.pitzzahh.mapper.LoanMapper;
 import io.github.pitzzahh.mapper.ClientMapper;
 import com.github.pitzzahh.utilities.SecurityUtil;
