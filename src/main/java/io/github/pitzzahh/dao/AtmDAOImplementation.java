@@ -68,7 +68,7 @@ public class AtmDAOImplementation implements AtmDAO {
     @Override
     public Function<String, Optional<Client>> getClientByAccountNumber() {
         final var QUERY = "SELECT * FROM clients WHERE account_number = ?";
-        return an -> Optional.ofNullable(Objects.requireNonNull(db.queryForObject(QUERY, new ClientMapper(), SecurityUtil.encrypt(an))));
+        return an -> Optional.ofNullable(db.queryForObject(QUERY, new ClientMapper(), SecurityUtil.encrypt(an)));
     }
 
     /**
@@ -259,13 +259,11 @@ public class AtmDAOImplementation implements AtmDAO {
     public BiFunction<Integer, String, Optional<Loan>> getLoanByLoanNumberAndAccountNumber() {
         final var QUERY = "SELECT * FROM loans WHERE loan_number = ? AND account_number = ?";
         return (loanNumber, accountNumber) -> Optional.ofNullable(
-                Objects.requireNonNull(
-                        db.queryForObject(
-                                QUERY,
-                                new LoanMapper(),
-                                loanNumber,
-                                SecurityUtil.encrypt(accountNumber))
-                )
+                db.queryForObject(
+                        QUERY,
+                        new LoanMapper(),
+                        loanNumber,
+                        SecurityUtil.encrypt(accountNumber))
         );
     }
 
@@ -300,7 +298,8 @@ public class AtmDAOImplementation implements AtmDAO {
     @Override
     public BiFunction<Loan, Client, Status> approveLoan() {
         final var QUERY = "UPDATE loans SET pending = ? WHERE loan_number = ? AND account_number = ?";
-        return (loan, client) -> {
+        return (loan, c) -> {
+            var client = getClientByAccountNumber().apply(c.accountNumber()).get();
             var status = updateClientSavingsByAccountNumber().apply(client.accountNumber(), client.savings() + loan.amount());
             return status == SUCCESS ? db.update(
                     QUERY,
