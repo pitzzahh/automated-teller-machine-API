@@ -384,8 +384,6 @@ public class Atm {
                 } while (!choice.equals("3"));
             }
 
-            // TODO: add comment
-
             /**
              *  Manages account loans.
              * @param scanner the scanner needed for keyboard input.
@@ -435,8 +433,10 @@ public class Atm {
                         }
                         default -> throw new IllegalStateException(String.format("\nINVALID INPUT: %s\n", choice));
                     }
+                    CLIENTS.clear();
                     LOANS.clear();
                     LOAN_REQUESTS.clear();
+                    loadClients();
                     loadClientLoans();
                     LOAN_REQUESTS = getAllLoanRequests();
                     if (LOAN_REQUESTS.isEmpty()) break;
@@ -447,6 +447,7 @@ public class Atm {
              * Approves a loan
              * @param scanner the scanner needed for keyboard input.
              * @param allLoans the {@code List<Loan>}.
+             * @param transaction the transaction to be processed wether {@link Machine#APPROVE} or {@link Machine#DECLINE}.
              * @return a {@code Status}
              */
             private static Status process(Scanner scanner, List<Loan> allLoans, int transaction) {
@@ -494,6 +495,7 @@ public class Atm {
                 return new Loan(
                         loan.loanNumber(),
                         loan.accountNumber(),
+                        loan.amount(),
                         false
                 );
             }
@@ -668,7 +670,7 @@ public class Atm {
                                 ));
                         var message = switch (transaction) {
                             case DEPOSIT -> status == SUCCESS ? BLUE_BOLD_BRIGHT + "CASH DEPOSITED SUCCESSFULLY" + RESET : RED_BOLD_BRIGHT + "ERROR DEPOSITING CASH" + RESET;
-                            case CHECK_BALANCE -> String.format(BLUE_BOLD_BRIGHT + "ACCOUNT BALANCE: %s %s %s", CYAN_BOLD_BRIGHT,
+                            case CHECK_BALANCE -> String.format(BLUE_BOLD_BRIGHT + "ACCOUNT BALANCE: %s%s%s", CYAN_BOLD_BRIGHT,
                                     Currency.getInstance("PHP").getSymbol().concat(NumberFormat.getInstance().format(cashToProcess))
                                     , RESET);
                             case WITHDRAW -> status == SUCCESS ? BLUE_BOLD_BRIGHT + "CASH WITHDRAWED SUCCESSFULLY" + RESET : RED_BOLD_BRIGHT + "ERROR WITHDRAWING CASH" + RESET;
