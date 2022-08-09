@@ -109,7 +109,7 @@ public class AtmService {
      * @see BiFunction
      * @see Status
      */
-    public BiFunction<String, Boolean, Status> updateClientAttemptsByAccountNumber() {
+    public BiFunction<String, Boolean, Status> updateClientAccountStatusByAccountNumber() {
         return atmDAO.updateClientStatusByAccountNumber();
     }
 
@@ -202,11 +202,11 @@ public class AtmService {
      * Function that approves a loan request.
      * The function takes a {@code Loan} object containing the loan information to be approved.
      * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
-     * @see Function
+     * @see BiFunction
      * @see Loan
      * @see Status
      */
-    public Function<Loan, Status> approveLoan() {
+    public BiFunction<Loan, Client, Status> approveLoan() {
         return atmDAO.approveLoan();
     }
 
