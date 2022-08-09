@@ -121,18 +121,17 @@ class AtmServiceTest extends AtmDAOImplementation {
     void E_shouldApproveLoan() {
 
         var client = makeZamira();
-        var c = atmService.getClientByAccountNumber().apply(client.accountNumber()).get();
         var loan = atmService.getAllLoans()
                 .get()
                 .entrySet()
                 .stream()
                 .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
-                .filter(l -> l.accountNumber().equals(c.accountNumber()) && l.pending())
+                .filter(l -> l.accountNumber().equals(client.accountNumber()) && l.pending())
                 .findAny()
                 .get();
 
-        var result = atmService.approveLoan().apply(loan, c);
+        var result = atmService.approveLoan().apply(loan, client);
         assertEquals(Status.SUCCESS, result);
     }
 
@@ -141,18 +140,17 @@ class AtmServiceTest extends AtmDAOImplementation {
     void F_shouldApproveLoan() {
 
         var client = makePeter();
-        var c = atmService.getClientByAccountNumber().apply(client.accountNumber()).get();
         var loan = atmService.getAllLoans()
                 .get()
                 .entrySet()
                 .stream()
                 .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
-                .filter(l -> l.accountNumber().equals(c.accountNumber()) && l.pending())
+                .filter(l -> l.accountNumber().equals(client.accountNumber()) && l.pending())
                 .findAny()
                 .get();
 
-        var result = atmService.approveLoan().apply(loan, c);
+        var result = atmService.approveLoan().apply(loan, client);
         assertEquals(Status.SUCCESS, result);
     }
 
