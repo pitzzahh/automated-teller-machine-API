@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.BiFunction;
+
+import com.github.pitzzahh.utilities.Print;
+import com.github.pitzzahh.utilities.Util;
 import io.github.pitzzahh.entity.Loan;
 import io.github.pitzzahh.entity.Client;
 import io.github.pitzzahh.entity.Message;
@@ -377,17 +380,19 @@ public class AtmDAOImplementation implements AtmDAO {
                     .stream()
                     .map(Map.Entry::getValue)
                     .toList();
-            var clientLoan = getAllLoans()
+            Print.println();
+            var isStillPending = getAllLoans()
                     .get()
                     .entrySet()
                     .stream()
                     .map(Map.Entry::getValue)
                     .flatMap(Collection::stream)
                     .filter(a -> a.accountNumber().equals(accountNumber))
-                    .findAny()
-                    .get();
-            if (clientLoan.pending())
-                throw new IllegalStateException(String.format("LOAN MESSAGES WITH ACCOUNT NUMBER %S DOES NOT EXIST", accountNumber));
+                    .collect(Collectors.toList())
+                    .stream()
+                    .map(Loan::pending)
+                    .toList();
+            if (Util.areAllTheSame(isStillPending, () -> true)) throw new IllegalStateException("THERE ARE NO MESSAGES AT THE MOMENT");
             return getAllLoans().get()
                     .entrySet()
                     .stream()
