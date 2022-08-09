@@ -165,11 +165,11 @@ public interface AtmDAO {
      * Function that approves a loan request.
      * The function takes a {@code Loan} object containing the loan information to be approved.
      * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
-     * @see Function
+     * @see BiFunction
      * @see Loan
      * @see Status
      */
-    Function<Loan, Status> approveLoan();
+    BiFunction<Loan, Client, Status> approveLoan();
 
     /**
      * Function that declines a loan request.
