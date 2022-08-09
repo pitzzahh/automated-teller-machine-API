@@ -401,10 +401,10 @@ public class Atm {
                             "╩ ╩╩ ╩╝╚╝╩ ╩╚═╝╚═╝  ╩ ╩╚═╝╚═╝╚═╝╚═╝╝╚╝ ╩   ╩═╝╚═╝╩ ╩╝╚╝╚═╝\n");
                     println(RED_BOLD_BRIGHT + (LOAN_REQUESTS.size() > 1 ? "LIST OF LOANS" : "LOAN") + "\n");
                     LOAN_REQUESTS.stream().forEach(Print::println);
-                    println(PURPLE_BOLD + ":" + BLUE_BOLD_BRIGHT   + " 1 " + PURPLE_BOLD_BRIGHT + ": " + BLUE_BOLD_BRIGHT  + "APPROVE LOAN");
-                    println(PURPLE_BOLD + ":" + YELLOW_BOLD_BRIGHT + " 2 " + PURPLE_BOLD_BRIGHT + ": " + YELLOW_BOLD_BRIGHT  + "DECLINE LOAN");
-                    println(PURPLE_BOLD + ":" + RED_BOLD_BRIGHT    + " 3 " + PURPLE_BOLD_BRIGHT + ": " + RED_BOLD_BRIGHT   + "REMOVE LOAN");
-                    println(PURPLE_BOLD + ":" + GREEN_BOLD_BRIGHT  + " 4 " + PURPLE_BOLD_BRIGHT + ": " + GREEN_BOLD_BRIGHT + "BACK");
+                    println(PURPLE_BOLD + ":" + BLUE_BOLD_BRIGHT   + " 1 " + PURPLE_BOLD_BRIGHT + ": " + BLUE_BOLD_BRIGHT   + "APPROVE LOAN");
+                    println(PURPLE_BOLD + ":" + YELLOW_BOLD_BRIGHT + " 2 " + PURPLE_BOLD_BRIGHT + ": " + YELLOW_BOLD_BRIGHT + "DECLINE LOAN");
+                    println(PURPLE_BOLD + ":" + RED_BOLD_BRIGHT    + " 3 " + PURPLE_BOLD_BRIGHT + ": " + RED_BOLD_BRIGHT    + "REMOVE LOAN");
+                    println(PURPLE_BOLD + ":" + GREEN_BOLD_BRIGHT  + " 4 " + PURPLE_BOLD_BRIGHT + ": " + GREEN_BOLD_BRIGHT  + "BACK");
                     print(YELLOW_BOLD + ">>>: " + RESET);
                     choice = scanner.nextLine().trim();
                     switch (choice) {
@@ -440,7 +440,7 @@ public class Atm {
                     loadClientLoans();
                     LOAN_REQUESTS = getAllLoanRequests();
                     if (LOAN_REQUESTS.isEmpty()) break;
-                } while (!choice.equals("3"));
+                } while (!choice.equals("4"));
             }
 
             /**
@@ -452,29 +452,25 @@ public class Atm {
             private static Status process(Scanner scanner, List<Loan> allLoans, int transaction) {
                 var loan = new Loan();
                 var client = new Client();
-                var status = CANNOT_PERFORM_OPERATION;
                 if (allLoans.size() == 1 && transaction == APPROVE) {
                     loan = allLoans.get(0);
                     client = CLIENTS.get(loan.accountNumber());
-                    status = ATM_SERVICE.updateClientSavingsByAccountNumber().apply(loan.accountNumber(), client.savings() + loan.amount());
-                    return status == SUCCESS ? ATM_SERVICE.approveLoan().apply(mapLoan(loan)) : status;
+                    return ATM_SERVICE.approveLoan().apply(mapLoan(loan), client);
                 }
                 if (allLoans.size() == 1 && transaction == DECLINE) return ATM_SERVICE.declineLoan().apply(mapLoan(allLoans.get(0)));
                 else {
                     println(CYAN_BOLD_BRIGHT + String.format("%s %s %s LOAN REQUEST" + RESET,
                             (transaction == APPROVE ? BLUE_BOLD : RED_BOLD),
                             (transaction == APPROVE ? "APPROVE" : "DECLINE"),
-                            CYAN_BOLD_BRIGHT));
+                            CYAN_BOLD_BRIGHT)
+                    );
                     println(YELLOW_BOLD_BRIGHT + ":ENTER LOAN NUMBER AND ACCOUNT NUMBER TO SEPARATED BY SPACE:");
                     println(GREEN_BOLD + "example: " + YELLOW_BOLD_BRIGHT + CYAN_BACKGROUND + "1" + RESET + " " + YELLOW_BOLD_BRIGHT + CYAN_BACKGROUND + "200263444" + RESET);
                     print(PURPLE_BOLD + ">>>: " + RESET);
-                    final var $s = scanner.nextLine().trim().split(" ");
-                    if (isValidFormat().negate().test($s[0] + " " + $s[1]))
-                        throw new IllegalStateException("\nINVALID FORMAT\nPLEASE FOLLOW THE EXAMPLE\n");
-                    else if (isWholeNumber().negate().test($s[0]))
-                        throw new IllegalStateException("\nLOAN NUMBER SHOULD BE A NUMBER\n");
-                    else if (isWholeNumber().negate().test($s[1]))
-                        throw new IllegalStateException("\nACCOUNT NUMBER SHOULD BE A NUMBER\n");
+                    final var $s = scanner.nextLine().trim().split("\\s");
+                    if (isValidFormat().negate().test($s[0] + " " + $s[1])) throw new IllegalStateException("\nINVALID FORMAT\nPLEASE FOLLOW THE EXAMPLE\n");
+                    else if (isWholeNumber().negate().test($s[0])) throw new IllegalStateException("\nLOAN NUMBER SHOULD BE A NUMBER\n");
+                    else if (isWholeNumber().negate().test($s[1])) throw new IllegalStateException("\nACCOUNT NUMBER SHOULD BE A NUMBER\n");
 
                     loan = allLoans
                             .stream()
@@ -485,9 +481,8 @@ public class Atm {
                     client = CLIENTS.get(loan.accountNumber());
                 }
 
-                if (transaction == APPROVE) status = ATM_SERVICE.updateClientSavingsByAccountNumber().apply(loan.accountNumber(), client.savings() + loan.amount());
+                if (transaction == APPROVE) return ATM_SERVICE.approveLoan().apply(mapLoan(loan), client);
                 else return ATM_SERVICE.declineLoan().apply(mapLoan(loan));
-                return status == SUCCESS ? ATM_SERVICE.approveLoan().apply(mapLoan(loan)) : CANNOT_PERFORM_OPERATION;
             }
 
             // TODO: implement
@@ -518,7 +513,7 @@ public class Atm {
                     checkAccountNumberInput($an);
                     if (!searchLockedAccount($an)) throw new IllegalStateException(String.format("\nACCOUNT: %s DOES NOT EXIST\n", $an));
                 }
-                return ATM_SERVICE.updateClientAttemptsByAccountNumber().apply($an, false);
+                return ATM_SERVICE.updateClientAccountStatusByAccountNumber().apply($an, false);
             }
 
             /**
@@ -730,7 +725,7 @@ public class Atm {
                         break;
                     }
                     if (attempts == 0) {
-                        ATM_SERVICE.updateClientAttemptsByAccountNumber().apply(client.accountNumber(), true);
+                        ATM_SERVICE.updateClientAccountStatusByAccountNumber().apply(client.accountNumber(), true);
                         throw new IllegalStateException(LOCKED_ACCOUNT_MESSAGE + RESET);
                     }
                 }
