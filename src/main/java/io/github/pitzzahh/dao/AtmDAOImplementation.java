@@ -293,19 +293,22 @@ public class AtmDAOImplementation implements AtmDAO {
      * Function that approves a loan request.
      * The function takes a {@code Loan} object containing the loan information to be approved.
      * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
-     * @see Function
+     * @see BiFunction
      * @see Loan
      * @see Status
      */
     @Override
-    public Function<Loan, Status> approveLoan() {
+    public BiFunction<Loan, Client, Status> approveLoan() {
         final var QUERY = "UPDATE loans SET pending = ? WHERE loan_number = ? AND account_number = ?";
-        return loan -> db.update(
-                QUERY,
-                SecurityUtil.encrypt(Boolean.FALSE.toString()),
-                loan.loanNumber(),
-                SecurityUtil.encrypt(loan.accountNumber())
-        ) > 0 ? SUCCESS : ERROR;
+        return (loan, client) -> {
+            var status = updateClientSavingsByAccountNumber().apply(client.accountNumber(), client.savings() + loan.amount());
+            return status == SUCCESS ? db.update(
+                    QUERY,
+                    SecurityUtil.encrypt(Boolean.FALSE.toString()),
+                    loan.loanNumber(),
+                    SecurityUtil.encrypt(loan.accountNumber())
+            ) > 0 ? SUCCESS : ERROR : CANNOT_PERFORM_OPERATION;
+        };
     }
 
     /**
@@ -375,14 +378,17 @@ public class AtmDAOImplementation implements AtmDAO {
                     .stream()
                     .map(Map.Entry::getValue)
                     .toList();
-            boolean doesMessageExists = getAllLoans()
+            var clientLoan = getAllLoans()
                     .get()
                     .entrySet()
                     .stream()
-                    .map(Map.Entry::getKey)
-                    .anyMatch(a -> a.equals(accountNumber));
-            if (!doesMessageExists)
-                throw new IllegalStateException(String.format("\nLOAN MESSAGES WITH ACCOUNT NUMBER %S DOES NOT EXIST\n", accountNumber));
+                    .map(Map.Entry::getValue)
+                    .flatMap(Collection::stream)
+                    .filter(a -> a.accountNumber().equals(accountNumber))
+                    .findAny()
+                    .get();
+            if (clientLoan.pending())
+                throw new IllegalStateException(String.format("LOAN MESSAGES WITH ACCOUNT NUMBER %S DOES NOT EXIST", accountNumber));
             return getAllLoans().get()
                     .entrySet()
                     .stream()
