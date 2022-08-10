@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.BiFunction;
 import io.github.pitzzahh.atm.dao.AtmDAO;
+import io.github.pitzzahh.atm.database.DatabaseConnection;
 import io.github.pitzzahh.atm.entity.Loan;
 import io.github.pitzzahh.atm.entity.Client;
 import io.github.pitzzahh.atm.entity.Message;
@@ -24,12 +25,19 @@ public class AtmService {
     private AtmDAO atmDAO;
 
     /**
+     * {@code DatabaseConnection} dependency.
+     */
+    public DatabaseConnection databaseConnection;
+
+    /**
      * Dependency ibjection object.
      * @param atmDAO the {@code AtmDAO} dependency to be injected.
+     * @param databaseConnection the {@code DatabaseConnection} dependency to be injected.
      * @see AtmDAO
      */
-    public AtmService(AtmDAO atmDAO) {
+    public AtmService(AtmDAO atmDAO, DatabaseConnection databaseConnection) {
         this.atmDAO = new AtmDAOImplementation();
+        this.databaseConnection = new DatabaseConnection();
     }
 
     /**
