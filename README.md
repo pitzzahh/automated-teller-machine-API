@@ -7,7 +7,30 @@ A colorful Java console application that imitates what an ATM (automated-teller-
 ![License](https://img.shields.io/github/license/pitzzahh/automated-teller-machine-console)
 ________________________________________
 ## Quickstart
-1. 
+* connecting to a database
+```java
+import io.github.pitzzahh.atm.dao.AtmDAO;
+import io.github.pitzzahh.atm.service.AtmService;
+import io.github.pitzzahh.atm.database.DatabaseConnection;
+
+public class App {
+
+    private static AtmDAO atmDAO;
+    private static AtmService atmService;
+    private static DatabaseConnection databaseConnection;
+
+    public static void main(String[] args) {
+        atmService = new AtmService(atmDAO);
+        atmService.setDataSource().accept(
+                databaseConnection.setDriverClassName("org.postgresql.Driver")
+                        .setUrl("jdbc:postgresql://localhost/postgres")
+                        .setUsername("postgres")
+                        .setPassword("password")
+                        .getDataSource()
+        );
+    }
+}
+ ```
 
 ### Add Maven Dependency
 
