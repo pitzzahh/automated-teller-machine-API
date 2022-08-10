@@ -1,5 +1,5 @@
-# automated-teller-machine-console
-A colorful Java console application that imitates what an ATM (automated-teller-machine).
+# automated-teller-machine-API
+An API for an atm application
 
 ![GitHub Issues](https://img.shields.io/github/issues/pitzzahh/automated-teller-machine-console)
 ![Forks](https://img.shields.io/github/forks/pitzzahh/automated-teller-machine-console)
