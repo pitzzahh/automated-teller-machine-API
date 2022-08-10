@@ -6,12 +6,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.BiFunction;
+import com.github.pitzzahh.utilities.classes.enums.Status;
 import io.github.pitzzahh.automated_teller_machine.dao.AtmDAO;
 import io.github.pitzzahh.automated_teller_machine.entity.Loan;
 import io.github.pitzzahh.automated_teller_machine.entity.Client;
-import io.github.pitzzahh.automated_teller_machine.dao.AtmDAOImplementation;
-import com.github.pitzzahh.utilities.classes.enums.Status;
 import io.github.pitzzahh.automated_teller_machine.entity.Message;
+import io.github.pitzzahh.automated_teller_machine.dao.AtmDAOImplementation;
 
 /**
  * The service for overall functionality..

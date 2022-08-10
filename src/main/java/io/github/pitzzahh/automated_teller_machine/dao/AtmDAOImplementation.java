@@ -7,16 +7,15 @@ import java.util.stream.Collectors;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.BiFunction;
-
-import io.github.pitzzahh.automated_teller_machine.entity.Loan;
-import io.github.pitzzahh.automated_teller_machine.mapper.ClientMapper;
-import io.github.pitzzahh.automated_teller_machine.entity.Client;
-import io.github.pitzzahh.automated_teller_machine.entity.Message;
-import io.github.pitzzahh.automated_teller_machine.mapper.LoanMapper;
 import com.github.pitzzahh.utilities.SecurityUtil;
 import org.springframework.jdbc.core.JdbcTemplate;
 import com.github.pitzzahh.utilities.classes.enums.Status;
+import io.github.pitzzahh.automated_teller_machine.entity.Loan;
+import io.github.pitzzahh.automated_teller_machine.entity.Client;
+import io.github.pitzzahh.automated_teller_machine.entity.Message;
 import static com.github.pitzzahh.utilities.classes.enums.Status.*;
+import io.github.pitzzahh.automated_teller_machine.mapper.LoanMapper;
+import io.github.pitzzahh.automated_teller_machine.mapper.ClientMapper;
 
 /**
  * Implementation of the {@link AtmDAO}.

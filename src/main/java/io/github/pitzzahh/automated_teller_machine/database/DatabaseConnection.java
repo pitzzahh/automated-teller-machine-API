@@ -1,8 +1,8 @@
 package io.github.pitzzahh.automated_teller_machine.database;
 
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import io.github.pitzzahh.automated_teller_machine.service.AtmService;
 import io.github.pitzzahh.automated_teller_machine.dao.AtmDAOImplementation;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
  * Interface used by services to gain access to the database.
