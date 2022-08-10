@@ -1,7 +1,7 @@
-package io.github.pitzzahh.database;
+package io.github.pitzzahh.automated_teller_machine.database;
 
-import io.github.pitzzahh.service.AtmService;
-import io.github.pitzzahh.dao.AtmDAOImplementation;
+import io.github.pitzzahh.automated_teller_machine.service.AtmService;
+import io.github.pitzzahh.automated_teller_machine.dao.AtmDAOImplementation;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**

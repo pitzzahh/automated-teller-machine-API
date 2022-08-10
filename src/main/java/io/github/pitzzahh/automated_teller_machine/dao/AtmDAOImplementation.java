@@ -1,4 +1,4 @@
-package io.github.pitzzahh.dao;
+package io.github.pitzzahh.automated_teller_machine.dao;
 
 import java.util.*;
 import javax.sql.DataSource;
@@ -7,11 +7,12 @@ import java.util.stream.Collectors;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.BiFunction;
-import io.github.pitzzahh.entity.Loan;
-import io.github.pitzzahh.entity.Client;
-import io.github.pitzzahh.entity.Message;
-import io.github.pitzzahh.mapper.LoanMapper;
-import io.github.pitzzahh.mapper.ClientMapper;
+
+import io.github.pitzzahh.automated_teller_machine.entity.Loan;
+import io.github.pitzzahh.automated_teller_machine.mapper.ClientMapper;
+import io.github.pitzzahh.automated_teller_machine.entity.Client;
+import io.github.pitzzahh.automated_teller_machine.entity.Message;
+import io.github.pitzzahh.automated_teller_machine.mapper.LoanMapper;
 import com.github.pitzzahh.utilities.SecurityUtil;
 import org.springframework.jdbc.core.JdbcTemplate;
 import com.github.pitzzahh.utilities.classes.enums.Status;

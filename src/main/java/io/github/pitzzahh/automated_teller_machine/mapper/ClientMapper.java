@@ -1,8 +1,8 @@
-package io.github.pitzzahh.mapper;
+package io.github.pitzzahh.automated_teller_machine.mapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import io.github.pitzzahh.entity.Client;
+import io.github.pitzzahh.automated_teller_machine.entity.Client;
 import org.springframework.jdbc.core.RowMapper;
 import com.github.pitzzahh.utilities.SecurityUtil;
 import com.github.pitzzahh.utilities.classes.Person;

@@ -4,16 +4,18 @@ import java.time.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Collection;
+
+import io.github.pitzzahh.automated_teller_machine.service.AtmService;
 import org.junit.jupiter.api.*;
-import io.github.pitzzahh.dao.AtmDAO;
-import io.github.pitzzahh.entity.Loan;
-import io.github.pitzzahh.entity.Client;
+import io.github.pitzzahh.automated_teller_machine.dao.AtmDAO;
+import io.github.pitzzahh.automated_teller_machine.entity.Loan;
+import io.github.pitzzahh.automated_teller_machine.entity.Client;
 import com.github.pitzzahh.utilities.Print;
 import static org.junit.jupiter.api.Assertions.*;
-import io.github.pitzzahh.dao.AtmDAOImplementation;
+import io.github.pitzzahh.automated_teller_machine.dao.AtmDAOImplementation;
 import com.github.pitzzahh.utilities.classes.Person;
 import com.github.pitzzahh.utilities.classes.enums.*;
-import io.github.pitzzahh.database.DatabaseConnection;
+import io.github.pitzzahh.automated_teller_machine.database.DatabaseConnection;
 import org.junit.jupiter.api.function.Executable;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

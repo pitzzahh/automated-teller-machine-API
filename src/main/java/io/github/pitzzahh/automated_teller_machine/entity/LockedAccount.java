@@ -1,4 +1,4 @@
-package io.github.pitzzahh.entity;
+package io.github.pitzzahh.automated_teller_machine.entity;
 
 import com.github.pitzzahh.utilities.classes.enums.Gender;
 import static com.github.pitzzahh.utilities.classes.TextColors.*;

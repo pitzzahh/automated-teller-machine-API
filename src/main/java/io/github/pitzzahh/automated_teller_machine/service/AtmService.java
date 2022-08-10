@@ -1,27 +1,36 @@
-package io.github.pitzzahh.dao;
+package io.github.pitzzahh.automated_teller_machine.service;
 
-import java.util.Map;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import javax.sql.DataSource;
-import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.BiFunction;
-import io.github.pitzzahh.entity.Loan;
-import io.github.pitzzahh.entity.Client;
-import io.github.pitzzahh.entity.Message;
-import io.github.pitzzahh.service.AtmService;
+import io.github.pitzzahh.automated_teller_machine.dao.AtmDAO;
+import io.github.pitzzahh.automated_teller_machine.entity.Loan;
+import io.github.pitzzahh.automated_teller_machine.entity.Client;
+import io.github.pitzzahh.automated_teller_machine.dao.AtmDAOImplementation;
 import com.github.pitzzahh.utilities.classes.enums.Status;
+import io.github.pitzzahh.automated_teller_machine.entity.Message;
 
 /**
- * interface used to access the database. Implemented by {@code AtmDAOImplementation}.
- * Used in {@code AtmService}
- * @see AtmDAOImplementation
- * @see AtmService
+ * The service for overall functionality..
  */
-public interface AtmDAO {
+public class AtmService {
+
+    /**
+     * {@code AtmDAO} dependency.
+     */
+    private AtmDAO atmDAO;
+
+    /**
+     * Dependency ibjection object.
+     * @param atmDAO the {@code AtmDAO} dependency to be injected.
+     * @see AtmDAO
+     */
+    public AtmService(AtmDAO atmDAO) {
+        this.atmDAO = new AtmDAOImplementation();
+    }
 
     /**
      * Function that accepts a {@code DataSource} object.
@@ -29,7 +38,9 @@ public interface AtmDAO {
      * @see Consumer
      * @see DataSource
      */
-    Consumer<DataSource> setDataSource();
+    public Consumer<DataSource> setDataSource() {
+        return atmDAO.setDataSource();
+    }
 
     /**
      * Function that suppplies a {@code Map<String, Client>}.
@@ -40,7 +51,9 @@ public interface AtmDAO {
      * @see Supplier
      * @see Client
      */
-    Supplier<Map<String, Client>> getAllClients();
+    public Supplier<Map<String, Client>> getAllClients() {
+        return atmDAO.getAllClients();
+    }
 
     /**
      * Function that returns a {@code Optional<Client>} object based on the {@code String}
@@ -52,7 +65,9 @@ public interface AtmDAO {
      * @see Optional
      * @see Client
      */
-    Function<String, Optional<Client>> getClientByAccountNumber();
+    public Function<String, Optional<Client>> getClientByAccountNumber() {
+        return atmDAO.getClientByAccountNumber();
+    }
 
     /**
      * Function that accepts a {@code String} containing the account number.
@@ -60,7 +75,9 @@ public interface AtmDAO {
      * @return a {@code Double} containing the savings of the client with the account number.
      * @see Function
      */
-    Function<String, Double> getClientSavingsByAccountNumber();
+    public Function<String, Double> getClientSavingsByAccountNumber() {
+        return atmDAO.getClientSavingsByAccountNumber();
+    }
 
     /**
      * Function that removes a client in the database using the account number.
@@ -70,7 +87,9 @@ public interface AtmDAO {
      * @see Function
      * @see Status
      */
-    Function<String, Status> removeClientByAccountNumber();
+    public Function<String, Status> removeClientByAccountNumber() {
+        return atmDAO.removeClientByAccountNumber();
+    }
 
     /**
      * Function that removes all the clients in the database.
@@ -78,7 +97,9 @@ public interface AtmDAO {
      * @see Supplier
      * @see Status
      */
-    Supplier<Status> removeAllClients();
+    public Supplier<Status> removeAllClients() {
+        return atmDAO.removeAllClients();
+    }
 
     /**
      * Function that accepts two values. A {@code String} and a {@code Boolean}.
@@ -88,7 +109,9 @@ public interface AtmDAO {
      * @see BiFunction
      * @see Status
      */
-    BiFunction<String, Boolean, Status> updateClientStatusByAccountNumber();
+    public BiFunction<String, Boolean, Status> updateClientAccountStatusByAccountNumber() {
+        return atmDAO.updateClientStatusByAccountNumber();
+    }
 
     /**
      * Function that accepts two values. A {@code String} and a {@code Double}.
@@ -98,7 +121,9 @@ public interface AtmDAO {
      * @see BiFunction
      * @see Status
      */
-    BiFunction<String, Double, Status> updateClientSavingsByAccountNumber();
+    public BiFunction<String, Double, Status> updateClientSavingsByAccountNumber() {
+        return atmDAO.updateClientSavingsByAccountNumber();
+    }
 
     /**
      * Function that save a client to the database. The function takes a {@code Client} object,
@@ -108,7 +133,9 @@ public interface AtmDAO {
      * @see Client
      * @see Status
      */
-    Function<Client, Status> saveClient();
+    public Function<Client, Status> saveClient() {
+        return atmDAO.saveClient();
+    }
 
     /**
      * Function that saves a {@code Collection<Client} to the database table.
@@ -118,7 +145,9 @@ public interface AtmDAO {
      * @see Client
      * @see Status
      */
-    Function<Collection<Client>, Status> saveAllClients();
+    public Function<Collection<Client>, Status> saveAllClients() {
+        return atmDAO.saveAllClients();
+    }
 
     /**
      * Function that submits a loan request.
@@ -128,7 +157,9 @@ public interface AtmDAO {
      * @see Loan
      * @see Status
      */
-    Function<Loan, Status> requestLoan();
+    public Function<Loan, Status> requestLoan() {
+        return atmDAO.requestLoan();
+    }
 
     /**
      * Function that returns a key value pair, a Map<K,V> in particular.
@@ -140,7 +171,9 @@ public interface AtmDAO {
      * @see List
      * @see Loan
      */
-    Supplier<Map<String, List<Loan>>> getAllLoans();
+    public Supplier<Map<String, List<Loan>>> getAllLoans() {
+        return atmDAO.getAllLoans();
+    }
 
     /**
      * Function that gets the loan of a client using loan number and account number.
@@ -151,7 +184,9 @@ public interface AtmDAO {
      * @see Optional
      * @see Loan
      */
-    BiFunction<Integer, String, Optional<Loan>> getLoanByLoanNumberAndAccountNumber();
+    public BiFunction<Integer, String, Optional<Loan>> getLoanByLoanNumberAndAccountNumber() {
+        return atmDAO.getLoanByLoanNumberAndAccountNumber();
+    }
 
     /**
      * Function that gets the latest loan count of a client and returns the count.
@@ -159,7 +194,9 @@ public interface AtmDAO {
      * @return a {@code Integer} containing the loan count of a client.
      * @see Function
      */
-    Function<String, Integer> getLoanCount();
+    public Function<String, Integer> getLoanCount() {
+        return atmDAO.getLoanCount();
+    }
 
     /**
      * Function that approves a loan request.
@@ -169,7 +206,9 @@ public interface AtmDAO {
      * @see Loan
      * @see Status
      */
-    BiFunction<Loan, Client, Status> approveLoan();
+    public BiFunction<Loan, Client, Status> approveLoan() {
+        return atmDAO.approveLoan();
+    }
 
     /**
      * Function that declines a loan request.
@@ -179,7 +218,9 @@ public interface AtmDAO {
      * @see Loan
      * @see Status
      */
-    Function<Loan, Status> declineLoan();
+    public Function<Loan, Status> declineLoan() {
+        return atmDAO.declineLoan();
+    }
 
     /**
      * Function that removes a loan.
@@ -189,7 +230,9 @@ public interface AtmDAO {
      * @see Loan
      * @see Status
      */
-    Function<Loan, Status> removeLoan();
+    public Function<Loan, Status> removeLoan() {
+        return atmDAO.removeLoan();
+    }
 
     /**
      * Function that removes all the loans from the database.
@@ -197,7 +240,9 @@ public interface AtmDAO {
      * @see Supplier
      * @see Status
      */
-    Supplier<Status> removeAllLoans();
+    public Supplier<Status> removeAllLoans() {
+        return atmDAO.removeAllLoans();
+    }
 
     /**
      * Function that gets the message of the loan requst of a client to the database.
@@ -209,5 +254,7 @@ public interface AtmDAO {
      * @see List
      * @see Message
      */
-    Function<String, Map<String, List<Message>>> getMessage();
+    public Function<String, Map<String, List<Message>>> getMessage() {
+        return atmDAO.getMessage();
+    }
 }

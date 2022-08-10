@@ -2,13 +2,15 @@ package io.github.pitzzahh.entity;
 
 import com.github.pitzzahh.utilities.classes.enums.Gender;
 import com.github.pitzzahh.utilities.classes.enums.Status;
-import io.github.pitzzahh.database.DatabaseConnection;
+import io.github.pitzzahh.automated_teller_machine.database.DatabaseConnection;
 import com.github.pitzzahh.utilities.classes.Person;
-import io.github.pitzzahh.dao.AtmDAOImplementation;
+import io.github.pitzzahh.automated_teller_machine.dao.AtmDAOImplementation;
 import static org.junit.jupiter.api.Assertions.*;
-import io.github.pitzzahh.service.AtmService;
+
+import io.github.pitzzahh.automated_teller_machine.entity.Client;
+import io.github.pitzzahh.automated_teller_machine.service.AtmService;
 import org.junit.jupiter.api.BeforeEach;
-import io.github.pitzzahh.dao.AtmDAO;
+import io.github.pitzzahh.automated_teller_machine.dao.AtmDAO;
 import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.time.Month;
