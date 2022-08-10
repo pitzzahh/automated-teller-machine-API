@@ -2,11 +2,11 @@ package io.github.pitzzahh.atm.mapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import io.github.pitzzahh.atm.entity.Client;
 import org.springframework.jdbc.core.RowMapper;
 import com.github.pitzzahh.utilities.SecurityUtil;
 import com.github.pitzzahh.utilities.classes.Person;
 import com.github.pitzzahh.utilities.classes.enums.Gender;
-import io.github.pitzzahh.atm.entity.Client;
 
 /**
  * Class used to map data from the table to a {@code Client} object

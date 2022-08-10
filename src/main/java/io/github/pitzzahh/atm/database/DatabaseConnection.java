@@ -1,8 +1,8 @@
 package io.github.pitzzahh.atm.database;
 
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import io.github.pitzzahh.atm.service.AtmService;
 import io.github.pitzzahh.atm.dao.AtmDAOImplementation;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
  * Interface used by services to gain access to the database.

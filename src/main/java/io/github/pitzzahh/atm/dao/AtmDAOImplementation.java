@@ -7,15 +7,15 @@ import java.util.stream.Collectors;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.BiFunction;
-import com.github.pitzzahh.utilities.SecurityUtil;
-import org.springframework.jdbc.core.JdbcTemplate;
-import com.github.pitzzahh.utilities.classes.enums.Status;
 import io.github.pitzzahh.atm.entity.Loan;
 import io.github.pitzzahh.atm.entity.Client;
 import io.github.pitzzahh.atm.entity.Message;
-import static com.github.pitzzahh.utilities.classes.enums.Status.*;
 import io.github.pitzzahh.atm.mapper.LoanMapper;
+import com.github.pitzzahh.utilities.SecurityUtil;
+import org.springframework.jdbc.core.JdbcTemplate;
 import io.github.pitzzahh.atm.mapper.ClientMapper;
+import com.github.pitzzahh.utilities.classes.enums.Status;
+import static com.github.pitzzahh.utilities.classes.enums.Status.*;
 
 /**
  * Implementation of the {@link AtmDAO}.

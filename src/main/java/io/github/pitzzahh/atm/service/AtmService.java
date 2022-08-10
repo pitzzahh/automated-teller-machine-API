@@ -6,12 +6,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.BiFunction;
-import com.github.pitzzahh.utilities.classes.enums.Status;
 import io.github.pitzzahh.atm.dao.AtmDAO;
 import io.github.pitzzahh.atm.entity.Loan;
 import io.github.pitzzahh.atm.entity.Client;
 import io.github.pitzzahh.atm.entity.Message;
 import io.github.pitzzahh.atm.dao.AtmDAOImplementation;
+import com.github.pitzzahh.utilities.classes.enums.Status;
 
 /**
  * The service for overall functionality..

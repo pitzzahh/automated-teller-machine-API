@@ -9,11 +9,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.BiFunction;
-import com.github.pitzzahh.utilities.classes.enums.Status;
 import io.github.pitzzahh.atm.entity.Loan;
 import io.github.pitzzahh.atm.entity.Client;
 import io.github.pitzzahh.atm.entity.Message;
 import io.github.pitzzahh.atm.service.AtmService;
+import com.github.pitzzahh.utilities.classes.enums.Status;
 
 /**
  * interface used to access the database. Implemented by {@code AtmDAOImplementation}.
