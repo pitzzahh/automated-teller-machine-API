@@ -46,32 +46,8 @@ class AtmServiceTest extends AtmDAOImplementation {
     @Order(1)
     void A_shouldSaveAllClients() {
         var clients = List.of(
-                new Client(
-                        "200263444",
-                        "555555",
-                        Person.builder()
-                                .firstName("Peter John")
-                                .lastName("Arao")
-                                .gender(Gender.MALE)
-                                .address("Earth")
-                                .birthDate(LocalDate.of(2002, Month.AUGUST, 24))
-                                .build(),
-                        5_000_000,
-                        false
-                ),
-                new Client(
-                        "143143143",
-                        "143143",
-                        Person.builder()
-                                .firstName("Zamira Alexis")
-                                .lastName("Morozuk")
-                                .gender(Gender.FEMALE)
-                                .address("Earth")
-                                .birthDate(LocalDate.of(2009, Month.APRIL, 29))
-                                .build(),
-                        5_000_000,
-                        false
-                )
+                makePeter(),
+                makeZamira()
         );
         var result = atmService.saveAllClients().apply(clients);
         assertEquals(Status.SUCCESS, result);
@@ -88,6 +64,7 @@ class AtmServiceTest extends AtmDAOImplementation {
                 .forEach(Print::println);
     }
 
+    @Disabled
     @Test
     @Order(3)
     void C_shouldMakeALoan() {
@@ -116,6 +93,7 @@ class AtmServiceTest extends AtmDAOImplementation {
         }
     }
 
+    @Disabled
     @RepeatedTest(2)
     @Order(5)
     void E_shouldApproveLoan() {
@@ -135,6 +113,7 @@ class AtmServiceTest extends AtmDAOImplementation {
         assertEquals(Status.SUCCESS, result);
     }
 
+    @Disabled
     @RepeatedTest(2)
     @Order(6)
     void F_shouldApproveLoan() {
@@ -154,6 +133,7 @@ class AtmServiceTest extends AtmDAOImplementation {
         assertEquals(Status.SUCCESS, result);
     }
 
+    @Disabled
     @Test
     @Order(7)
     void J_shouldGetLoanMessage() {
@@ -171,6 +151,7 @@ class AtmServiceTest extends AtmDAOImplementation {
         result.forEach(Print::println);
     }
 
+    @Disabled
     @Test
     @Order(8)
     void K_shouldGetLoanMessage() {
@@ -201,6 +182,47 @@ class AtmServiceTest extends AtmDAOImplementation {
 
     @Test
     @Order(10)
+    void shouldDeclineLoan() {
+        var client = makePeter();
+        var loan = new Loan(
+                1,
+                client.accountNumber(),
+                true
+        );
+        var result = atmService.declineLoan().apply(loan);
+        assertEquals(Status.SUCCESS, result);
+    }
+
+    @Test
+    @Order(11)
+    void K_shouldGetLoanMessage2() {
+        // given
+        var accountNumber = "123123123";
+        // when
+        var result = atmService.getMessage().apply(accountNumber)
+                .entrySet()
+                .stream()
+                .filter(e -> e.getKey().equals(accountNumber))
+                .map(Map.Entry::getValue)
+                .flatMap(Collection::stream)
+                .toList();
+        // then
+        result.forEach(Print::println);
+    }
+
+    @Test
+    @Order(12)
+    void G_shouldPrintAllClientsAfterLoanRequests2() {
+        atmService.getAllClients()
+                .get()
+                .entrySet()
+                .stream()
+                .map(Map.Entry::getValue)
+                .forEach(Print::println);
+    }
+
+    @Test
+    @Order(13)
     void remove() {
         assertEquals(Status.SUCCESS, atmService.removeAllClients().get());
         assertEquals(Status.SUCCESS, atmService.removeAllLoans().get());
@@ -252,8 +274,8 @@ class AtmServiceTest extends AtmDAOImplementation {
 
     private Client makePeter() {
         return new Client(
-                "200263444",
-                "143143143",
+                "123123123",
+                "123123",
                 Person.builder()
                         .firstName("Peter John")
                         .lastName("Arao")
