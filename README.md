@@ -5,6 +5,7 @@ An API for an atm application
 ![Forks](https://img.shields.io/github/forks/pitzzahh/automated-teller-machine-console)
 ![Stars](https://img.shields.io/github/stars/pitzzahh/automated-teller-machine-console)
 ![License](https://img.shields.io/github/license/pitzzahh/automated-teller-machine-console)
+![Stable Release](https://img.shields.io/badge/version-1.0.0-blue)
 ________________________________________
 ## Quickstart
 * connecting to a database
