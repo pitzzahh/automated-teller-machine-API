@@ -10,8 +10,6 @@ import java.util.function.BiFunction;
 import io.github.pitzzahh.entity.Loan;
 import io.github.pitzzahh.entity.Client;
 import io.github.pitzzahh.entity.Message;
-import com.github.pitzzahh.utilities.Util;
-import com.github.pitzzahh.utilities.Print;
 import io.github.pitzzahh.mapper.LoanMapper;
 import io.github.pitzzahh.mapper.ClientMapper;
 import com.github.pitzzahh.utilities.SecurityUtil;
@@ -379,31 +377,30 @@ public class AtmDAOImplementation implements AtmDAO {
                     .stream()
                     .map(Map.Entry::getValue)
                     .toList();
-            Print.println();
-            var isStillPending = getAllLoans()
+            var check = getAllLoans()
                     .get()
                     .entrySet()
                     .stream()
                     .map(Map.Entry::getValue)
                     .flatMap(Collection::stream)
-                    .filter(a -> a.accountNumber().equals(accountNumber))
-                    .collect(Collectors.toList())
-                    .stream()
-                    .map(Loan::pending)
-                    .toList();
-            if (Util.areAllTheSame(isStillPending, () -> true)) throw new IllegalStateException("THERE ARE NO MESSAGES AT THE MOMENT");
+                    .allMatch(a -> a.accountNumber().equals(accountNumber) && ( a.pending() && !a.isDeclined() ));
+            if (check) throw new IllegalStateException("THERE ARE NO MESSAGES AT THE MOMENT");
             return getAllLoans().get()
                     .entrySet()
                     .stream()
                     .map(Map.Entry::getValue)
                     .flatMap(Collection::stream)
                     .filter(l -> l.pending() == false || l.isDeclined())
-                    .map(loan -> new Message(loan, clients.stream()
-                                            .filter(a -> a.accountNumber().equals(loan.accountNumber()))
-                                            .findAny()
-                                            .get()
-                            )
-                    )
+                    .map(loan -> {
+                        return new Message(
+                                loan,
+                                clients.stream()
+                                        .filter(a -> a.accountNumber().equals(loan.accountNumber()))
+                                        .findFirst()
+                                        .get(),
+                                loan.pending() && loan.isDeclined() ? true : false
+                        );
+                    })
                     .collect(Collectors.groupingBy(message -> message.loan().accountNumber()));
         };
     }
