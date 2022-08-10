@@ -1,4 +1,4 @@
-package io.github.pitzzahh.automated_teller_machine.dao;
+package io.github.pitzzahh.atm.dao;
 
 import java.util.*;
 import javax.sql.DataSource;
@@ -10,12 +10,12 @@ import java.util.function.BiFunction;
 import com.github.pitzzahh.utilities.SecurityUtil;
 import org.springframework.jdbc.core.JdbcTemplate;
 import com.github.pitzzahh.utilities.classes.enums.Status;
-import io.github.pitzzahh.automated_teller_machine.entity.Loan;
-import io.github.pitzzahh.automated_teller_machine.entity.Client;
-import io.github.pitzzahh.automated_teller_machine.entity.Message;
+import io.github.pitzzahh.atm.entity.Loan;
+import io.github.pitzzahh.atm.entity.Client;
+import io.github.pitzzahh.atm.entity.Message;
 import static com.github.pitzzahh.utilities.classes.enums.Status.*;
-import io.github.pitzzahh.automated_teller_machine.mapper.LoanMapper;
-import io.github.pitzzahh.automated_teller_machine.mapper.ClientMapper;
+import io.github.pitzzahh.atm.mapper.LoanMapper;
+import io.github.pitzzahh.atm.mapper.ClientMapper;
 
 /**
  * Implementation of the {@link AtmDAO}.

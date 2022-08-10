@@ -1,4 +1,4 @@
-package io.github.pitzzahh.automated_teller_machine.service;
+package io.github.pitzzahh.atm.service;
 
 import java.util.*;
 import javax.sql.DataSource;
@@ -7,11 +7,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.BiFunction;
 import com.github.pitzzahh.utilities.classes.enums.Status;
-import io.github.pitzzahh.automated_teller_machine.dao.AtmDAO;
-import io.github.pitzzahh.automated_teller_machine.entity.Loan;
-import io.github.pitzzahh.automated_teller_machine.entity.Client;
-import io.github.pitzzahh.automated_teller_machine.entity.Message;
-import io.github.pitzzahh.automated_teller_machine.dao.AtmDAOImplementation;
+import io.github.pitzzahh.atm.dao.AtmDAO;
+import io.github.pitzzahh.atm.entity.Loan;
+import io.github.pitzzahh.atm.entity.Client;
+import io.github.pitzzahh.atm.entity.Message;
+import io.github.pitzzahh.atm.dao.AtmDAOImplementation;
 
 /**
  * The service for overall functionality..

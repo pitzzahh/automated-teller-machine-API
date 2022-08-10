@@ -1,4 +1,4 @@
-package io.github.pitzzahh.automated_teller_machine.entity;
+package io.github.pitzzahh.atm.entity;
 
 import java.util.Currency;
 import java.text.NumberFormat;

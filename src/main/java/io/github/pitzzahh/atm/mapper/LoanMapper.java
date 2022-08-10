@@ -1,10 +1,10 @@
-package io.github.pitzzahh.automated_teller_machine.mapper;
+package io.github.pitzzahh.atm.mapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
 import com.github.pitzzahh.utilities.SecurityUtil;
-import io.github.pitzzahh.automated_teller_machine.entity.Loan;
+import io.github.pitzzahh.atm.entity.Loan;
 
 /**
  * Used to map loan history row from the database to a {@code Loan} object.
