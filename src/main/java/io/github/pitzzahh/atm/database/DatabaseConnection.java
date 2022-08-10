@@ -22,7 +22,6 @@ public class DatabaseConnection {
      * @param driverClassName the driver class name
      * @return a {@code DatabaseConnection} object.
      * @see org.postgresql.Driver
-     * @see com.mysql.cj.jdbc.Driver
      */
     public DatabaseConnection setDriverClassName(String driverClassName) {
         this.driverClassName = driverClassName;
@@ -37,7 +36,6 @@ public class DatabaseConnection {
      * @param url the url to the database.
      * @return a {@code DatabaseConnection} object.
      * @see org.postgresql.Driver
-     * @see com.mysql.cj.jdbc.Driver
      */
     public DatabaseConnection setUrl(String url) {
         this.url = url;
