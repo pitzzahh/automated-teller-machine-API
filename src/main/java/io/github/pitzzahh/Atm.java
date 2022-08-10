@@ -4,27 +4,33 @@ import java.util.*;
 import java.time.LocalDate;
 import java.text.NumberFormat;
 import java.util.regex.Pattern;
-import io.github.pitzzahh.entity.*;
 import java.util.stream.Collectors;
 import java.util.function.Predicate;
 import static java.lang.System.exit;
 import java.util.concurrent.TimeUnit;
-import io.github.pitzzahh.dao.AtmDAO;
 import com.github.pitzzahh.utilities.Print;
-import io.github.pitzzahh.service.AtmService;
 import com.github.pitzzahh.utilities.SecurityUtil;
-import static com.github.pitzzahh.utilities.Print.*;
 import com.github.pitzzahh.utilities.classes.Person;
-import io.github.pitzzahh.database.DatabaseConnection;
 import com.github.pitzzahh.utilities.classes.enums.Role;
+import static com.github.pitzzahh.utilities.Print.print;
 import com.github.pitzzahh.utilities.classes.enums.Gender;
+import static com.github.pitzzahh.utilities.Print.println;
 import com.github.pitzzahh.utilities.classes.enums.Status;
+import io.github.pitzzahh.automated_teller_machine.dao.AtmDAO;
+import io.github.pitzzahh.automated_teller_machine.entity.Loan;
 import static com.github.pitzzahh.utilities.classes.TextColors.*;
-import static com.github.pitzzahh.utilities.classes.enums.Role.*;
-import static com.github.pitzzahh.utilities.classes.enums.Status.*;
+import io.github.pitzzahh.automated_teller_machine.entity.Client;
+import io.github.pitzzahh.automated_teller_machine.entity.Message;
 import static com.github.pitzzahh.utilities.validation.Validator.*;
 import static io.github.pitzzahh.Atm.Machine.Validator.isValidFormat;
+import static com.github.pitzzahh.utilities.classes.enums.Role.ADMIN;
+import io.github.pitzzahh.automated_teller_machine.service.AtmService;
+import static com.github.pitzzahh.utilities.classes.enums.Role.CLIENT;
+import io.github.pitzzahh.automated_teller_machine.entity.LockedAccount;
+import static com.github.pitzzahh.utilities.classes.enums.Status.SUCCESS;
 import static io.github.pitzzahh.Atm.Machine.AdminAcc.getAllLockedAccounts;
+import io.github.pitzzahh.automated_teller_machine.database.DatabaseConnection;
+import static com.github.pitzzahh.utilities.classes.enums.Status.CANNOT_PERFORM_OPERATION;
 
 /**
  * Automated Teller Machine.
@@ -161,7 +167,7 @@ public class Atm {
                                 println(status == SUCCESS ? BLUE_BOLD_BRIGHT + "\nCLIENT ADDED SUCCESSFULLY\n" : RED_BOLD_BRIGHT + "\nERROR ADDING CLIENT\n" + RESET);
                             }
                             case "2" -> {
-                                var status = removeClient(scanner);
+                                var status = removeClient(scanner, getAllLockedAccounts());
                                 println(status == SUCCESS ? BLUE_BOLD_BRIGHT + "\nCLIENT REMOVED SUCCESSFULLY\n" : RED_BOLD_BRIGHT + "\nERROR REMOVING CLIENT\n" + RESET);
                             }
                             case "3" -> viewAllClients();
@@ -301,7 +307,7 @@ public class Atm {
              * @return a {@code Status} of removal.
              * @throws IllegalStateException if there are no clients available.
              */
-            protected static Status removeClient(Scanner scanner) throws IllegalStateException {
+            protected static Status removeClient(Scanner scanner, List<LockedAccount> lockedAccounts) throws IllegalStateException {
                 checkIfThereAreClientsAvailable();
                 println(RED_BOLD_BRIGHT +
                         "╦═╗╔═╗╔╦╗╔═╗╦  ╦╔═╗" + YELLOW_BOLD + "  ╔═╗╦  ╦╔═╗╔╗╔╔╦╗\n" + RED_BOLD_BRIGHT +
@@ -309,7 +315,7 @@ public class Atm {
                         "╩╚═╚═╝╩ ╩╚═╝ ╚╝ ╚═╝" + YELLOW_BOLD + "  ╚═╝╩═╝╩╚═╝╝╚╝ ╩ \n" + RESET
                 );
                 if (CLIENTS.size() == 1) $an = CLIENTS.entrySet().stream().findAny().get().getValue().accountNumber();
-                else if (getAllLockedAccounts().size() == 1) $an = CLIENTS.get(getAllLockedAccounts().get(0).accountNumber()).accountNumber();
+                else if (lockedAccounts.size() == 1) $an = CLIENTS.get(lockedAccounts.get(0).accountNumber()).accountNumber();
                 else {
                     println(RED_BOLD_BRIGHT + ":ENTER ACCOUNT NUMBER TO REMOVE:");
                     print(PURPLE_BOLD + ">>>: " + RESET);
@@ -338,7 +344,7 @@ public class Atm {
              * @param scanner the scanner needed for keyboard input.
              */
             private static void manageLockedAccounts(Scanner scanner) throws IllegalStateException {
-                final var LOCKED_ACCOUNTS = getAllLockedAccounts();
+                var LOCKED_ACCOUNTS = getAllLockedAccounts();
                 if (LOCKED_ACCOUNTS.isEmpty()) throw new IllegalStateException("\nTHERE ARE NO LOCKED ACCOUNTS\n");
                 String choice = "";
                 do {
@@ -357,14 +363,14 @@ public class Atm {
                     switch (choice) {
                         case "1" -> {
                             println(BLUE_BOLD_BRIGHT + "REOPEN ACCOUNT" + RESET);
-                            var status = reopenAccount(scanner);
+                            var status = reopenAccount(scanner, LOCKED_ACCOUNTS);
                             println(status == SUCCESS ? BLUE_BOLD_BRIGHT + "\nACCOUNT REOPENED SUCCESSFULLY\n" :
                                             RED_BOLD_BRIGHT + "\nERROR REOPENING ACCOUNT\n" + RESET
                             );
                         }
                         case "2" -> {
                             println(YELLOW_BOLD_BRIGHT + "REMOVE ACCOUNT" + RESET);
-                            var status = removeClient(scanner);
+                            var status = removeClient(scanner, LOCKED_ACCOUNTS);
                             println(status == SUCCESS ? BLUE_BOLD_BRIGHT + "\nACCOUNT REMOVED SUCCESSFULLY\n" :
                                             RED_BOLD_BRIGHT + "\nERROR REMOVING ACCOUNT\n" + RESET
                             );
@@ -375,9 +381,10 @@ public class Atm {
                         }
                         default -> throw new IllegalStateException(String.format("\nINVALID INPUT: %s\n", choice));
                     }
-                    LOCKED_ACCOUNTS.removeIf(c -> c.accountNumber().equals($an) && LOCKED_ACCOUNTS.size() == 1);
                     CLIENTS.clear();
+                    LOCKED_ACCOUNTS.clear();
                     loadClients();
+                    LOCKED_ACCOUNTS = getAllLockedAccounts();
                     if (LOCKED_ACCOUNTS.isEmpty()) break;
                 } while (!choice.equals("3"));
             }
@@ -503,9 +510,8 @@ public class Atm {
              * @param scanner the scanner needed for keyboard input.
              * @return a {@code Status} of the operation.
              */
-            private static Status reopenAccount(Scanner scanner) {
-                final var client = getAllLockedAccounts();
-                if (client.size() == 1) $an = client.stream().findAny().get().accountNumber();
+            private static Status reopenAccount(Scanner scanner, List<LockedAccount> lockedAccounts) {
+                if (lockedAccounts.size() == 1) $an = lockedAccounts.stream().findAny().get().accountNumber();
                 else {
                     println(YELLOW_BOLD_BRIGHT + ":ENTER ACCOUNT NUMBER TO REOPEN:");
                     print(PURPLE_BOLD + ">>>: " + RESET);
@@ -532,7 +538,7 @@ public class Atm {
                                     client.details().getGender()
                             );
                         })
-                        .toList();
+                        .collect(Collectors.toList());
             }
 
             /**
