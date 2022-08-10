@@ -31,8 +31,8 @@ public class DatabaseConnection {
     /**
      * Sets the url of the database.
      * <p>Examples:</p>
-     * <p>postgres: jdbc:postgresql://localhost/<>name of the database</></p>
-     * <p>mysql: jdbc:mysql://host1:33060/<>name of the database</></p>
+     * <p>postgres: jdbc:postgresql://localhost/{@code <name of the database>}</p>
+     * <p>mysql: jdbc:mysql://host1:33060/{@code <name of the database>}</p>
      * @param url the url to the database.
      * @return a {@code DatabaseConnection} object.
      * @see org.postgresql.Driver

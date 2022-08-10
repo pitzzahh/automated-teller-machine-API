@@ -132,7 +132,7 @@ public interface AtmDAO {
     Function<Loan, Status> requestLoan();
 
     /**
-     * Function that returns a key value pair, a Map<K,V> in particular.
+     * Function that returns a key value pair, a {@code Map<String, List<Loan>>} in particular.
      * <p>K - is a {@code String} containing the key, the key is the account number of the client who requested a loan.</p>
      * <p>V - is a {@code String} containing the value, the value is all the loans that the account requested. It is a {@code List<Loan>}</p>
      * @return a {@code Map<String, List<Loan>>} a key value pair containing all the loans from the table in the database.
