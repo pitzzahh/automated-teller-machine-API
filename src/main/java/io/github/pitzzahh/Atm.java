@@ -177,10 +177,8 @@ public class Atm {
                         loadClients();
                         LOANS.clear();
                         loadClientLoans();
-                        if (!choice.equals("6")) {
-                            pause();
-                            if (!choice.equals("3")) println("");
-                        }
+                        if (!choice.equals("6")) pause();
+                        if (!choice.equals("3")) println();
                     } catch (RuntimeException runtimeException) {
                         println(RED_BOLD_BRIGHT +  runtimeException.getMessage() + RESET);
                         print(YELLOW_BOLD_BRIGHT + "LOADING");
@@ -377,7 +375,7 @@ public class Atm {
                         }
                         default -> throw new IllegalStateException(String.format("\nINVALID INPUT: %s\n", choice));
                     }
-                    LOCKED_ACCOUNTS.removeIf(c -> c.accountNumber().equals($an));
+                    LOCKED_ACCOUNTS.removeIf(c -> c.accountNumber().equals($an) && LOCKED_ACCOUNTS.size() == 1);
                     CLIENTS.clear();
                     loadClients();
                     if (LOCKED_ACCOUNTS.isEmpty()) break;
@@ -546,7 +544,7 @@ public class Atm {
                         .stream()
                         .map(Map.Entry::getValue)
                         .flatMap(Collection::stream)
-                        .filter(Loan::pending)
+                        .filter(l -> !l.isDeclined() && l.pending())
                         .collect(Collectors.toList());
             }
 
@@ -599,10 +597,7 @@ public class Atm {
                     }
                     CLIENTS.clear();
                     loadClients();
-                    if (!choice.equals("6")) {
-                        pause();
-                        println("");
-                    }
+                    if (!choice.equals("6")) pause();
                     if (searchLockedAccount($an)) break;
                 } while (!choice.equals("6"));
                 loadClientLoans();
@@ -822,6 +817,7 @@ public class Atm {
     private static void pause() {
         print(YELLOW_BOLD + ": PRESS ENTER TO CONTINUE :" + RESET);
         new Scanner(System.in).nextLine();
+        println();
     }
 }
 
