@@ -21,13 +21,14 @@ public class App {
     private static DatabaseConnection databaseConnection;
 
     public static void main(String[] args) {
-        atmService = new AtmService(atmDAO);
-        atmService.setDataSource().accept(
-                databaseConnection.setDriverClassName("org.postgresql.Driver")
-                        .setUrl("jdbc:postgresql://localhost/postgres")
-                        .setUsername("postgres")
-                        .setPassword("password")
-                        .getDataSource()
+        atmService = new AtmService(atmDAO, databaseConnection);
+        atmService.setDataSource().accept(atmService
+                .databaseConnection
+                .setDriverClassName("org.postgresql.Driver")
+                .setUrl("jdbc:postgresql://localhost/postgres")
+                .setUsername("postgres")
+                .setPassword("!Password123")
+                .getDataSource()
         );
     }
 }
