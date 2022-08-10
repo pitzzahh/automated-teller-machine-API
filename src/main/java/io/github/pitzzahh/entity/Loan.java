@@ -10,6 +10,8 @@ import java.time.LocalDate;
  * @param dateOfLoan the date when the loan is processed.
  * @param amount the amount that was loan.
  * @param pending if the loan is not yet resolved.
+ * @param isDeclined if {@code true} the loan is declined, otherwise {@code false}.
+ * @see LocalDate
  */
 public record Loan(int loanNumber, String accountNumber, LocalDate dateOfLoan, double amount, boolean pending, boolean isDeclined) {
 
@@ -27,6 +29,17 @@ public record Loan(int loanNumber, String accountNumber, LocalDate dateOfLoan, d
      */
     public Loan(String accountNumber, LocalDate dateOfLoan, double amount, boolean pending) {
         this(0, accountNumber, dateOfLoan, amount, pending, false);
+    }
+
+    /**
+     * record for making a loan.
+     * @param loanNumber the loan number containing the current count of the loan.
+     * @param accountNumber the account number that made the loan.
+     * @param pending if the loan is not yet resolved.
+     * @param isDeclined if loan is declined.
+     */
+    public Loan(int loanNumber, String accountNumber, boolean pending, boolean isDeclined) {
+        this(loanNumber, accountNumber, null, 0, pending, isDeclined);
     }
 
     /**
