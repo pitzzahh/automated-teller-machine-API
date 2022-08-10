@@ -8,3 +8,21 @@ A colorful Java console application that imitates what an ATM (automated-teller-
 ________________________________________
 ## Quickstart
 1. 
+
+### Add Maven Dependency
+
+If you use Maven, add the following configuration to your project's `pom.xml`
+
+```maven
+<dependencies>
+
+    <!-- other dependencies are there -->
+    <dependency>
+        <groupId>io.github.pitzzahh</groupId>
+        <artifactId>util-classes</artifactId>
+        <version>1.0.5</version>
+    </dependency>
+    <!-- other dependencies are there -->
+
+</dependencies>
+```
