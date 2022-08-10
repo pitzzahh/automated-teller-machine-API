@@ -28,6 +28,7 @@ public class AtmDAOImplementation implements AtmDAO {
     /**
      * Function that accepts a {@code DataSource} object.
      * Object needed to connect to the database.
+     * @return nothing
      * @see Consumer
      * @see DataSource
      */
@@ -95,7 +96,7 @@ public class AtmDAOImplementation implements AtmDAO {
      * Function that removes a client in the database using the account number.
      * <p>T - a {@code String} the account number of the client needed in order to remove the client.</p>
      * <p>R - the {@code Status} of the operation if {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Status
      */
@@ -106,7 +107,7 @@ public class AtmDAOImplementation implements AtmDAO {
 
     /**
      * Function that removes all the clients in the database.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Supplier
      * @see Status
      */
@@ -119,7 +120,7 @@ public class AtmDAOImplementation implements AtmDAO {
      * Function that accepts two values. A {@code String} and a {@code Boolean}.
      * <p>First parameter is a {@code String} contains the account number of the client.</p>
      * <p>Second parameter is a {@code Boolean}, {@code true} if the client account should be locked, default is false.</p>
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see BiFunction
      * @see Status
      */
@@ -133,7 +134,7 @@ public class AtmDAOImplementation implements AtmDAO {
      * Function that accepts two values. A {@code String} and a {@code Double}.
      * <p>First parameter is a {@code String} contains the account number of the client.</p>
      * <p>Second parameter is a {@code Double}, the new savings balance of the client.</p>
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see BiFunction
      * @see Status
      */
@@ -150,7 +151,7 @@ public class AtmDAOImplementation implements AtmDAO {
     /**
      * Function that save a client to the database. The function takes a {@code Client} object,
      * the object to be saved in the database table.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Client
      * @see Status
@@ -175,7 +176,7 @@ public class AtmDAOImplementation implements AtmDAO {
 
     /**
      * Function that saves a {@code Collection<Client} to the database table.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Collection
      * @see Client
@@ -210,7 +211,7 @@ public class AtmDAOImplementation implements AtmDAO {
     /**
      * Function that submits a loan request.
      * The Function takes a {@code Loan} object containing the loan information.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Loan
      * @see Status
@@ -290,7 +291,7 @@ public class AtmDAOImplementation implements AtmDAO {
     /**
      * Function that approves a loan request.
      * The function takes a {@code Loan} object containing the loan information to be approved.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see BiFunction
      * @see Loan
      * @see Status
@@ -313,7 +314,7 @@ public class AtmDAOImplementation implements AtmDAO {
     /**
      * Function that declines a loan request.
      * The function takes a {@code Loan} object containing the loan information to be approved.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Loan
      * @see Status
@@ -332,7 +333,7 @@ public class AtmDAOImplementation implements AtmDAO {
     /**
      * Function that removes a loan.
      * The function takes a {@code Loan} object containing the loan information to be removed.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Loan
      * @see Status
@@ -350,7 +351,7 @@ public class AtmDAOImplementation implements AtmDAO {
 
     /**
      * Function that removes all the loans from the database.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Supplier
      * @see Status
      */
@@ -390,7 +391,7 @@ public class AtmDAOImplementation implements AtmDAO {
                     .stream()
                     .map(Map.Entry::getValue)
                     .flatMap(Collection::stream)
-                    .filter(l -> l.pending() == false || l.isDeclined())
+                    .filter(l -> !l.pending() || l.isDeclined())
                     .map(loan -> {
                         return new Message(
                                 loan,
@@ -398,7 +399,7 @@ public class AtmDAOImplementation implements AtmDAO {
                                         .filter(a -> a.accountNumber().equals(loan.accountNumber()))
                                         .findFirst()
                                         .get(),
-                                loan.pending() && loan.isDeclined() ? true : false
+                                loan.pending() && loan.isDeclined()
                         );
                     })
                     .collect(Collectors.groupingBy(message -> message.loan().accountNumber()));
