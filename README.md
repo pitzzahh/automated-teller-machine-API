@@ -147,3 +147,6 @@ If you use Maven, add the following configuration to your project's `pom.xml`
 
 </dependencies>
 ```
+### About
+Dependencies
+- [util-classes](https://github.com/pitzzahh/util-classes)
