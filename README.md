@@ -9,6 +9,7 @@ An API for an atm application
 ________________________________________
 ## Quickstart
 * connecting to a database
+
 ```java
 import io.github.pitzzahh.atm.dao.AtmDAO;
 import io.github.pitzzahh.atm.service.AtmService;
@@ -23,11 +24,11 @@ public class App {
     public static void main(String[] args) {
         atmService = new AtmService(atmDAO, databaseConnection);
         atmService.setDataSource().accept(atmService
-                .databaseConnection
+                .connection
                 .setDriverClassName("org.postgresql.Driver")
                 .setUrl("jdbc:postgresql://localhost/postgres")
-                .setUsername("postgres")
-                .setPassword("!Password123")
+                .setUsername("usernameHere")
+                .setPassword("passwordHere")
                 .getDataSource()
         );
     }

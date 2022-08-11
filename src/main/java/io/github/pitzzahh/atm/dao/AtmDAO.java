@@ -27,10 +27,11 @@ public interface AtmDAO {
      * Function that accepts a {@code DataSource} object.
      * Object needed to connect to the database.
      * @return nothing
+     * @throws RuntimeException if failed to connect to the database.
      * @see Consumer
      * @see DataSource
      */
-    Consumer<DataSource> setDataSource();
+    Consumer<DataSource> setDataSource() throws RuntimeException;
 
     /**
      * Function that suppplies a {@code Map<String, Client>}.

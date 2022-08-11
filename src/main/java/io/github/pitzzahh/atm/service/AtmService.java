@@ -27,27 +27,28 @@ public class AtmService {
     /**
      * {@code DatabaseConnection} dependency.
      */
-    public DatabaseConnection databaseConnection;
+    public DatabaseConnection connection;
 
     /**
      * Dependency ibjection object.
      * @param atmDAO the {@code AtmDAO} dependency to be injected.
-     * @param databaseConnection the {@code DatabaseConnection} dependency to be injected.
+     * @param connection the {@code DatabaseConnection} dependency to be injected.
      * @see AtmDAO
      */
-    public AtmService(AtmDAO atmDAO, DatabaseConnection databaseConnection) {
+    public AtmService(AtmDAO atmDAO, DatabaseConnection connection) {
         this.atmDAO = new AtmDAOImplementation();
-        this.databaseConnection = new DatabaseConnection();
+        this.connection = new DatabaseConnection();
     }
 
     /**
      * Function that accepts a {@code DataSource} object.
      * Object needed to connect to the database.
      * @return nothing
+     * @throws RuntimeException if failed to connect to the database.
      * @see Consumer
      * @see DataSource
      */
-    public Consumer<DataSource> setDataSource() {
+    public Consumer<DataSource> setDataSource() throws RuntimeException {
         return atmDAO.setDataSource();
     }
 

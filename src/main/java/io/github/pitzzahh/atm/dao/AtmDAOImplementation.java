@@ -1,5 +1,6 @@
 package io.github.pitzzahh.atm.dao;
 
+import java.sql.SQLException;
 import java.util.*;
 import javax.sql.DataSource;
 import java.util.function.Consumer;
@@ -29,13 +30,19 @@ public class AtmDAOImplementation implements AtmDAO {
      * Function that accepts a {@code DataSource} object.
      * Object needed to connect to the database.
      * @return nothing
+     * @throws RuntimeException if failed to connect to the database.
      * @see Consumer
      * @see DataSource
      */
     @Override
-    public Consumer<DataSource> setDataSource() {
+    public Consumer<DataSource> setDataSource() throws RuntimeException {
         return source -> {
             this.dataSource = source;
+            try {
+                this.dataSource.getConnection().beginRequest();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
             this.db = new JdbcTemplate(dataSource);
         };
     }
