@@ -6,7 +6,7 @@
 
     <groupId>io.github.pitzzahh</groupId>
     <artifactId>automated-teller-machine-API</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
 
     <properties>
         <maven.test.skip>true</maven.test.skip>
