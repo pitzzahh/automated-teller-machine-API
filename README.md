@@ -89,7 +89,7 @@ public class App {
     }
 }
 ```
-To save a client object, a method called saveClient() in AtmService is used. It is a Function that accepts a Client Object.
+To save a client object, a method called `saveClient()` in `AtmService` is used. It is a Function that accepts a Client Object.
 ```java
 atmService.saveClient().apply(
         new Client(
@@ -107,10 +107,17 @@ atmService.saveClient().apply(
         )
 );
 ```
-To get the client from the database, there are two methods that can be used, first is getAllClients() that get all the client
-as a `Map<String, Client>` 
+To get the client from the database, there are two methods that can be used, first is `getClientByAccountNumber()` a method that accepts a
+`String` containing an account number, second is `getAllClients()` a method that get all the client
+as a `Supplier<Map<String, Client>>`.
+Below shows the two ways on how to get a client/clients.
 ```java
+// getting client by account number
 Optional<Client> client = atmService.getClientByAccountNumber().apply("123123123");
+```
+```java
+// getting all the clients.
+Supplier<Map<String, Client> > clients = atmService.getAllClients();
 ```
 To remove a client, there are also two methods that can be used, first is removing client by account number,
 second is removing all the clients.
