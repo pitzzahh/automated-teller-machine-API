@@ -259,12 +259,14 @@ public class AtmService {
      * The Function takes a {@code String}.
      * The {@code String} contains the account number of the client.
      * @return a {@code Message} object containg the message of the loan.
+     * @throws IllegalArgumentException if the account number does not belong to any client.
+     * @throws IllegalStateException if there are no messages for the client.
      * @see Function
      * @see Map
      * @see List
      * @see Message
      */
-    public Function<String, Map<String, List<Message>>> getMessage() {
+    public Function<String, Map<String, List<Message>>> getMessage() throws IllegalArgumentException, IllegalStateException {
         return atmDAO.getMessage();
     }
 }
