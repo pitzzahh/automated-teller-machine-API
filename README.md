@@ -83,7 +83,7 @@ public class App {
         // getting the client, returns an Optional<Client> because Client Object might be null.
         Client client = atmService.getClientByAccountNumber().apply("123123123");
         // prints the client (using Print class from util-classes-API) or else throws an exception
-        client.ifPresentOrElse(Print::println, () -> new IllegalStateException("CLIENT WITH ACCOUNT NUMBER 123123123 DOES NOT EXIST"));
+        Print.println(client);
         // removes the client by account number
         atmService.removeClientByAccountNumber().apply("123123123");
     }
