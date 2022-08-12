@@ -379,19 +379,17 @@ public class AtmDAOImplementation implements AtmDAO {
      * The Function takes a {@code String}.
      * The {@code String} contains the account number of the client.
      * @return a {@code Message} object containg the message of the loan.
+     * @throws IllegalArgumentException if the account number does not belong to any client.
+     * @throws IllegalStateException if there are no messages for the client.
      * @see Function
      * @see Map
      * @see List
      * @see Message
      */
     @Override
-    public Function<String, Map<String, List<Message>>> getMessage() {
+    public Function<String, Map<String, List<Message>>> getMessage() throws IllegalArgumentException, IllegalStateException {
         return accountNumber -> {
-            var clients = getAllClients().get()
-                    .entrySet()
-                    .stream()
-                    .map(Map.Entry::getValue)
-                    .toList();
+            var client = getClientByAccountNumber().apply(accountNumber);
             var check = getAllLoans()
                     .get()
                     .entrySet()
@@ -407,14 +405,7 @@ public class AtmDAOImplementation implements AtmDAO {
                     .flatMap(Collection::stream)
                     .filter(l -> !l.pending() || l.isDeclined())
                     .map(loan -> {
-                        return new Message(
-                                loan,
-                                clients.stream()
-                                        .filter(a -> a.accountNumber().equals(loan.accountNumber()))
-                                        .findFirst()
-                                        .get(),
-                                loan.pending() && loan.isDeclined()
-                        );
+                        return new Message(loan, client, loan.pending() && loan.isDeclined());
                     })
                     .collect(Collectors.groupingBy(message -> message.loan().accountNumber()));
         };
