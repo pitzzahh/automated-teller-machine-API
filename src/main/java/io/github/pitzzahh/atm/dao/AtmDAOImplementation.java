@@ -1,8 +1,8 @@
 package io.github.pitzzahh.atm.dao;
 
-import java.sql.SQLException;
 import java.util.*;
 import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.function.Function;
@@ -69,14 +69,20 @@ public class AtmDAOImplementation implements AtmDAO {
      * <p>T - a {@code String} containing the account number to be search from the database.</p>
      * <p>R - a {@code Optional<Client>} containing the result if the client is found or not.</p>
      * @return a {@code Optional<Client>} object.
+     * @throws IllegalArgumentException if the account number does not belong to any client.
      * @see Function
-     * @see Optional
      * @see Client
      */
     @Override
-    public Function<String, Optional<Client>> getClientByAccountNumber() {
+    public Function<String, Client> getClientByAccountNumber() throws IllegalArgumentException {
         final var QUERY = "SELECT * FROM clients WHERE account_number = ?";
-        return an -> Optional.ofNullable(db.queryForObject(QUERY, new ClientMapper(), SecurityUtil.encrypt(an)));
+        return an -> {
+            try {
+                return db.queryForObject(QUERY, new ClientMapper(), SecurityUtil.encrypt(an));
+            } catch (RuntimeException ignored) {
+                throw new IllegalArgumentException(String.format("CLIENT WITH ACCOUNT NUMBER: %s DOES NOT EXIST", an));
+            }
+        };
     }
 
     /**
@@ -299,15 +305,16 @@ public class AtmDAOImplementation implements AtmDAO {
      * Function that approves a loan request.
      * The function takes a {@code Loan} object containing the loan information to be approved.
      * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @throws IllegalArgumentException if the account number does not belong to any client, thus the message cannot be found.
      * @see BiFunction
      * @see Loan
      * @see Status
      */
     @Override
-    public BiFunction<Loan, Client, Status> approveLoan() {
+    public BiFunction<Loan, Client, Status> approveLoan() throws IllegalArgumentException {
         final var QUERY = "UPDATE loans SET pending = ? WHERE loan_number = ? AND account_number = ?";
         return (loan, c) -> {
-            var client = getClientByAccountNumber().apply(c.accountNumber()).get();
+            var client = getClientByAccountNumber().apply(c.accountNumber());
             var status = updateClientSavingsByAccountNumber().apply(client.accountNumber(), client.savings() + loan.amount());
             return status == SUCCESS ? db.update(
                     QUERY,
@@ -372,19 +379,17 @@ public class AtmDAOImplementation implements AtmDAO {
      * The Function takes a {@code String}.
      * The {@code String} contains the account number of the client.
      * @return a {@code Message} object containg the message of the loan.
+     * @throws IllegalArgumentException if the account number does not belong to any client.
+     * @throws IllegalStateException if there are no messages for the client.
      * @see Function
      * @see Map
      * @see List
      * @see Message
      */
     @Override
-    public Function<String, Map<String, List<Message>>> getMessage() {
+    public Function<String, Map<String, List<Message>>> getMessage() throws IllegalArgumentException, IllegalStateException {
         return accountNumber -> {
-            var clients = getAllClients().get()
-                    .entrySet()
-                    .stream()
-                    .map(Map.Entry::getValue)
-                    .toList();
+            var client = getClientByAccountNumber().apply(accountNumber);
             var check = getAllLoans()
                     .get()
                     .entrySet()
@@ -400,14 +405,7 @@ public class AtmDAOImplementation implements AtmDAO {
                     .flatMap(Collection::stream)
                     .filter(l -> !l.pending() || l.isDeclined())
                     .map(loan -> {
-                        return new Message(
-                                loan,
-                                clients.stream()
-                                        .filter(a -> a.accountNumber().equals(loan.accountNumber()))
-                                        .findFirst()
-                                        .get(),
-                                loan.pending() && loan.isDeclined()
-                        );
+                        return new Message(loan, client, loan.pending() && loan.isDeclined());
                     })
                     .collect(Collectors.groupingBy(message -> message.loan().accountNumber()));
         };
