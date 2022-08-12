@@ -7,12 +7,12 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.BiFunction;
 import io.github.pitzzahh.atm.dao.AtmDAO;
-import io.github.pitzzahh.atm.database.DatabaseConnection;
 import io.github.pitzzahh.atm.entity.Loan;
 import io.github.pitzzahh.atm.entity.Client;
 import io.github.pitzzahh.atm.entity.Message;
 import io.github.pitzzahh.atm.dao.AtmDAOImplementation;
 import com.github.pitzzahh.utilities.classes.enums.Status;
+import io.github.pitzzahh.atm.database.DatabaseConnection;
 
 /**
  * The service for overall functionality..
@@ -71,11 +71,11 @@ public class AtmService {
      * <p>T - a {@code String} containing the account number to be search from the database.</p>
      * <p>R - a {@code Optional<Client>} containing the result if the client is found or not.</p>
      * @return a {@code Optional<Client>} object.
+     * @throws IllegalArgumentException if the account number does not belong to any client.
      * @see Function
-     * @see Optional
      * @see Client
      */
-    public Function<String, Optional<Client>> getClientByAccountNumber() {
+    public Function<String, Client> getClientByAccountNumber() throws IllegalArgumentException {
         return atmDAO.getClientByAccountNumber();
     }
 
