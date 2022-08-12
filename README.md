@@ -81,7 +81,7 @@ public class App {
                 )
         );
         // getting the client, returns an Optional<Client> because Client Object might be null.
-        Optional<Client> client = atmService.getClientByAccountNumber().apply("123123123");
+        Client client = atmService.getClientByAccountNumber().apply("123123123");
         // prints the client (using Print class from util-classes-API) or else throws an exception
         client.ifPresentOrElse(Print::println, () -> new IllegalStateException("CLIENT WITH ACCOUNT NUMBER 123123123 DOES NOT EXIST"));
         // removes the client by account number
@@ -113,7 +113,7 @@ as a `Supplier<Map<String, Client>>`.
 Below shows the two ways on how to get a client/clients.
 ```java
 // getting client by account number
-Optional<Client> client = atmService.getClientByAccountNumber().apply("123123123");
+Client client = atmService.getClientByAccountNumber().apply("123123123");
 ```
 ```java
 // getting all the clients.
@@ -147,6 +147,6 @@ If you use Maven, add the following configuration to your project's `pom.xml`
 
 </dependencies>
 ```
-### About
+### Others
 Dependencies
 - [util-classes](https://github.com/pitzzahh/util-classes)
