@@ -4,19 +4,18 @@ import java.time.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Collection;
-
-import io.github.pitzzahh.atm.service.AtmService;
 import org.junit.jupiter.api.*;
 import io.github.pitzzahh.atm.dao.AtmDAO;
 import io.github.pitzzahh.atm.entity.Loan;
 import io.github.pitzzahh.atm.entity.Client;
 import com.github.pitzzahh.utilities.Print;
+import io.github.pitzzahh.atm.service.AtmService;
 import static org.junit.jupiter.api.Assertions.*;
-import io.github.pitzzahh.atm.dao.AtmDAOImplementation;
+import org.junit.jupiter.api.function.Executable;
 import com.github.pitzzahh.utilities.classes.Person;
 import com.github.pitzzahh.utilities.classes.enums.*;
+import io.github.pitzzahh.atm.dao.AtmDAOImplementation;
 import io.github.pitzzahh.atm.database.DatabaseConnection;
-import org.junit.jupiter.api.function.Executable;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AtmServiceTest extends AtmDAOImplementation {
@@ -27,20 +26,17 @@ class AtmServiceTest extends AtmDAOImplementation {
 
     private DatabaseConnection databaseConnection;
 
-    private ZonedDateTime NOW = ZonedDateTime.now();
-
     @BeforeEach
     void setUp() {
 
-        atmService = new AtmService(atmDAO);
-        databaseConnection = new DatabaseConnection();
-        atmService.setDataSource()
-                .accept(databaseConnection
-                                .setDriverClassName("org.postgresql.Driver")
-                                .setUrl("jdbc:postgresql://localhost/atm")
-                                .setUsername("postgres")
-                                .setPassword("!Password123")
-                                .getDataSource()
+        atmService = new AtmService(atmDAO, databaseConnection);
+        atmService.setDataSource().accept(atmService
+                        .connection
+                        .setDriverClassName("org.postgresql.Driver")
+                        .setUrl("jdbc:postgresql://localhost/atm")
+                        .setUsername("postgres")
+                        .setPassword("!Password123")
+                        .getDataSource()
                 );
     }
 
@@ -66,7 +62,6 @@ class AtmServiceTest extends AtmDAOImplementation {
                 .forEach(Print::println);
     }
 
-    @Disabled
     @Test
     @Order(3)
     void C_shouldMakeALoan() {
@@ -95,7 +90,6 @@ class AtmServiceTest extends AtmDAOImplementation {
         }
     }
 
-    @Disabled
     @RepeatedTest(2)
     @Order(5)
     void E_shouldApproveLoan() {
@@ -115,7 +109,6 @@ class AtmServiceTest extends AtmDAOImplementation {
         assertEquals(Status.SUCCESS, result);
     }
 
-    @Disabled
     @RepeatedTest(2)
     @Order(6)
     void F_shouldApproveLoan() {
@@ -135,12 +128,11 @@ class AtmServiceTest extends AtmDAOImplementation {
         assertEquals(Status.SUCCESS, result);
     }
 
-    @Disabled
     @Test
     @Order(7)
     void J_shouldGetLoanMessage() {
         // given
-        var accountNumber = "143143143";
+        var accountNumber = makeZamira().accountNumber();
         // when
         var result = atmService.getMessage().apply(accountNumber)
                 .entrySet()
@@ -153,12 +145,11 @@ class AtmServiceTest extends AtmDAOImplementation {
         result.forEach(Print::println);
     }
 
-    @Disabled
     @Test
     @Order(8)
     void K_shouldGetLoanMessage() {
         // given
-        var accountNumber = "200263444";
+        var accountNumber = makePeter().accountNumber();
         // when
         var result = atmService.getMessage().apply(accountNumber)
                 .entrySet()
@@ -225,20 +216,13 @@ class AtmServiceTest extends AtmDAOImplementation {
 
     @Test
     @Order(13)
-    void remove() {
-        assertEquals(Status.SUCCESS, atmService.removeAllClients().get());
-        assertEquals(Status.SUCCESS, atmService.removeAllLoans().get());
-    }
-
-    @Test
-    @Disabled
-    void shouldThrowExceptionWhenGettingLoanMessageBecauseLoanMessageDoesNotExist() {
+    void shouldThrowExceptionWhenGettingLoanMessagesBecauseClientDoesNotExist() {
         // given
-        var accountNumber = "123123123";
+        var accountNumber = "321321321";
         // then
-        assertThrows(IllegalStateException.class, new Executable() {
+        assertThrows(IllegalArgumentException.class, new Executable() {
             @Override
-            public void execute() throws IllegalStateException {
+            public void execute() throws IllegalArgumentException {
                 // when
                 var result = atmService.getMessage().apply(accountNumber)
                         .entrySet()
@@ -248,13 +232,13 @@ class AtmServiceTest extends AtmDAOImplementation {
                         .flatMap(Collection::stream)
                         .toList();
                 // then
-                result.forEach(System.out::println);
+                result.forEach(Print::println);
             }
         });
     }
 
     @Test
-    @Disabled
+    @Order(14)
     void shouldGetSavingsByAccountNumber() {
         var client = makeZamira();
         var savings = atmService.getClientSavingsByAccountNumber().apply(client.accountNumber());
@@ -262,8 +246,8 @@ class AtmServiceTest extends AtmDAOImplementation {
     }
 
     @Test
-    @Disabled
-    void shouldMetTheLoan() {
+    @Order(15)
+    void shouldGetAllLoans() {
         // given
         var loan = atmService.getAllLoans();
         // when
@@ -273,6 +257,29 @@ class AtmServiceTest extends AtmDAOImplementation {
                 .flatMap(Collection::stream)
                 .forEach(Print::println);
     }
+
+    @Test
+    @Order(16)
+    void shouldThrowExceptionBecauseClientDoesNotExist() {
+        // given
+        var accountNumber = "123456789";
+        assertThrows(IllegalArgumentException.class, new Executable() {
+            @Override
+            public void execute() throws IllegalArgumentException {
+                // when
+                var client = atmService.getClientByAccountNumber().apply(accountNumber);
+                // then
+                Print.println(client);
+            }
+        });
+    }
+    @Test
+    @Order(17)
+    void remove() {
+        assertEquals(Status.SUCCESS, atmService.removeAllClients().get());
+        assertEquals(Status.SUCCESS, atmService.removeAllLoans().get());
+    }
+
 
     private Client makePeter() {
         return new Client(
