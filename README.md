@@ -80,7 +80,7 @@ public class App {
                         false
                 )
         );
-        // getting the client, returns an Optional<Client> because Client Object might be null.
+        // getting the client, returns a Client object, throws IllegalArgumentException if account number does not belong to any client.
         Client client = atmService.getClientByAccountNumber().apply("123123123");
         // prints the client (using Print class from util-classes-API) or else throws an exception
         Print.println(client);
