@@ -108,7 +108,7 @@
     </build>
 
     <name>automated-teller-machine-console</name>
-    <description>This is an automated teller machine that runs in a command line interface.</description>
+    <description>API used for making atm applications (none-web-app)</description>
     <url>https://github.com/pitzzahh/automated-teller-machine-API</url>
 
     <licenses>

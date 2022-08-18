@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"io.github.pitzzahh.atm.dao"},{"l":"io.github.pitzzahh.atm.database"},{"l":"io.github.pitzzahh.atm.entity"},{"l":"io.github.pitzzahh.atm.mapper"},{"l":"io.github.pitzzahh.atm.service"}];updateSearchResults();
