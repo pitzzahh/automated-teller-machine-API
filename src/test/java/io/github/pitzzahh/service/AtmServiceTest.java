@@ -1,17 +1,16 @@
 package io.github.pitzzahh.service;
 
 import java.time.*;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 import java.util.Collection;
 import org.junit.jupiter.api.*;
 import io.github.pitzzahh.atm.dao.AtmDAO;
 import io.github.pitzzahh.atm.entity.Loan;
-import io.github.pitzzahh.atm.entity.Client;
 import com.github.pitzzahh.utilities.Print;
+import io.github.pitzzahh.atm.entity.Client;
 import io.github.pitzzahh.atm.service.AtmService;
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.function.Executable;
 import com.github.pitzzahh.utilities.classes.Person;
 import com.github.pitzzahh.utilities.classes.enums.*;
 import io.github.pitzzahh.atm.dao.AtmDAOImplementation;
@@ -20,24 +19,23 @@ import io.github.pitzzahh.atm.database.DatabaseConnection;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AtmServiceTest extends AtmDAOImplementation {
 
-    private AtmDAO atmDAO;
 
     private AtmService atmService;
 
-    private DatabaseConnection databaseConnection;
+    private static final AtmDAO ATM_DAO = new AtmDAOImplementation();
+    private static final DatabaseConnection DATABASE_CONNECTION = new DatabaseConnection();
 
     @BeforeEach
     void setUp() {
-
-        atmService = new AtmService(atmDAO, databaseConnection);
-        atmService.setDataSource().accept(atmService
-                        .connection
+        atmService = new AtmService(ATM_DAO, DATABASE_CONNECTION);
+        atmService.setDataSource().accept(
+                DATABASE_CONNECTION
                         .setDriverClassName("org.postgresql.Driver")
-                        .setUrl("jdbc:postgresql://localhost/atm")
+                        .setUrl("jdbc:postgresql://localhost/postgres")
                         .setUsername("postgres")
-                        .setPassword("!Password123")
+                        .setPassword("!P4ssW0rd@123")
                         .getDataSource()
-                );
+        );
     }
 
     @Test
@@ -56,9 +54,7 @@ class AtmServiceTest extends AtmDAOImplementation {
     void B_shouldPrintAllClientsBeforeLoanRequests() {
         atmService.getAllClients()
                 .get()
-                .entrySet()
-                .stream()
-                .map(Map.Entry::getValue)
+                .values()
                 .forEach(Print::println);
     }
 
@@ -97,9 +93,8 @@ class AtmServiceTest extends AtmDAOImplementation {
         var client = makeZamira();
         var loan = atmService.getAllLoans()
                 .get()
-                .entrySet()
+                .values()
                 .stream()
-                .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
                 .filter(l -> l.accountNumber().equals(client.accountNumber()) && l.pending())
                 .findAny()
@@ -116,9 +111,8 @@ class AtmServiceTest extends AtmDAOImplementation {
         var client = makePeter();
         var loan = atmService.getAllLoans()
                 .get()
-                .entrySet()
+                .values()
                 .stream()
-                .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
                 .filter(l -> l.accountNumber().equals(client.accountNumber()) && l.pending())
                 .findAny()
@@ -167,9 +161,7 @@ class AtmServiceTest extends AtmDAOImplementation {
     void G_shouldPrintAllClientsAfterLoanRequests() {
         atmService.getAllClients()
                 .get()
-                .entrySet()
-                .stream()
-                .map(Map.Entry::getValue)
+                .values()
                 .forEach(Print::println);
     }
 
@@ -208,9 +200,7 @@ class AtmServiceTest extends AtmDAOImplementation {
     void G_shouldPrintAllClientsAfterLoanRequests2() {
         atmService.getAllClients()
                 .get()
-                .entrySet()
-                .stream()
-                .map(Map.Entry::getValue)
+                .values()
                 .forEach(Print::println);
     }
 
@@ -220,20 +210,17 @@ class AtmServiceTest extends AtmDAOImplementation {
         // given
         var accountNumber = "321321321";
         // then
-        assertThrows(IllegalArgumentException.class, new Executable() {
-            @Override
-            public void execute() throws IllegalArgumentException {
-                // when
-                var result = atmService.getMessage().apply(accountNumber)
-                        .entrySet()
-                        .stream()
-                        .filter(e -> e.getKey().equals(accountNumber))
-                        .map(Map.Entry::getValue)
-                        .flatMap(Collection::stream)
-                        .toList();
-                // then
-                result.forEach(Print::println);
-            }
+        assertThrows(IllegalArgumentException.class, () -> {
+            // when
+            var result = atmService.getMessage().apply(accountNumber)
+                    .entrySet()
+                    .stream()
+                    .filter(e -> e.getKey().equals(accountNumber))
+                    .map(Map.Entry::getValue)
+                    .flatMap(Collection::stream)
+                    .toList();
+            // then
+            result.forEach(Print::println);
         });
     }
 
@@ -251,9 +238,8 @@ class AtmServiceTest extends AtmDAOImplementation {
         // given
         var loan = atmService.getAllLoans();
         // when
-        loan.get().entrySet()
+        loan.get().values()
                 .stream()
-                .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
                 .forEach(Print::println);
     }
@@ -263,14 +249,11 @@ class AtmServiceTest extends AtmDAOImplementation {
     void shouldThrowExceptionBecauseClientDoesNotExist() {
         // given
         var accountNumber = "123456789";
-        assertThrows(IllegalArgumentException.class, new Executable() {
-            @Override
-            public void execute() throws IllegalArgumentException {
-                // when
-                var client = atmService.getClientByAccountNumber().apply(accountNumber);
-                // then
-                Print.println(client);
-            }
+        assertThrows(IllegalArgumentException.class, () -> {
+            // when
+            var client = atmService.getClientByAccountNumber().apply(accountNumber);
+            // then
+            Print.println(client);
         });
     }
     @Test
