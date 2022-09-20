@@ -5,66 +5,63 @@ API used for making atm applications (none-web-app)
 ![Forks](https://img.shields.io/github/forks/pitzzahh/automated-teller-machine-console)
 ![Stars](https://img.shields.io/github/stars/pitzzahh/automated-teller-machine-console)
 ![License](https://img.shields.io/github/license/pitzzahh/automated-teller-machine-console)
-![Stable Release](https://img.shields.io/badge/version-1.0.2-blue)
 ________________________________________
 ## Quickstart
 ### How to use the API
 * connecting to a database
 
 ```java
-import io.github.pitzzahh.atm.dao.AtmDAO;
-import io.github.pitzzahh.atm.service.AtmService;
 import io.github.pitzzahh.atm.database.DatabaseConnection;
+import io.github.pitzzahh.atm.dao.AtmDAOImplementation;
+import io.github.pitzzahh.atm.service.AtmService;
+import io.github.pitzzahh.atm.dao.AtmDAO;
 
 public class App {
-
-    private static AtmDAO atmDAO;
-    private static AtmService atmService;
-    private static DatabaseConnection databaseConnection;
+    private static final AtmDAO ATM_DAO = new AtmDAOImplementation();
+    private static final DatabaseConnection DATABASE_CONNECTION = new DatabaseConnection();
 
     public static void main(String[] args) {
-        atmService = new AtmService(atmDAO, databaseConnection);
-        atmService.setDataSource().accept(atmService
-                .connection
+        AtmService atmService = new AtmService(ATM_DAO, DATABASE_CONNECTION);
+        atmService.setDataSource().accept(
+                DATABASE_CONNECTION
+                        .setDriverClassName("org.postgresql.Driver")
+                        .setUrl("jdbc:postgresql://localhost/postgres")
+                        .setUsername("usernameHere")
+                        .setPassword("passwordHere")
+                        .getDataSource()
+        );
+    }
+}
+
+ ```
+* saving clients to the database
+
+```java
+import com.github.pitzzahh.utilities.classes.enums.Gender;
+import io.github.pitzzahh.atm.database.DatabaseConnection;
+import static com.github.pitzzahh.utilities.Print.println;
+import io.github.pitzzahh.atm.dao.AtmDAOImplementation;
+import com.github.pitzzahh.utilities.classes.Person;
+import io.github.pitzzahh.atm.service.AtmService;
+import io.github.pitzzahh.atm.entity.Client;
+import io.github.pitzzahh.atm.dao.AtmDAO;
+import java.time.LocalDate;
+import java.time.Month;
+
+public class App {
+    private static final AtmDAO ATM_DAO = new AtmDAOImplementation();
+    private static final DatabaseConnection DATABASE_CONNECTION = new DatabaseConnection();
+
+    public static void main(String[] args) {
+        AtmService atmService = new AtmService(ATM_DAO, DATABASE_CONNECTION);
+        atmService.setDataSource().accept(DATABASE_CONNECTION
                 .setDriverClassName("org.postgresql.Driver")
                 .setUrl("jdbc:postgresql://localhost/postgres")
                 .setUsername("usernameHere")
                 .setPassword("passwordHere")
                 .getDataSource()
         );
-    }
-}
- ```
-* saving clients to the database
-```java
-import io.github.pitzzahh.atm.database.DatabaseConnection;
-import com.github.pitzzahh.utilities.classes.enums.Gender;
-import com.github.pitzzahh.utilities.classes.Person;
-import io.github.pitzzahh.atm.service.AtmService;
-import io.github.pitzzahh.atm.entity.Client;
-import com.github.pitzzahh.utilities.Print;
-import io.github.pitzzahh.atm.dao.AtmDAO;
-import java.time.LocalDate;
-import java.util.Optional;
-import java.time.Month;
 
-public class App {
-
-    private static AtmDAO atmDAO;
-    private static AtmService atmService;
-    private static DatabaseConnection databaseConnection;
-
-    public static void main(String[] args) {
-        atmService = new AtmService(atmDAO, databaseConnection);
-        atmService.setDataSource().accept(atmService
-                .connection
-                .setDriverClassName("org.postgresql.Driver")
-                .setUrl("jdbc:postgresql://localhost/atm")
-                .setUsername("postgres")
-                .setPassword("!Password123")
-                .getDataSource()
-        );
-        // saving a client object to the clients table...
         atmService.saveClient().apply(
                 new Client(
                         "123123123",
@@ -82,12 +79,13 @@ public class App {
         );
         // getting the client, returns a Client object, throws IllegalArgumentException if account number does not belong to any client.
         Client client = atmService.getClientByAccountNumber().apply("123123123");
-        // prints the client (using Print class from util-classes-API) or else throws an exception
-        Print.println(client);
+        // prints the client (using Print class from util-classes-API)
+        println(client);
         // removes the client by account number
         atmService.removeClientByAccountNumber().apply("123123123");
     }
 }
+
 ```
 To save a client object, a method called `saveClient()` in `AtmService` is used. It is a Function that accepts a Client Object.
 ```java
@@ -131,8 +129,11 @@ atmService.removeClientByAccountNumber().apply("123123123");
 atmService.removeAllClients();
 ```
 ### Add Maven Dependency
+![maven-central](https://img.shields.io/maven-central/v/io.github.pitzzahh/automated-teller-machine-API?color=blue)
 
 If you use Maven, add the following configuration to your project's `pom.xml`
+
+Be sure to replace the **VERSION** key below with the one of the versions shown above
 
 ```maven
 <dependencies>
@@ -141,7 +142,7 @@ If you use Maven, add the following configuration to your project's `pom.xml`
     <dependency>
         <groupId>io.github.pitzzahh</groupId>
         <artifactId>automated-teller-machine-API</artifactId>
-        <version>1.0.2</version>
+        <version>VERSION</version>
     </dependency>
     <!-- other dependencies are there -->
 
