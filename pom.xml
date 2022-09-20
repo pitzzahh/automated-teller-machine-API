@@ -114,7 +114,7 @@
     <licenses>
         <license>
             <name>MIT License</name>
-            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <url>https://www.opensource.org/licenses/mit-license.php</url>
         </license>
     </licenses>
 
@@ -130,7 +130,7 @@
     <scm>
         <connection>scm:git:git://github.com/pitzzahh/automated-teller-machine-API.git</connection>
         <developerConnection>scm:git:ssh://github.com:pitzzahh/automated-teller-machine-API.git</developerConnection>
-        <url>http://github.com/pitzzahh/automated-teller-machine-API</url>
+        <url>https://github.com/pitzzahh/automated-teller-machine-API</url>
     </scm>
 
     <distributionManagement>
