@@ -48,7 +48,7 @@ public class AtmDAOImplementation implements AtmDAO {
     }
 
     /**
-     * Function that suppplies a {@code Map<String, Client>}.
+     * Function that supplies a {@code Map<String, Client>}.
      * <p>{@code String} - the key, the key is the account number of the client</p>
      * <p>{@code Client} - the value, the value is the client object</p>
      * @return a {@code Client} object
@@ -96,11 +96,11 @@ public class AtmDAOImplementation implements AtmDAO {
         final var QUERY = "SELECT savings FROM clients WHERE account_number = ?";
         return accountNumber -> Double.parseDouble(
                 SecurityUtil.decrypt(
-                        db.queryForObject(
+                        Objects.requireNonNull(db.queryForObject(
                                 QUERY,
                                 String.class,
                                 SecurityUtil.encrypt(accountNumber)
-                        )
+                        ))
                 )
         );
     }
@@ -109,7 +109,7 @@ public class AtmDAOImplementation implements AtmDAO {
      * Function that removes a client in the database using the account number.
      * <p>T - a {@code String} the account number of the client needed in order to remove the client.</p>
      * <p>R - the {@code Status} of the operation if {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Status
      */
@@ -120,7 +120,7 @@ public class AtmDAOImplementation implements AtmDAO {
 
     /**
      * Function that removes all the clients in the database.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Supplier
      * @see Status
      */
@@ -133,7 +133,7 @@ public class AtmDAOImplementation implements AtmDAO {
      * Function that accepts two values. A {@code String} and a {@code Boolean}.
      * <p>First parameter is a {@code String} contains the account number of the client.</p>
      * <p>Second parameter is a {@code Boolean}, {@code true} if the client account should be locked, default is false.</p>
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see BiFunction
      * @see Status
      */
@@ -147,7 +147,7 @@ public class AtmDAOImplementation implements AtmDAO {
      * Function that accepts two values. A {@code String} and a {@code Double}.
      * <p>First parameter is a {@code String} contains the account number of the client.</p>
      * <p>Second parameter is a {@code Double}, the new savings balance of the client.</p>
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see BiFunction
      * @see Status
      */
@@ -164,7 +164,7 @@ public class AtmDAOImplementation implements AtmDAO {
     /**
      * Function that save a client to the database. The function takes a {@code Client} object,
      * the object to be saved in the database table.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Client
      * @see Status
@@ -189,7 +189,7 @@ public class AtmDAOImplementation implements AtmDAO {
 
     /**
      * Function that saves a {@code Collection<Client} to the database table.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Collection
      * @see Client
@@ -200,22 +200,19 @@ public class AtmDAOImplementation implements AtmDAO {
         final var QUERY = "INSERT INTO clients (account_number, pin, first_name, last_name, gender, address, date_of_birth, savings, isLocked)" +
                 " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         return clients -> {
-            clients.stream()
-                    .forEach(
-                        client -> {
-                            db.update(
-                                    QUERY,
-                                    SecurityUtil.encrypt(client.accountNumber()),
-                                    SecurityUtil.encrypt(client.pin()),
-                                    SecurityUtil.encrypt(client.details().getFirstName()),
-                                    SecurityUtil.encrypt(client.details().getLastName()),
-                                    client.details().getGender().toString(),
-                                    SecurityUtil.encrypt(client.details().getAddress()),
-                                    client.details().getBirthDate(),
-                                    SecurityUtil.encrypt(String.valueOf(client.savings())),
-                                    client.isLocked()
-                            );
-                        }
+            clients.forEach(
+                        client -> db.update(
+                                QUERY,
+                                SecurityUtil.encrypt(client.accountNumber()),
+                                SecurityUtil.encrypt(client.pin()),
+                                SecurityUtil.encrypt(client.details().getFirstName()),
+                                SecurityUtil.encrypt(client.details().getLastName()),
+                                client.details().getGender().toString(),
+                                SecurityUtil.encrypt(client.details().getAddress()),
+                                client.details().getBirthDate(),
+                                SecurityUtil.encrypt(String.valueOf(client.savings())),
+                                client.isLocked()
+                        )
                     );
             return SUCCESS;
         };
@@ -224,7 +221,7 @@ public class AtmDAOImplementation implements AtmDAO {
     /**
      * Function that submits a loan request.
      * The Function takes a {@code Loan} object containing the loan information.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Loan
      * @see Status
@@ -264,7 +261,7 @@ public class AtmDAOImplementation implements AtmDAO {
      * Function that gets the loan of a client using loan number and account number.
      * The function takes an {@code Integer} and a {@code String}, the integer containing the loan number,
      * and the string containing the account number.
-     * @return an {@code Optional<Loan>} wether the loan exist or not.
+     * @return an {@code Optional<Loan>} whether the loan exist or not.
      * @see BiFunction
      * @see Optional
      * @see Loan
@@ -291,7 +288,7 @@ public class AtmDAOImplementation implements AtmDAO {
     public Function<String, Integer> getLoanCount() {
         final var QUERY = "SELECT MAX(loan_number) FROM loans WHERE account_number = ?";
         return accountNumber ->  {
-            var result = Optional.ofNullable(
+            int result = Optional.ofNullable(
                     db.queryForObject(
                             QUERY,
                             Integer.class,
@@ -304,7 +301,7 @@ public class AtmDAOImplementation implements AtmDAO {
     /**
      * Function that approves a loan request.
      * The function takes a {@code Loan} object containing the loan information to be approved.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @throws IllegalArgumentException if the account number does not belong to any client, thus the message cannot be found.
      * @see BiFunction
      * @see Loan
@@ -328,7 +325,7 @@ public class AtmDAOImplementation implements AtmDAO {
     /**
      * Function that declines a loan request.
      * The function takes a {@code Loan} object containing the loan information to be approved.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Loan
      * @see Status
@@ -347,7 +344,7 @@ public class AtmDAOImplementation implements AtmDAO {
     /**
      * Function that removes a loan.
      * The function takes a {@code Loan} object containing the loan information to be removed.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Loan
      * @see Status
@@ -365,7 +362,7 @@ public class AtmDAOImplementation implements AtmDAO {
 
     /**
      * Function that removes all the loans from the database.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Supplier
      * @see Status
      */
@@ -375,10 +372,10 @@ public class AtmDAOImplementation implements AtmDAO {
     }
 
     /**
-     * Function that gets the message of the loan requst of a client to the database.
+     * Function that gets the message of the loan request of a client to the database.
      * The Function takes a {@code String}.
      * The {@code String} contains the account number of the client.
-     * @return a {@code Message} object containg the message of the loan.
+     * @return a {@code Message} object containing the message of the loan.
      * @throws IllegalArgumentException if the account number does not belong to any client.
      * @throws IllegalStateException if there are no messages for the client.
      * @see Function
@@ -392,21 +389,17 @@ public class AtmDAOImplementation implements AtmDAO {
             var client = getClientByAccountNumber().apply(accountNumber);
             var check = getAllLoans()
                     .get()
-                    .entrySet()
+                    .values()
                     .stream()
-                    .map(Map.Entry::getValue)
                     .flatMap(Collection::stream)
                     .allMatch(a -> a.accountNumber().equals(accountNumber) && ( a.pending() && !a.isDeclined() ));
             if (check) throw new IllegalStateException("THERE ARE NO MESSAGES AT THE MOMENT");
             return getAllLoans().get()
-                    .entrySet()
+                    .values()
                     .stream()
-                    .map(Map.Entry::getValue)
                     .flatMap(Collection::stream)
                     .filter(l -> !l.pending() || l.isDeclined())
-                    .map(loan -> {
-                        return new Message(loan, client, loan.pending() && loan.isDeclined());
-                    })
+                    .map(loan -> new Message(loan, client, loan.pending() && loan.isDeclined()))
                     .collect(Collectors.groupingBy(message -> message.loan().accountNumber()));
         };
     }
