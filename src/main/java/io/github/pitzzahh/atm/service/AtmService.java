@@ -11,7 +11,6 @@ import io.github.pitzzahh.atm.entity.Loan;
 import io.github.pitzzahh.atm.entity.Client;
 import io.github.pitzzahh.atm.entity.Message;
 import com.github.pitzzahh.utilities.classes.enums.Status;
-import io.github.pitzzahh.atm.database.DatabaseConnection;
 
 /**
  * The service for overall functionality..
@@ -24,19 +23,12 @@ public class AtmService {
     private final AtmDAO ATM_DAO;
 
     /**
-     * {@code DatabaseConnection} dependency.
-     */
-    public final DatabaseConnection DATABASE_CONNECTION;
-
-    /**
      * Dependency injection.
      * @param dao the {@code AtmDAO} dependency to be injected.
-     * @param connection the {@code DatabaseConnection} dependency to be injected.
      * @see AtmDAO
      */
-    public AtmService(AtmDAO dao, DatabaseConnection connection) {
+    public AtmService(AtmDAO dao) {
         this.ATM_DAO = dao;
-        this.DATABASE_CONNECTION = connection;
     }
 
     /**
