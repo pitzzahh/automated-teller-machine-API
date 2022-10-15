@@ -44,7 +44,7 @@ public final class Client {
     }
 
     /**
-     * Constructs a {@code String} representation of a a {@code Client}.
+     * Constructs a {@code String} representation of a {@code Client}.
      * @return a {@code String} representation of a {@code Client}.
      */
     @Override

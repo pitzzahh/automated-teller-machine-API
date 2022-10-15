@@ -27,7 +27,7 @@ class AtmServiceTest extends AtmDAOImplementation {
 
     @BeforeEach
     void setUp() {
-        atmService = new AtmService(ATM_DAO, DATABASE_CONNECTION);
+        atmService = new AtmService(ATM_DAO);
         atmService.setDataSource().accept(
                 DATABASE_CONNECTION
                         .setDriverClassName("org.postgresql.Driver")
