@@ -1,4 +1,4 @@
-package io.github.pitzzahh.atm.database;
+package io.github.pitzzahh.atm.dao;
 
 import static io.github.pitzzahh.util.utilities.classes.enums.Status.ERROR;
 import static io.github.pitzzahh.util.utilities.classes.enums.Status.SUCCESS;
