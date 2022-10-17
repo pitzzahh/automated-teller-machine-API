@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.function.BiFunction;
 import io.github.pitzzahh.atm.entity.Loan;
 import io.github.pitzzahh.atm.entity.Client;
@@ -213,5 +214,23 @@ public interface AtmDAO {
      * @see List
      * @see Message
      */
-    Function<String, Map<String, List<Message>>> getMessage();
+    default Function<String, Map<String, List<Message>>> getMessage() {
+        return accountNumber -> {
+            var client = getClientByAccountNumber().apply(accountNumber);
+            var check = getAllLoans()
+                    .get()
+                    .values()
+                    .stream()
+                    .flatMap(Collection::stream)
+                    .allMatch(a -> a.accountNumber().equals(accountNumber) && ( a.pending() && !a.isDeclined() ));
+            if (check) throw new IllegalStateException("THERE ARE NO MESSAGES AT THE MOMENT");
+            return getAllLoans().get()
+                    .values()
+                    .stream()
+                    .flatMap(Collection::stream)
+                    .filter(l -> !l.pending() || l.isDeclined())
+                    .map(loan -> new Message(loan, client, loan.pending() && loan.isDeclined()))
+                    .collect(Collectors.groupingBy(message -> message.loan().accountNumber()));
+        };
+    }
 }
