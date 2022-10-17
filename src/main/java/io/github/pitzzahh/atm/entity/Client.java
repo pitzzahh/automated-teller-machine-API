@@ -15,11 +15,11 @@ public final class Client {
      * {@code NumberFormat} object for formatting numbers.
      */
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
-    private final String accountNumber;
-    private final String pin;
-    private final Person details;
-    private final double savings;
-    private final boolean isLocked;
+    private String accountNumber;
+    private String pin;
+    private Person details;
+    private double savings;
+    private boolean isLocked;
 
     /**
      * @param accountNumber the account number, denoted by a 9-digit number.
@@ -99,6 +99,26 @@ public final class Client {
      */
     public boolean isLocked() {
         return isLocked;
+    }
+
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
+    }
+
+    public void setPin(String pin) {
+        this.pin = pin;
+    }
+
+    public void setDetails(Person details) {
+        this.details = details;
+    }
+
+    public void setSavings(double savings) {
+        this.savings = savings;
+    }
+
+    public void setLocked(boolean locked) {
+        isLocked = locked;
     }
 
     @Override
