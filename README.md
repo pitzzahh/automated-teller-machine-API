@@ -12,12 +12,12 @@ ________________________________________
 
 ```java
 import io.github.pitzzahh.atm.database.DatabaseConnection;
-import io.github.pitzzahh.atm.dao.AtmDAOImplementation;
+import io.github.pitzzahh.atm.dao.InDatabase;
 import io.github.pitzzahh.atm.service.AtmService;
 import io.github.pitzzahh.atm.dao.AtmDAO;
 
 public class App {
-    private static final AtmDAO ATM_DAO = new AtmDAOImplementation();
+    private static final AtmDAO ATM_DAO = new InDatabase();
     private static final DatabaseConnection DATABASE_CONNECTION = new DatabaseConnection();
 
     public static void main(String[] args) {
@@ -39,17 +39,20 @@ public class App {
 ```java
 import com.github.pitzzahh.utilities.classes.enums.Gender;
 import io.github.pitzzahh.atm.database.DatabaseConnection;
+
 import static com.github.pitzzahh.utilities.Print.println;
-import io.github.pitzzahh.atm.dao.AtmDAOImplementation;
+
+import io.github.pitzzahh.atm.dao.InDatabase;
 import com.github.pitzzahh.utilities.classes.Person;
 import io.github.pitzzahh.atm.service.AtmService;
 import io.github.pitzzahh.atm.entity.Client;
 import io.github.pitzzahh.atm.dao.AtmDAO;
+
 import java.time.LocalDate;
 import java.time.Month;
 
 public class App {
-    private static final AtmDAO ATM_DAO = new AtmDAOImplementation();
+    private static final AtmDAO ATM_DAO = new InDatabase();
     private static final DatabaseConnection DATABASE_CONNECTION = new DatabaseConnection();
 
     public static void main(String[] args) {

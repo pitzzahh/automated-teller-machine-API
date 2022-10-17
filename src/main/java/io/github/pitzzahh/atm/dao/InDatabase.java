@@ -21,7 +21,7 @@ import static io.github.pitzzahh.util.utilities.classes.enums.Status.*;
 /**
  * Implementation of the {@link AtmDAO}.
  */
-public class AtmDAOImplementation implements AtmDAO {
+public class InDatabase implements AtmDAO {
 
     private DataSource dataSource;
     private JdbcTemplate db;
