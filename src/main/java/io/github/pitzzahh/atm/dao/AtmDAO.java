@@ -31,7 +31,9 @@ public interface AtmDAO {
      * @see Consumer
      * @see DataSource
      */
-    Consumer<DataSource> setDataSource() throws RuntimeException;
+    default Consumer<DataSource> setDataSource() throws RuntimeException {
+        return null;
+    }
 
     /**
      * Function that supplies a {@code Map<String, Client>}.
