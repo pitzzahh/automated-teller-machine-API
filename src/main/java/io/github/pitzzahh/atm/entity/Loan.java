@@ -14,12 +14,12 @@ public final class Loan {
      * {@code NumberFormat} object for formatting numbers.
      */
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
-    private final int loanNumber;
-    private final String accountNumber;
-    private final LocalDate dateOfLoan;
-    private final double amount;
-    private final boolean pending;
-    private final boolean isDeclined;
+    private int loanNumber;
+    private String accountNumber;
+    private LocalDate dateOfLoan;
+    private double amount;
+    private boolean pending;
+    private boolean isDeclined;
 
     /**
      * @param loanNumber    the loan number containing the current count of the loan.
@@ -152,6 +152,55 @@ public final class Loan {
      */
     public boolean isDeclined() {
         return isDeclined;
+    }
+
+    /**
+     * Set the loan number of a loan.
+     * @param loanNumber an {@code int} containing the loan number.
+     */
+    public void setLoanNumber(int loanNumber) {
+        this.loanNumber = loanNumber;
+    }
+
+    /**
+     * Set the account number of a client taking the loan.
+     * @param accountNumber a {@code String} containing the account number.
+     */
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
+    }
+
+    /**
+     * Set the date of loan.
+     * @param dateOfLoan a {@code LocalDate} object containing the date of the loan.
+     * @see LocalDate
+     */
+    public void setDateOfLoan(LocalDate dateOfLoan) {
+        this.dateOfLoan = dateOfLoan;
+    }
+
+    /**
+     * Set the amount of the loan.
+     * @param amount a {@code double} containing the amount of the loan.
+     */
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
+
+    /**
+     * Set the status of the loan if pending or approved.
+     * @param pending a {@code boolean} value if a loan is approved or pending.
+     */
+    public void setPending(boolean pending) {
+        this.pending = pending;
+    }
+
+    /**
+     * Set the status of the loan if declined.
+     * @param declined a {@code boolean} value if a loan is declined.
+     */
+    public void setDeclined(boolean declined) {
+        isDeclined = declined;
     }
 
     @Override
