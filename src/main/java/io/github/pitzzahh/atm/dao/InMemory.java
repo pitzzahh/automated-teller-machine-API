@@ -90,7 +90,11 @@ public class InMemory implements AtmDAO {
 
     @Override
     public Function<Loan, Status> requestLoan() {
-        return loan -> LOANS.put(loan.accountNumber(), loan) == loan ? SUCCESS : ERROR;
+        return loan -> {
+            var loanCount = getLoanCount().apply(loan.accountNumber());
+            LOANS.put(loan.accountNumber(), loan);
+            return Objects.equals(loanCount, getLoanCount().apply(loan.accountNumber())) ? SUCCESS : ERROR;
+        };
     }
 
     @Override
