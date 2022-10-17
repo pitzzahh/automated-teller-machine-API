@@ -4,32 +4,28 @@ import java.time.*;
 import java.util.Map;
 import java.util.List;
 import java.util.Collection;
-
-import io.github.pitzzahh.atm.dao.InDatabase;
 import org.junit.jupiter.api.*;
-import io.github.pitzzahh.atm.dao.AtmDAO;
 import io.github.pitzzahh.atm.entity.Loan;
 import io.github.pitzzahh.atm.entity.Client;
+import io.github.pitzzahh.atm.dao.InDatabase;
 import io.github.pitzzahh.util.utilities.Print;
 import io.github.pitzzahh.atm.service.AtmService;
 import static org.junit.jupiter.api.Assertions.*;
-
 import io.github.pitzzahh.util.utilities.classes.Person;
 import io.github.pitzzahh.util.utilities.classes.enums.*;
 import io.github.pitzzahh.atm.database.DatabaseConnection;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class AtmServiceTest extends InDatabase {
+class InDatabaseAtmServiceTest extends InDatabase {
 
 
-    private AtmService atmService;
+    private static AtmService atmService;
 
-    private static final AtmDAO ATM_DAO = new InDatabase();
     private static final DatabaseConnection DATABASE_CONNECTION = new DatabaseConnection();
 
     @BeforeEach
     void setUp() {
-        atmService = new AtmService(ATM_DAO);
+        atmService = new AtmService(new InDatabase());
         atmService.setDataSource().accept(
                 DATABASE_CONNECTION
                         .setDriverClassName("org.postgresql.Driver")
@@ -40,12 +36,18 @@ class AtmServiceTest extends InDatabase {
         );
     }
 
+    @AfterAll
+    static void afterAll() {
+        assertEquals(Status.SUCCESS, atmService.removeAllClients().get());
+        assertEquals(Status.SUCCESS, atmService.removeAllLoans().get());
+    }
+
     @Test
     @Order(1)
     void A_shouldSaveAllClients() {
         var clients = List.of(
                 makePeter(),
-                makeZamira()
+                makeMark()
         );
         var result = atmService.saveAllClients().apply(clients);
         assertEquals(Status.SUCCESS, result);
@@ -64,7 +66,7 @@ class AtmServiceTest extends InDatabase {
     @Order(3)
     void C_shouldMakeALoan() {
         // given
-        var client = makeZamira();
+        var client = makeMark();
         for (int i = 10_000; i <= 20_000; i += 10_000) {
             var loan = makeLoan(client, i);
             // when
@@ -92,7 +94,7 @@ class AtmServiceTest extends InDatabase {
     @Order(5)
     void E_shouldApproveLoan() {
 
-        var client = makeZamira();
+        var client = makeMark();
         var loan = atmService.getAllLoans()
                 .get()
                 .values()
@@ -129,7 +131,7 @@ class AtmServiceTest extends InDatabase {
     @Order(7)
     void J_shouldGetLoanMessage() {
         // given
-        var accountNumber = makeZamira().accountNumber();
+        var accountNumber = makeMark().accountNumber();
         // when
         var result = atmService.getMessage().apply(accountNumber)
                 .entrySet()
@@ -230,7 +232,7 @@ class AtmServiceTest extends InDatabase {
     @Test
     @Order(14)
     void shouldGetSavingsByAccountNumber() {
-        var client = makeZamira();
+        var client = makeMark();
         var savings = atmService.getClientSavingsByAccountNumber().apply(client.accountNumber());
         System.out.println("savings = " + savings);
     }
@@ -259,13 +261,6 @@ class AtmServiceTest extends InDatabase {
             Print.println(client);
         });
     }
-    @Test
-    @Order(17)
-    void remove() {
-        assertEquals(Status.SUCCESS, atmService.removeAllClients().get());
-        assertEquals(Status.SUCCESS, atmService.removeAllLoans().get());
-    }
-
 
     private Client makePeter() {
         return new Client(
@@ -283,14 +278,14 @@ class AtmServiceTest extends InDatabase {
         );
     }
 
-    private Client makeZamira() {
+    private Client makeMark() {
         return new Client(
                 "143143143",
                 "143143",
                 Person.builder()
-                        .firstName("Zamira Alexis")
-                        .lastName("Morozuk")
-                        .gender(Gender.FEMALE)
+                        .firstName("Mark")
+                        .lastName("Silent")
+                        .gender(Gender.PREFER_NOT_TO_SAY)
                         .address("Earth")
                         .birthDate(LocalDate.of(2009, Month.APRIL, 29))
                         .build(),
