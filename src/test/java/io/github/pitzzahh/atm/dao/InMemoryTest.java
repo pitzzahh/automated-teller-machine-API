@@ -1,5 +1,6 @@
 package io.github.pitzzahh.atm.dao;
 
+import static io.github.pitzzahh.util.utilities.Print.println;
 import static io.github.pitzzahh.util.utilities.classes.enums.Status.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -72,7 +73,7 @@ class InMemoryTest {
         assertEquals(SUCCESS, result);
     }
 
-    @RepeatedTest(2)
+    @Test
     @Order(5)
     void E_shouldApproveLoan() {
 
@@ -90,7 +91,7 @@ class InMemoryTest {
         assertEquals(SUCCESS, result);
     }
 
-    @RepeatedTest(2)
+    @Test
     @Order(6)
     void F_shouldApproveLoan() {
 
@@ -216,7 +217,7 @@ class InMemoryTest {
     void shouldGetSavingsByAccountNumber() {
         var client = makeMark();
         var savings = atmService.getClientSavingsByAccountNumber().apply(client.accountNumber());
-        System.out.println("savings = " + savings);
+        println("savings = " + savings);
     }
 
     @Test
@@ -236,12 +237,7 @@ class InMemoryTest {
     void shouldThrowExceptionBecauseClientDoesNotExist() {
         // given
         var accountNumber = "123456789";
-        assertThrows(IllegalArgumentException.class, () -> {
-            // when
-            var client = atmService.getClientByAccountNumber().apply(accountNumber);
-            // then
-            Print.println(client);
-        });
+        assertThrows(IllegalArgumentException.class, () -> atmService.getClientByAccountNumber().apply(accountNumber));
     }
 
 }
