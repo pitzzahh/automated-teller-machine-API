@@ -1,10 +1,11 @@
 package io.github.pitzzahh.atm.dao;
 
-import io.github.pitzzahh.util.utilities.classes.enums.Status;
+import static io.github.pitzzahh.util.utilities.classes.enums.Status.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static io.github.pitzzahh.atm.dao.Util.*;
+import io.github.pitzzahh.atm.exceptions.LoanDoesNotExist;
 import io.github.pitzzahh.atm.service.AtmService;
+import static io.github.pitzzahh.atm.dao.Util.*;
 import io.github.pitzzahh.util.utilities.Print;
 import io.github.pitzzahh.atm.entity.Loan;
 import org.junit.jupiter.api.*;
@@ -24,9 +25,8 @@ class InMemoryTest {
 
     @AfterAll
     static void afterAll() {
-        atmService.removeAllClients();
+        assertEquals(SUCCESS, atmService.removeAllLoans().get());
     }
-
 
     @Test
     @Order(1)
@@ -36,7 +36,7 @@ class InMemoryTest {
                 makeMark()
         );
         var result = atmService.saveAllClients().apply(clients);
-        assertEquals(Status.SUCCESS, result);
+        assertEquals(SUCCESS, result);
     }
 
     @Test
@@ -53,13 +53,11 @@ class InMemoryTest {
     void C_shouldMakeALoan() {
         // given
         var client = makeMark();
-        for (int i = 10_000; i <= 20_000; i += 10_000) {
-            var loan = makeLoan(client, i);
-            // when
-            var result = atmService.requestLoan().apply(loan);
-            // then
-            assertEquals(Status.SUCCESS, result);
-        }
+        var loan = makeLoan(client, 10_000);
+        // when
+        var result = atmService.requestLoan().apply(loan);
+        // then
+        assertEquals(SUCCESS, result);
     }
 
     @Test()
@@ -67,13 +65,11 @@ class InMemoryTest {
     void D_shouldMakeALoan() {
         // given
         var client = makePeter();
-        for (int i = 10_000; i <= 20_000; i += 10_000) {
-            var loan = makeLoan(client, i);
-            // when
-            var result = atmService.requestLoan().apply(loan);
-            // then
-            assertEquals(Status.SUCCESS, result);
-        }
+        var loan = makeLoan(client, 10_000);
+        // when
+        var result = atmService.requestLoan().apply(loan);
+        // then
+        assertEquals(SUCCESS, result);
     }
 
     @RepeatedTest(2)
@@ -88,10 +84,10 @@ class InMemoryTest {
                 .flatMap(Collection::stream)
                 .filter(l -> l.accountNumber().equals(client.accountNumber()) && l.pending())
                 .findAny()
-                .orElseThrow(IllegalStateException::new);
+                .orElseThrow(LoanDoesNotExist::new);
 
         var result = atmService.approveLoan().apply(loan, client);
-        assertEquals(Status.SUCCESS, result);
+        assertEquals(SUCCESS, result);
     }
 
     @RepeatedTest(2)
@@ -106,11 +102,11 @@ class InMemoryTest {
                 .flatMap(Collection::stream)
                 .filter(l -> l.accountNumber().equals(client.accountNumber()) && l.pending())
                 .findAny()
-                .orElseThrow(IllegalStateException::new);
+                .orElseThrow(LoanDoesNotExist::new);
 
 
         var result = atmService.approveLoan().apply(loan, client);
-        assertEquals(Status.SUCCESS, result);
+        assertEquals(SUCCESS, result);
     }
 
     @Test
@@ -166,7 +162,7 @@ class InMemoryTest {
                 true
         );
         var result = atmService.declineLoan().apply(loan);
-        assertEquals(Status.SUCCESS, result);
+        assertEquals(SUCCESS, result);
     }
 
     @Test
