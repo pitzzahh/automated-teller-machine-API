@@ -3,8 +3,8 @@ package io.github.pitzzahh.atm.entity;
 import java.util.Objects;
 import java.util.Currency;
 import java.text.NumberFormat;
-import com.github.pitzzahh.utilities.classes.Person;
-import static com.github.pitzzahh.utilities.classes.TextColors.*;
+import io.github.pitzzahh.util.utilities.classes.Person;
+import static io.github.pitzzahh.util.utilities.classes.Colors.*;
 
 /**
  * record used for making clients.

@@ -4,7 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import io.github.pitzzahh.atm.entity.Loan;
 import org.springframework.jdbc.core.RowMapper;
-import com.github.pitzzahh.utilities.SecurityUtil;
+import io.github.pitzzahh.util.utilities.SecurityUtil;
 
 /**
  * Used to map loan history row from the database to a {@code Loan} object.

@@ -13,7 +13,7 @@ import io.github.pitzzahh.atm.entity.Loan;
 import io.github.pitzzahh.atm.entity.Client;
 import io.github.pitzzahh.atm.entity.Message;
 import io.github.pitzzahh.atm.service.AtmService;
-import com.github.pitzzahh.utilities.classes.enums.Status;
+import io.github.pitzzahh.util.utilities.classes.enums.Status;
 
 /**
  * interface used to access the database. Implemented by {@code AtmDAOImplementation}.

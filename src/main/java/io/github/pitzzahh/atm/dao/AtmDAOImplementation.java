@@ -12,11 +12,11 @@ import io.github.pitzzahh.atm.entity.Loan;
 import io.github.pitzzahh.atm.entity.Client;
 import io.github.pitzzahh.atm.entity.Message;
 import io.github.pitzzahh.atm.mapper.LoanMapper;
-import com.github.pitzzahh.utilities.SecurityUtil;
 import org.springframework.jdbc.core.JdbcTemplate;
 import io.github.pitzzahh.atm.mapper.ClientMapper;
-import com.github.pitzzahh.utilities.classes.enums.Status;
-import static com.github.pitzzahh.utilities.classes.enums.Status.*;
+import io.github.pitzzahh.util.utilities.SecurityUtil;
+import io.github.pitzzahh.util.utilities.classes.enums.Status;
+import static io.github.pitzzahh.util.utilities.classes.enums.Status.*;
 
 /**
  * Implementation of the {@link AtmDAO}.
@@ -126,7 +126,7 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public Supplier<Status> removeAllClients() {
-        return () -> db.update("DELETE FROM clients") > 0 ? SUCCESS : ERROR;
+        return () -> db.update("DELETE FROM clients WHERE TRUE") > 0 ? SUCCESS : ERROR;
     }
 
     /**
@@ -368,7 +368,7 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public Supplier<Status> removeAllLoans() {
-        return () ->  db.update("DELETE FROM loans") > 0 ? SUCCESS : ERROR;
+        return () ->  db.update("DELETE FROM loans WHERE TRUE") > 0 ? SUCCESS : ERROR;
     }
 
     /**

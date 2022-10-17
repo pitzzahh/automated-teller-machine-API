@@ -7,13 +7,13 @@ import java.util.Collection;
 import org.junit.jupiter.api.*;
 import io.github.pitzzahh.atm.dao.AtmDAO;
 import io.github.pitzzahh.atm.entity.Loan;
-import com.github.pitzzahh.utilities.Print;
 import io.github.pitzzahh.atm.entity.Client;
+import io.github.pitzzahh.util.utilities.Print;
 import io.github.pitzzahh.atm.service.AtmService;
 import static org.junit.jupiter.api.Assertions.*;
-import com.github.pitzzahh.utilities.classes.Person;
-import com.github.pitzzahh.utilities.classes.enums.*;
 import io.github.pitzzahh.atm.dao.AtmDAOImplementation;
+import io.github.pitzzahh.util.utilities.classes.Person;
+import io.github.pitzzahh.util.utilities.classes.enums.*;
 import io.github.pitzzahh.atm.database.DatabaseConnection;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -98,7 +98,7 @@ class AtmServiceTest extends AtmDAOImplementation {
                 .flatMap(Collection::stream)
                 .filter(l -> l.accountNumber().equals(client.accountNumber()) && l.pending())
                 .findAny()
-                .get();
+                .orElseThrow(IllegalStateException::new);
 
         var result = atmService.approveLoan().apply(loan, client);
         assertEquals(Status.SUCCESS, result);
@@ -116,7 +116,8 @@ class AtmServiceTest extends AtmDAOImplementation {
                 .flatMap(Collection::stream)
                 .filter(l -> l.accountNumber().equals(client.accountNumber()) && l.pending())
                 .findAny()
-                .get();
+                .orElseThrow(IllegalStateException::new);
+
 
         var result = atmService.approveLoan().apply(loan, client);
         assertEquals(Status.SUCCESS, result);

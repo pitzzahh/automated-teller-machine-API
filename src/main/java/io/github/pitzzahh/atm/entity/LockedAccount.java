@@ -1,10 +1,8 @@
 package io.github.pitzzahh.atm.entity;
 
-import com.github.pitzzahh.utilities.classes.enums.Gender;
-
+import static io.github.pitzzahh.util.utilities.classes.Colors.*;
+import io.github.pitzzahh.util.utilities.classes.enums.Gender;
 import java.util.Objects;
-
-import static com.github.pitzzahh.utilities.classes.TextColors.*;
 
 /**
  * record used for making locked accounts.
