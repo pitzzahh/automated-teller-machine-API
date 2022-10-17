@@ -10,7 +10,6 @@ import java.util.function.Supplier;
 import java.util.function.BiFunction;
 import io.github.pitzzahh.atm.entity.Loan;
 import io.github.pitzzahh.atm.entity.Client;
-import io.github.pitzzahh.atm.entity.Message;
 import io.github.pitzzahh.atm.mapper.LoanMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import io.github.pitzzahh.atm.mapper.ClientMapper;
@@ -371,36 +370,4 @@ public class InDatabase implements AtmDAO {
         return () ->  db.update("DELETE FROM loans WHERE TRUE") > 0 ? SUCCESS : ERROR;
     }
 
-    /**
-     * Function that gets the message of the loan request of a client to the database.
-     * The Function takes a {@code String}.
-     * The {@code String} contains the account number of the client.
-     * @return a {@code Message} object containing the message of the loan.
-     * @throws IllegalArgumentException if the account number does not belong to any client.
-     * @throws IllegalStateException if there are no messages for the client.
-     * @see Function
-     * @see Map
-     * @see List
-     * @see Message
-     */
-    @Override
-    public Function<String, Map<String, List<Message>>> getMessage() throws IllegalArgumentException, IllegalStateException {
-        return accountNumber -> {
-            var client = getClientByAccountNumber().apply(accountNumber);
-            var check = getAllLoans()
-                    .get()
-                    .values()
-                    .stream()
-                    .flatMap(Collection::stream)
-                    .allMatch(a -> a.accountNumber().equals(accountNumber) && ( a.pending() && !a.isDeclined() ));
-            if (check) throw new IllegalStateException("THERE ARE NO MESSAGES AT THE MOMENT");
-            return getAllLoans().get()
-                    .values()
-                    .stream()
-                    .flatMap(Collection::stream)
-                    .filter(l -> !l.pending() || l.isDeclined())
-                    .map(loan -> new Message(loan, client, loan.pending() && loan.isDeclined()))
-                    .collect(Collectors.groupingBy(message -> message.loan().accountNumber()));
-        };
-    }
 }
