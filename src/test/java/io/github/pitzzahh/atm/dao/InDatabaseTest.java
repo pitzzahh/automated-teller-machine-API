@@ -6,9 +6,9 @@ import java.util.Collection;
 import org.junit.jupiter.api.*;
 import io.github.pitzzahh.atm.entity.Loan;
 import io.github.pitzzahh.util.utilities.Print;
+import static io.github.pitzzahh.atm.dao.Util.*;
 import io.github.pitzzahh.atm.service.AtmService;
 import static org.junit.jupiter.api.Assertions.*;
-import static io.github.pitzzahh.atm.dao.People.*;
 import io.github.pitzzahh.util.utilities.classes.enums.*;
 import io.github.pitzzahh.atm.database.DatabaseConnection;
 
