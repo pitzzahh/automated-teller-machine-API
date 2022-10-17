@@ -101,22 +101,43 @@ public final class Client {
         return isLocked;
     }
 
+    /**
+     * Sets the account number of a client.
+     * @param accountNumber the account number of a client.
+     */
     public void setAccountNumber(String accountNumber) {
         this.accountNumber = accountNumber;
     }
 
+    /**
+     * Sets the pin of a client.
+     * @param pin the pin of a client.
+     */
     public void setPin(String pin) {
         this.pin = pin;
     }
 
+    /**
+     * Sets the details of a client.
+     * @param details the details of a client.
+     * @see Person
+     */
     public void setDetails(Person details) {
         this.details = details;
     }
 
+    /**
+     * Sets the savings of a client.
+     * @param savings the savings of a client.
+     */
     public void setSavings(double savings) {
         this.savings = savings;
     }
 
+    /**
+     * Sets the status of the account of a client if locked or not.
+     * @param locked the status of the account of a client if locked or not.
+     */
     public void setLocked(boolean locked) {
         isLocked = locked;
     }
