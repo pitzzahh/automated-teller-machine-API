@@ -6,7 +6,6 @@ import io.github.pitzzahh.atm.exceptions.ClientNotFoundException;
 import io.github.pitzzahh.util.utilities.classes.enums.Status;
 import io.github.pitzzahh.atm.entity.Client;
 import io.github.pitzzahh.atm.entity.Loan;
-import io.github.pitzzahh.atm.dao.AtmDAO;
 import static java.lang.String.format;
 import java.util.function.BiFunction;
 import java.util.function.Function;
