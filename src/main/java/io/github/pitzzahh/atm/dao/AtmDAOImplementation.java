@@ -240,7 +240,7 @@ public class AtmDAOImplementation implements AtmDAO {
         ) > 0 ? SUCCESS : ERROR;
     }
 
-    /**s
+    /**
      * Function that returns a key value pair, a {@code Map<String, List<Loan>>} in particular.
      * <p>K - is a {@code String} containing the key, the key is the account number of the client who requested a loan.</p>
      * <p>V - is a {@code String} containing the value, the value is all the loans that the account requested. It is a {@code List<Loan>}</p>
