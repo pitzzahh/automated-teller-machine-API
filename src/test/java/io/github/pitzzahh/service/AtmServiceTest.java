@@ -4,6 +4,8 @@ import java.time.*;
 import java.util.Map;
 import java.util.List;
 import java.util.Collection;
+
+import io.github.pitzzahh.atm.dao.InDatabase;
 import org.junit.jupiter.api.*;
 import io.github.pitzzahh.atm.dao.AtmDAO;
 import io.github.pitzzahh.atm.entity.Loan;
@@ -11,18 +13,18 @@ import io.github.pitzzahh.atm.entity.Client;
 import io.github.pitzzahh.util.utilities.Print;
 import io.github.pitzzahh.atm.service.AtmService;
 import static org.junit.jupiter.api.Assertions.*;
-import io.github.pitzzahh.atm.dao.AtmDAOImplementation;
+
 import io.github.pitzzahh.util.utilities.classes.Person;
 import io.github.pitzzahh.util.utilities.classes.enums.*;
 import io.github.pitzzahh.atm.database.DatabaseConnection;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class AtmServiceTest extends AtmDAOImplementation {
+class AtmServiceTest extends InDatabase {
 
 
     private AtmService atmService;
 
-    private static final AtmDAO ATM_DAO = new AtmDAOImplementation();
+    private static final AtmDAO ATM_DAO = new InDatabase();
     private static final DatabaseConnection DATABASE_CONNECTION = new DatabaseConnection();
 
     @BeforeEach

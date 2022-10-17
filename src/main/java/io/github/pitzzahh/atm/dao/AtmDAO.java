@@ -16,9 +16,9 @@ import io.github.pitzzahh.atm.service.AtmService;
 import io.github.pitzzahh.util.utilities.classes.enums.Status;
 
 /**
- * interface used to access the database. Implemented by {@code AtmDAOImplementation}.
+ * interface used to access the database. Implemented by {@code InDatabase}.
  * Used in {@code AtmService}
- * @see AtmDAOImplementation
+ * @see InDatabase
  * @see AtmService
  */
 public interface AtmDAO {
