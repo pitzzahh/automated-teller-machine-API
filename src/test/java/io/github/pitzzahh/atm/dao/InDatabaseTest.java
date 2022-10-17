@@ -1,22 +1,19 @@
 package io.github.pitzzahh.atm.dao;
 
-import java.time.*;
 import java.util.Map;
 import java.util.List;
 import java.util.Collection;
 import org.junit.jupiter.api.*;
 import io.github.pitzzahh.atm.entity.Loan;
-import io.github.pitzzahh.atm.entity.Client;
-import io.github.pitzzahh.atm.dao.InDatabase;
 import io.github.pitzzahh.util.utilities.Print;
 import io.github.pitzzahh.atm.service.AtmService;
 import static org.junit.jupiter.api.Assertions.*;
-import io.github.pitzzahh.util.utilities.classes.Person;
+import static io.github.pitzzahh.atm.dao.People.*;
 import io.github.pitzzahh.util.utilities.classes.enums.*;
 import io.github.pitzzahh.atm.database.DatabaseConnection;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class InDatabaseAtmServiceTest extends InDatabase {
+class InDatabaseTest extends InDatabase {
 
 
     private static AtmService atmService;
@@ -29,7 +26,7 @@ class InDatabaseAtmServiceTest extends InDatabase {
         atmService.setDataSource().accept(
                 DATABASE_CONNECTION
                         .setDriverClassName("org.postgresql.Driver")
-                        .setUrl("jdbc:postgresql://localhost/postgres")
+                        .setUrl("jdbc:postgresql://localhost:5432/postgres")
                         .setUsername("postgres")
                         .setPassword("!P4ssW0rd@123")
                         .getDataSource()
@@ -262,44 +259,4 @@ class InDatabaseAtmServiceTest extends InDatabase {
         });
     }
 
-    private Client makePeter() {
-        return new Client(
-                "123123123",
-                "123123",
-                Person.builder()
-                        .firstName("Peter John")
-                        .lastName("Arao")
-                        .gender(Gender.MALE)
-                        .address("Earth")
-                        .birthDate(LocalDate.of(2002, Month.AUGUST, 24))
-                        .build(),
-                5_000_000,
-                false
-        );
-    }
-
-    private Client makeMark() {
-        return new Client(
-                "143143143",
-                "143143",
-                Person.builder()
-                        .firstName("Mark")
-                        .lastName("Silent")
-                        .gender(Gender.PREFER_NOT_TO_SAY)
-                        .address("Earth")
-                        .birthDate(LocalDate.of(2009, Month.APRIL, 29))
-                        .build(),
-                5_000_000,
-                false
-        );
-    }
-
-    private Loan makeLoan(Client client, double amount) {
-        return new Loan(
-                client.accountNumber(),
-                LocalDate.of(2022, Month.AUGUST, 6),
-                amount,
-                true
-        );
-    }
 }
