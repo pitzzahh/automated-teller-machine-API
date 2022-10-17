@@ -124,17 +124,25 @@ public class InMemory implements AtmDAO {
 
     @Override
     public BiFunction<Loan, Client, Status> approveLoan() {
-        return null;
+        return (loan, client) -> {
+            var c = getClientByAccountNumber().apply(client.accountNumber());
+            var status = updateClientSavingsByAccountNumber().apply(c.accountNumber(), c.savings() + loan.amount());
+            LOANS.get(loan.accountNumber()).setPending(false);
+            return status;
+        };
     }
 
     @Override
     public Function<Loan, Status> declineLoan() {
-        return null;
+        return loan -> {
+            LOANS.get(loan.accountNumber()).setDeclined(true);
+            return LOANS.get(loan.accountNumber()).isDeclined() ? SUCCESS : ERROR;
+        };
     }
 
     @Override
     public Function<Loan, Status> removeLoan() {
-        return null;
+        return loan -> loan.equals(LOANS.remove(loan.accountNumber())) ? SUCCESS : ERROR;
     }
 
     @Override
