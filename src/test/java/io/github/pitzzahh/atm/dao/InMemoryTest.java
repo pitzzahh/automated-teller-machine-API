@@ -9,7 +9,6 @@ import io.github.pitzzahh.atm.exceptions.LoanNotFoundException;
 import io.github.pitzzahh.atm.service.AtmService;
 import static io.github.pitzzahh.atm.dao.Util.*;
 import io.github.pitzzahh.util.utilities.Print;
-import io.github.pitzzahh.atm.entity.Client;
 import io.github.pitzzahh.atm.entity.Loan;
 import org.junit.jupiter.api.*;
 import java.util.Collection;
@@ -44,7 +43,7 @@ class InMemoryTest {
     @Order(2)
     @Test
     void shouldGetClientByAccountNumber() {
-        Client apply = atmService.getClientByAccountNumber().apply(makePeter().accountNumber());
+        var apply = atmService.getClientByAccountNumber().apply(makePeter().accountNumber()).orElse(null);
         System.out.println("apply = " + apply);
     }
     @Test

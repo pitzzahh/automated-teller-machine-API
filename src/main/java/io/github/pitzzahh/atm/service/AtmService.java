@@ -66,7 +66,7 @@ public class AtmService {
      * @see Function
      * @see Client
      */
-    public Function<String, Client> getClientByAccountNumber() throws IllegalArgumentException {
+    public Function<String, Optional<Client>> getClientByAccountNumber() throws IllegalArgumentException {
         return ATM_DAO.getClientByAccountNumber();
     }
 
