@@ -1,13 +1,15 @@
 package io.github.pitzzahh.atm.dao;
 
-import static io.github.pitzzahh.util.utilities.Print.println;
 import static io.github.pitzzahh.util.utilities.classes.enums.Status.SUCCESS;
+import io.github.pitzzahh.atm.exceptions.ClientNotFoundException;
+import static io.github.pitzzahh.util.utilities.Print.println;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import io.github.pitzzahh.atm.exceptions.LoanDoesNotExist;
 import io.github.pitzzahh.atm.service.AtmService;
 import static io.github.pitzzahh.atm.dao.Util.*;
 import io.github.pitzzahh.util.utilities.Print;
+import io.github.pitzzahh.atm.entity.Client;
 import io.github.pitzzahh.atm.entity.Loan;
 import org.junit.jupiter.api.*;
 import java.util.Collection;
@@ -19,8 +21,8 @@ class InMemoryTest {
 
     private static AtmService atmService;
 
-    @BeforeEach
-    void setUp() {
+    @BeforeAll
+    static void setUp() {
         atmService = new AtmService(new InMemory());
     }
 
@@ -39,9 +41,14 @@ class InMemoryTest {
         var result = atmService.saveAllClients().apply(clients);
         assertEquals(SUCCESS, result);
     }
-
-    @Test
     @Order(2)
+    @Test
+    void shouldGetClientByAccountNumber() {
+        Client apply = atmService.getClientByAccountNumber().apply(makePeter().accountNumber());
+        System.out.println("apply = " + apply);
+    }
+    @Test
+    @Order(3)
     void B_shouldPrintAllClientsBeforeLoanRequests() {
         atmService.getAllClients()
                 .get()
@@ -50,7 +57,7 @@ class InMemoryTest {
     }
 
     @Test
-    @Order(3)
+    @Order(4)
     void C_shouldMakeALoan() {
         // given
         var client = makeMark();
@@ -62,19 +69,20 @@ class InMemoryTest {
     }
 
     @Test()
-    @Order(4)
+    @Order(5)
     void D_shouldMakeALoan() {
         // given
         var client = makePeter();
         var loan = makeLoan(client, 10_000);
         // when
+        println(loan);
         var result = atmService.requestLoan().apply(loan);
         // then
         assertEquals(SUCCESS, result);
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     void E_shouldApproveLoan() {
 
         var client = makeMark();
@@ -92,7 +100,7 @@ class InMemoryTest {
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     void F_shouldApproveLoan() {
 
         var client = makePeter();
@@ -111,7 +119,7 @@ class InMemoryTest {
     }
 
     @Test
-    @Order(7)
+    @Order(8)
     void J_shouldGetLoanMessage() {
         // given
         var accountNumber = makeMark().accountNumber();
@@ -128,7 +136,7 @@ class InMemoryTest {
     }
 
     @Test
-    @Order(8)
+    @Order(9)
     void K_shouldGetLoanMessage() {
         // given
         var accountNumber = makePeter().accountNumber();
@@ -145,7 +153,7 @@ class InMemoryTest {
     }
 
     @Test
-    @Order(9)
+    @Order(10)
     void G_shouldPrintAllClientsAfterLoanRequests() {
         atmService.getAllClients()
                 .get()
@@ -154,7 +162,7 @@ class InMemoryTest {
     }
 
     @Test
-    @Order(10)
+    @Order(11)
     void shouldDeclineLoan() {
         var client = makePeter();
         var loan = new Loan(
@@ -167,7 +175,7 @@ class InMemoryTest {
     }
 
     @Test
-    @Order(11)
+    @Order(12)
     void K_shouldGetLoanMessage2() {
         // given
         var accountNumber = "123123123";
@@ -184,7 +192,7 @@ class InMemoryTest {
     }
 
     @Test
-    @Order(12)
+    @Order(13)
     void G_shouldPrintAllClientsAfterLoanRequests2() {
         atmService.getAllClients()
                 .get()
@@ -193,12 +201,12 @@ class InMemoryTest {
     }
 
     @Test
-    @Order(13)
+    @Order(14)
     void shouldThrowExceptionWhenGettingLoanMessagesBecauseClientDoesNotExist() {
         // given
         var accountNumber = "321321321";
         // then
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(ClientNotFoundException.class, () -> {
             // when
             var result = atmService.getMessage().apply(accountNumber)
                     .entrySet()
@@ -213,7 +221,7 @@ class InMemoryTest {
     }
 
     @Test
-    @Order(14)
+    @Order(15)
     void shouldGetSavingsByAccountNumber() {
         var client = makeMark();
         var savings = atmService.getClientSavingsByAccountNumber().apply(client.accountNumber());
@@ -221,7 +229,7 @@ class InMemoryTest {
     }
 
     @Test
-    @Order(15)
+    @Order(16)
     void shouldGetAllLoans() {
         // given
         var loan = atmService.getAllLoans();
@@ -233,11 +241,11 @@ class InMemoryTest {
     }
 
     @Test
-    @Order(16)
+    @Order(17)
     void shouldThrowExceptionBecauseClientDoesNotExist() {
         // given
         var accountNumber = "123456789";
-        assertThrows(IllegalArgumentException.class, () -> atmService.getClientByAccountNumber().apply(accountNumber));
+        assertThrows(ClientNotFoundException.class, () -> atmService.getClientByAccountNumber().apply(accountNumber));
     }
 
 }
