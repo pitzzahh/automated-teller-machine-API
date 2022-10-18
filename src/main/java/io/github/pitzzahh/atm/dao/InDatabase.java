@@ -1,21 +1,23 @@
 package io.github.pitzzahh.atm.dao;
 
-import java.util.*;
-import javax.sql.DataSource;
-import java.sql.SQLException;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.function.BiFunction;
-import io.github.pitzzahh.atm.entity.Loan;
-import io.github.pitzzahh.atm.entity.Client;
-import io.github.pitzzahh.atm.mapper.LoanMapper;
+import static io.github.pitzzahh.util.utilities.classes.enums.Status.*;
+import io.github.pitzzahh.atm.exceptions.ClientNotFoundException;
+import io.github.pitzzahh.util.utilities.classes.enums.Status;
+import io.github.pitzzahh.util.utilities.SecurityUtil;
 import org.springframework.jdbc.core.JdbcTemplate;
 import io.github.pitzzahh.atm.mapper.ClientMapper;
-import io.github.pitzzahh.util.utilities.SecurityUtil;
-import io.github.pitzzahh.util.utilities.classes.enums.Status;
-import static io.github.pitzzahh.util.utilities.classes.enums.Status.*;
+import io.github.pitzzahh.atm.mapper.LoanMapper;
+import io.github.pitzzahh.atm.entity.Client;
+import io.github.pitzzahh.atm.entity.Loan;
+import static java.lang.String.format;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.function.Consumer;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+import java.util.*;
 
 /**
  * Implementation of the {@link AtmDAO}.
@@ -80,7 +82,7 @@ public class InDatabase implements AtmDAO {
             try {
                 return jdbcTemplate.queryForObject(QUERY, new ClientMapper(), SecurityUtil.encrypt(an));
             } catch (RuntimeException ignored) {
-                throw new IllegalArgumentException(String.format("CLIENT WITH ACCOUNT NUMBER: %s DOES NOT EXIST", an));
+                throw new ClientNotFoundException(format("CLIENT WITH ACCOUNT NUMBER: %s DOES NOT EXIST", an));
             }
         };
     }
