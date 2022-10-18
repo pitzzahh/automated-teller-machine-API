@@ -5,7 +5,7 @@ import io.github.pitzzahh.atm.exceptions.ClientNotFoundException;
 import static io.github.pitzzahh.util.utilities.Print.println;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import io.github.pitzzahh.atm.exceptions.LoanDoesNotExist;
+import io.github.pitzzahh.atm.exceptions.LoanNotFoundException;
 import io.github.pitzzahh.atm.service.AtmService;
 import static io.github.pitzzahh.atm.dao.Util.*;
 import io.github.pitzzahh.util.utilities.Print;
@@ -93,7 +93,7 @@ class InMemoryTest {
                 .flatMap(Collection::stream)
                 .filter(l -> l.accountNumber().equals(client.accountNumber()) && l.pending())
                 .findAny()
-                .orElseThrow(LoanDoesNotExist::new);
+                .orElseThrow(LoanNotFoundException::new);
 
         var result = atmService.approveLoan().apply(loan, client);
         assertEquals(SUCCESS, result);
@@ -111,7 +111,7 @@ class InMemoryTest {
                 .flatMap(Collection::stream)
                 .filter(l -> l.accountNumber().equals(client.accountNumber()) && l.pending())
                 .findAny()
-                .orElseThrow(LoanDoesNotExist::new);
+                .orElseThrow(LoanNotFoundException::new);
 
 
         var result = atmService.approveLoan().apply(loan, client);

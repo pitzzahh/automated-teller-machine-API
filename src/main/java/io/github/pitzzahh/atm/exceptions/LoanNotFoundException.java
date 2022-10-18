@@ -3,9 +3,9 @@ package io.github.pitzzahh.atm.exceptions;
 /**
  * Exception thrown when loan does not exist.
  */
-public class LoanDoesNotExist extends RuntimeException {
+public class LoanNotFoundException extends RuntimeException {
 
-    public LoanDoesNotExist() {
+    public LoanNotFoundException() {
         super("Loan does not exist");
     }
 
@@ -13,7 +13,7 @@ public class LoanDoesNotExist extends RuntimeException {
      * Constructs a new exception with the specified detail message.
      * @param message the detail message.
      */
-    public LoanDoesNotExist(String message) {
+    public LoanNotFoundException(String message) {
         super(message);
     }
 }
