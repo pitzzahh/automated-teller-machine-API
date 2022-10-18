@@ -1,16 +1,17 @@
 package io.github.pitzzahh.atm.dao;
 
-import java.util.Map;
-import java.util.List;
-import java.util.Collection;
-import org.junit.jupiter.api.*;
-import io.github.pitzzahh.atm.entity.Loan;
-import io.github.pitzzahh.util.utilities.Print;
-import static io.github.pitzzahh.atm.dao.Util.*;
+import io.github.pitzzahh.atm.exceptions.ClientNotFoundException;
+import io.github.pitzzahh.atm.database.DatabaseConnection;
+import io.github.pitzzahh.util.utilities.classes.enums.*;
 import io.github.pitzzahh.atm.service.AtmService;
 import static org.junit.jupiter.api.Assertions.*;
-import io.github.pitzzahh.util.utilities.classes.enums.*;
-import io.github.pitzzahh.atm.database.DatabaseConnection;
+import static io.github.pitzzahh.atm.dao.Util.*;
+import io.github.pitzzahh.util.utilities.Print;
+import io.github.pitzzahh.atm.entity.Loan;
+import org.junit.jupiter.api.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class InDatabaseTest extends InDatabase {
@@ -20,14 +21,14 @@ class InDatabaseTest extends InDatabase {
 
     private static final DatabaseConnection DATABASE_CONNECTION = new DatabaseConnection();
 
-    @BeforeEach
-    void setUp() {
+    @BeforeAll
+    static void setUp() {
         atmService = new AtmService(new InDatabase());
         atmService.setDataSource().accept(
                 DATABASE_CONNECTION
                         .setDriverClassName("org.postgresql.Driver")
                         .setUrl("jdbc:postgresql://localhost:5432/postgres")
-                        .setUsername("postgres")
+                        .setUsername("Student")
                         .setPassword("!P4ssW0rd@123")
                         .getDataSource()
         );
@@ -59,7 +60,7 @@ class InDatabaseTest extends InDatabase {
                 .forEach(Print::println);
     }
 
-    @Test
+    @RepeatedTest(2)
     @Order(3)
     void C_shouldMakeALoan() {
         // given
@@ -73,7 +74,7 @@ class InDatabaseTest extends InDatabase {
         }
     }
 
-    @Test()
+    @RepeatedTest(2)
     @Order(4)
     void D_shouldMakeALoan() {
         // given
@@ -212,7 +213,7 @@ class InDatabaseTest extends InDatabase {
         // given
         var accountNumber = "321321321";
         // then
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(ClientNotFoundException.class, () -> {
             // when
             var result = atmService.getMessage().apply(accountNumber)
                     .entrySet()
@@ -251,12 +252,7 @@ class InDatabaseTest extends InDatabase {
     void shouldThrowExceptionBecauseClientDoesNotExist() {
         // given
         var accountNumber = "123456789";
-        assertThrows(IllegalArgumentException.class, () -> {
-            // when
-            var client = atmService.getClientByAccountNumber().apply(accountNumber);
-            // then
-            Print.println(client);
-        });
+        assertThrows(ClientNotFoundException.class, () -> atmService.getClientByAccountNumber().apply(accountNumber));
     }
 
 }
