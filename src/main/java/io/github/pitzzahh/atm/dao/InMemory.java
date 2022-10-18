@@ -15,14 +15,42 @@ import java.util.*;
 
 public class InMemory implements AtmDAO {
 
+    /**
+     * Stores the {@code Client} objects.
+     * The {@code Map<String, Client>} object.
+     */
     private final Map<String, Client> CLIENTS = new HashMap<>();
+
+    /**
+     * Stores the {@code Loan} objects.
+     * The {@code Map<String, Loan>} object.
+     */
     private final Map<String, Loan> LOANS = new HashMap<>();
 
+    /**
+     * Function that supplies a {@code Map<String, Client>}.
+     * <p>{@code String} - the key, the key is the account number of the client</p>
+     * <p>{@code Client} - the value, the value is the client object</p>
+     * @return a {@code Client} object
+     * @see Map
+     * @see Supplier
+     * @see Client
+     */
     @Override
     public Supplier<Map<String, Client>> getAllClients() {
         return () -> CLIENTS;
     }
 
+    /**
+     * Function that returns a {@code Optional<Client>} object based on the {@code String}
+     * that contains the account number.
+     * <p>T - a {@code String} containing the account number to be search from the database.</p>
+     * <p>R - a {@code Optional<Client>} containing the result if the client is found or not.</p>
+     * @return a {@code Optional<Client>} object.
+     * @throws IllegalArgumentException if the account number does not belong to any client.
+     * @see Function
+     * @see Client
+     */
     @Override
     public Function<String, Client> getClientByAccountNumber() throws IllegalArgumentException {
         return accountNumber -> CLIENTS.entrySet()
@@ -33,11 +61,25 @@ public class InMemory implements AtmDAO {
                 .orElseThrow(() -> new ClientNotFoundException(format("Client with account number [%s] does not exist", accountNumber)));
     }
 
+    /**
+     * Function that accepts a {@code String} containing the account number.
+     * The account number will be used to search for the clients savings.
+     * @return a {@code Double} containing the savings of the client with the account number.
+     * @see Function
+     */
     @Override
     public Function<String, Double> getClientSavingsByAccountNumber() {
         return accountNumber -> getClientByAccountNumber().apply(accountNumber).savings();
     }
 
+    /**
+     * Function that removes a client in the database using the account number.
+     * <p>T - a {@code String} the account number of the client needed in order to remove the client.</p>
+     * <p>R - the {@code Status} of the operation if {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @see Function
+     * @see Status
+     */
     @Override
     public Function<String, Status> removeClientByAccountNumber() {
         return accountNumber -> {
@@ -48,12 +90,26 @@ public class InMemory implements AtmDAO {
         };
     }
 
+    /**
+     * Function that removes all the clients in the database.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @see Supplier
+     * @see Status
+     */
     @Override
     public Supplier<Status> removeAllClients() {
         CLIENTS.clear();
         return () -> CLIENTS.isEmpty() ? SUCCESS : ERROR;
     }
 
+    /**
+     * Function that accepts two values. A {@code String} and a {@code Boolean}.
+     * <p>First parameter is a {@code String} contains the account number of the client.</p>
+     * <p>Second parameter is a {@code Boolean}, {@code true} if the client account should be locked, default is false.</p>
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @see BiFunction
+     * @see Status
+     */
     @Override
     public BiFunction<String, Boolean, Status> updateClientStatusByAccountNumber() {
         return (accountNumber, status) -> {
@@ -63,6 +119,14 @@ public class InMemory implements AtmDAO {
         };
     }
 
+    /**
+     * Function that accepts two values. A {@code String} and a {@code Double}.
+     * <p>First parameter is a {@code String} contains the account number of the client.</p>
+     * <p>Second parameter is a {@code Double}, the new savings balance of the client.</p>
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @see BiFunction
+     * @see Status
+     */
     @Override
     public BiFunction<String, Double, Status> updateClientSavingsByAccountNumber() {
         return (accountNumber, savings) -> {
@@ -72,11 +136,27 @@ public class InMemory implements AtmDAO {
         };
     }
 
+    /**
+     * Function that save a client to the database. The function takes a {@code Client} object,
+     * the object to be saved in the database table.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @see Function
+     * @see Client
+     * @see Status
+     */
     @Override
     public Function<Client, Status> saveClient() {
         return client -> CLIENTS.put(client.accountNumber(), client) == client ? SUCCESS : ERROR;
     }
 
+    /**
+     * Function that saves a {@code Collection<Client} to the database table.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @see Function
+     * @see Collection
+     * @see Client
+     * @see Status
+     */
     @Override
     public Function<Collection<Client>, Status> saveAllClients() {
         return clients -> {
@@ -84,10 +164,19 @@ public class InMemory implements AtmDAO {
                     clients.stream()
                             .collect(Collectors.toMap(Client::accountNumber, Function.identity()))
             );
-            return SUCCESS;
+            System.out.println(CLIENTS);
+            return CLIENTS.size() == clients.size() ? SUCCESS : ERROR;
         };
     }
 
+    /**
+     * Function that submits a loan request.
+     * The Function takes a {@code Loan} object containing the loan information.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @see Function
+     * @see Loan
+     * @see Status
+     */
     @Override
     public Function<Loan, Status> requestLoan() {
         return loan -> {
@@ -97,6 +186,16 @@ public class InMemory implements AtmDAO {
         };
     }
 
+    /**
+     * Function that returns a key value pair, a {@code Map<String, List<Loan>>} in particular.
+     * <p>K - is a {@code String} containing the key, the key is the account number of the client who requested a loan.</p>
+     * <p>V - is a {@code String} containing the value, the value is all the loans that the account requested. It is a {@code List<Loan>}</p>
+     * @return a {@code Map<String, List<Loan>>} a key value pair containing all the loans from the table in the database.
+     * @see Supplier
+     * @see Map
+     * @see List
+     * @see Loan
+     */
     @Override
     public Supplier<Map<String, List<Loan>>> getAllLoans() {
         return () -> LOANS.values()
@@ -104,6 +203,15 @@ public class InMemory implements AtmDAO {
                 .collect(Collectors.groupingBy(Loan::accountNumber));
     }
 
+    /**
+     * Function that gets the loan of a client using loan number and account number.
+     * The function takes an {@code Integer} and a {@code String}, the integer containing the loan number,
+     * and the string containing the account number.
+     * @return an {@code Optional<Loan>} whether the loan exist or not.
+     * @see BiFunction
+     * @see Optional
+     * @see Loan
+     */
     @Override
     public BiFunction<Integer, String, Optional<Loan>> getLoanByLoanNumberAndAccountNumber() {
         return (loanNumber, accountNumber) -> LOANS.values()
@@ -112,6 +220,12 @@ public class InMemory implements AtmDAO {
                 .findAny();
     }
 
+    /**
+     * Function that gets the latest loan count of a client and returns the count.
+     * The function takes a {@code String} containing the account number that holds a loan.
+     * @return a {@code Integer} containing the loan count of a client.
+     * @see Function
+     */
     @Override
     public Function<String, Integer> getLoanCount() {
         return accountNumber -> {
@@ -125,16 +239,33 @@ public class InMemory implements AtmDAO {
         };
     }
 
+    /**
+     * Function that approves a loan request.
+     * The function takes a {@code Loan} object containing the loan information to be approved.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @see BiFunction
+     * @see Loan
+     * @see Status
+     */
     @Override
     public BiFunction<Loan, Client, Status> approveLoan() {
         return (loan, client) -> {
             var c = getClientByAccountNumber().apply(client.accountNumber());
+            System.out.println("c = " + c);
             var status = updateClientSavingsByAccountNumber().apply(c.accountNumber(), c.savings() + loan.amount());
             LOANS.get(loan.accountNumber()).setPending(false);
             return status;
         };
     }
 
+    /**
+     * Function that declines a loan request.
+     * The function takes a {@code Loan} object containing the loan information to be approved.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @see Function
+     * @see Loan
+     * @see Status
+     */
     @Override
     public Function<Loan, Status> declineLoan() {
         return loan -> {
@@ -143,11 +274,25 @@ public class InMemory implements AtmDAO {
         };
     }
 
+    /**
+     * Function that removes a loan.
+     * The function takes a {@code Loan} object containing the loan information to be removed.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @see Function
+     * @see Loan
+     * @see Status
+     */
     @Override
     public Function<Loan, Status> removeLoan() {
         return loan -> loan.equals(LOANS.remove(loan.accountNumber())) ? SUCCESS : ERROR;
     }
 
+    /**
+     * Function that removes all the loans from the database.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @see Supplier
+     * @see Status
+     */
     @Override
     public Supplier<Status> removeAllLoans() {
         LOANS.clear();
