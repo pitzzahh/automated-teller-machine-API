@@ -54,10 +54,11 @@ public interface AtmDAO {
      * <p>R - a {@code Optional<Client>} containing the result if the client is found or not.</p>
      * @return a {@code Optional<Client>} object.
      * @throws IllegalArgumentException if the account number does not belong to any client.
+     * @see Optional
      * @see Function
      * @see Client
      */
-    Function<String, Client> getClientByAccountNumber() throws IllegalArgumentException;
+    Function<String, Optional<Client>> getClientByAccountNumber() throws IllegalArgumentException;
 
     /**
      * Function that accepts a {@code String} containing the account number.
@@ -216,7 +217,7 @@ public interface AtmDAO {
      */
     default Function<String, Map<String, List<Message>>> getMessage() {
         return accountNumber -> {
-            var client = getClientByAccountNumber().apply(accountNumber);
+            var client = getClientByAccountNumber().apply(accountNumber).orElse(null);
             var check = getAllLoans()
                     .get()
                     .values()

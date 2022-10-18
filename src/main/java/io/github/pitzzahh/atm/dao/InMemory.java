@@ -52,17 +52,18 @@ public class InMemory implements AtmDAO {
      * <p>R - a {@code Optional<Client>} containing the result if the client is found or not.</p>
      * @return a {@code Optional<Client>} object.
      * @throws IllegalArgumentException if the account number does not belong to any client.
+     * @see Optional
      * @see Function
      * @see Client
      */
     @Override
-    public Function<String, Client> getClientByAccountNumber() throws IllegalArgumentException {
-        return accountNumber -> CLIENTS.entrySet()
+    public Function<String, Optional<Client>> getClientByAccountNumber() throws IllegalArgumentException {
+        return accountNumber -> Optional.ofNullable(CLIENTS.entrySet()
                 .stream()
                 .filter(e -> e.getKey().equals(accountNumber))
                 .findAny()
                 .map(Map.Entry::getValue)
-                .orElseThrow(() -> new ClientNotFoundException(format("Client with account number [%s] does not exist", accountNumber)));
+                .orElseThrow(() -> new ClientNotFoundException(format("Client with account number [%s] does not exist", accountNumber))));
     }
 
     /**
@@ -73,7 +74,7 @@ public class InMemory implements AtmDAO {
      */
     @Override
     public Function<String, Double> getClientSavingsByAccountNumber() {
-        return accountNumber -> getClientByAccountNumber().apply(accountNumber).savings();
+        return accountNumber -> getClientByAccountNumber().apply(accountNumber).map(Client::savings).orElse(0.0);
     }
 
     /**
@@ -117,9 +118,12 @@ public class InMemory implements AtmDAO {
     @Override
     public BiFunction<String, Boolean, Status> updateClientStatusByAccountNumber() {
         return (accountNumber, status) -> {
-            var client = getClientByAccountNumber().apply(accountNumber);
-            client.setLocked(status);
-            return client.isLocked() == status? SUCCESS : ERROR;
+            var result = getClientByAccountNumber().apply(accountNumber)
+                    .map(client -> {
+                        client.setLocked(status);
+                        return client.isLocked() == status ? SUCCESS : ERROR;
+                    });
+            return result.orElse(ERROR);
         };
     }
 
@@ -134,9 +138,12 @@ public class InMemory implements AtmDAO {
     @Override
     public BiFunction<String, Double, Status> updateClientSavingsByAccountNumber() {
         return (accountNumber, savings) -> {
-            var client = getClientByAccountNumber().apply(accountNumber);
-            client.setSavings(savings);
-            return client.savings() == savings ? SUCCESS : ERROR;
+            var status = getClientByAccountNumber().apply(accountNumber)
+                    .map(c -> {
+                        c.setSavings(savings);
+                        return c.savings() == savings ? SUCCESS : ERROR;
+                    });
+            return status.orElse(ERROR);
         };
     }
 
@@ -253,10 +260,9 @@ public class InMemory implements AtmDAO {
      */
     @Override
     public BiFunction<Loan, Client, Status> approveLoan() {
-        return (loan, client) -> {
-            var c = getClientByAccountNumber().apply(client.accountNumber());
-            System.out.println("c = " + c);
-            var status = updateClientSavingsByAccountNumber().apply(c.accountNumber(), c.savings() + loan.amount());
+        return (loan, c) -> {
+            var client = getClientByAccountNumber().apply(c.accountNumber());
+            var status = updateClientSavingsByAccountNumber().apply(client.map(Client::accountNumber).orElse(null), client.map(Client::savings).orElse(0.0) + loan.amount());
             LOANS.get(loan.accountNumber()).setPending(false);
             return status;
         };

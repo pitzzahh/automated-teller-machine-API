@@ -72,15 +72,16 @@ public class InDatabase implements AtmDAO {
      * <p>R - a {@code Optional<Client>} containing the result if the client is found or not.</p>
      * @return a {@code Optional<Client>} object.
      * @throws IllegalArgumentException if the account number does not belong to any client.
+     * @see Optional
      * @see Function
      * @see Client
      */
     @Override
-    public Function<String, Client> getClientByAccountNumber() throws IllegalArgumentException {
+    public Function<String, Optional<Client>> getClientByAccountNumber() throws IllegalArgumentException {
         final var QUERY = "SELECT * FROM clients WHERE account_number = ?";
         return an -> {
             try {
-                return jdbcTemplate.queryForObject(QUERY, new ClientMapper(), SecurityUtil.encrypt(an));
+                return Optional.ofNullable(jdbcTemplate.queryForObject(QUERY, new ClientMapper(), SecurityUtil.encrypt(an)));
             } catch (RuntimeException ignored) {
                 throw new ClientNotFoundException(format("CLIENT WITH ACCOUNT NUMBER: %s DOES NOT EXIST", an));
             }
@@ -314,7 +315,7 @@ public class InDatabase implements AtmDAO {
         final var QUERY = "UPDATE loans SET pending = ? WHERE loan_number = ? AND account_number = ?";
         return (loan, c) -> {
             var client = getClientByAccountNumber().apply(c.accountNumber());
-            var status = updateClientSavingsByAccountNumber().apply(client.accountNumber(), client.savings() + loan.amount());
+            var status = updateClientSavingsByAccountNumber().apply(client.map(Client::accountNumber).orElse(null), client.map(Client::savings).orElse(0.0) + loan.amount());
             return status == SUCCESS ? jdbcTemplate.update(
                     QUERY,
                     SecurityUtil.encrypt(Boolean.FALSE.toString()),
