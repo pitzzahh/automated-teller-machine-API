@@ -89,6 +89,10 @@ public final class Message {
         return client;
     }
 
+    /**
+     * Get the status of the loan.
+     * @return {@code true} if the loan is declined, {@code false} if the loan is approved.
+     */
     public boolean status() {
         return status;
     }
