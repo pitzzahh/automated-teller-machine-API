@@ -1,7 +1,7 @@
 package io.github.pitzzahh.atm.database;
 
+import io.github.pitzzahh.atm.dao.InDatabase;
 import io.github.pitzzahh.atm.service.AtmService;
-import io.github.pitzzahh.atm.dao.AtmDAOImplementation;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
@@ -64,7 +64,7 @@ public class DatabaseConnection {
      * Returns the complete data source.
      * @return the datasource.
      * @see AtmService
-     * @see AtmDAOImplementation
+     * @see InDatabase
      */
     public DriverManagerDataSource getDataSource() {
         var dataSource = new DriverManagerDataSource();

@@ -1,30 +1,31 @@
 package io.github.pitzzahh.atm.dao;
 
-import java.util.*;
-import javax.sql.DataSource;
-import java.sql.SQLException;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.function.BiFunction;
-import io.github.pitzzahh.atm.entity.Loan;
-import io.github.pitzzahh.atm.entity.Client;
-import io.github.pitzzahh.atm.entity.Message;
-import io.github.pitzzahh.atm.mapper.LoanMapper;
-import com.github.pitzzahh.utilities.SecurityUtil;
+import static io.github.pitzzahh.util.utilities.classes.enums.Status.*;
+import io.github.pitzzahh.atm.exceptions.ClientNotFoundException;
+import io.github.pitzzahh.util.utilities.classes.enums.Status;
+import io.github.pitzzahh.util.utilities.SecurityUtil;
 import org.springframework.jdbc.core.JdbcTemplate;
 import io.github.pitzzahh.atm.mapper.ClientMapper;
-import com.github.pitzzahh.utilities.classes.enums.Status;
-import static com.github.pitzzahh.utilities.classes.enums.Status.*;
+import io.github.pitzzahh.atm.mapper.LoanMapper;
+import io.github.pitzzahh.atm.entity.Client;
+import io.github.pitzzahh.atm.entity.Loan;
+import static java.lang.String.format;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.function.Consumer;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+import java.util.*;
 
 /**
  * Implementation of the {@link AtmDAO}.
  */
-public class AtmDAOImplementation implements AtmDAO {
+public class InDatabase implements AtmDAO {
 
     private DataSource dataSource;
-    private JdbcTemplate db;
+    private JdbcTemplate jdbcTemplate;
 
     /**
      * Function that accepts a {@code DataSource} object.
@@ -37,13 +38,14 @@ public class AtmDAOImplementation implements AtmDAO {
     @Override
     public Consumer<DataSource> setDataSource() throws RuntimeException {
         return source -> {
-            this.dataSource = source;
+            if (source == null) throw new UnsupportedOperationException("No DataSource provided, to use in memory database use InMemory class as DAO and do not provide a datasource.");
             try {
+                this.dataSource = source;
                 this.dataSource.getConnection().beginRequest();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-            this.db = new JdbcTemplate(dataSource);
+            this.jdbcTemplate = new JdbcTemplate(dataSource);
         };
     }
 
@@ -58,7 +60,7 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public Supplier<Map<String, Client>> getAllClients() {
-        return () -> db.query("SELECT * FROM clients", new ClientMapper())
+        return () -> jdbcTemplate.query("SELECT * FROM clients", new ClientMapper())
                 .stream()
                 .collect(Collectors.toMap(Client::accountNumber, Function.identity()));
     }
@@ -78,9 +80,9 @@ public class AtmDAOImplementation implements AtmDAO {
         final var QUERY = "SELECT * FROM clients WHERE account_number = ?";
         return an -> {
             try {
-                return db.queryForObject(QUERY, new ClientMapper(), SecurityUtil.encrypt(an));
+                return jdbcTemplate.queryForObject(QUERY, new ClientMapper(), SecurityUtil.encrypt(an));
             } catch (RuntimeException ignored) {
-                throw new IllegalArgumentException(String.format("CLIENT WITH ACCOUNT NUMBER: %s DOES NOT EXIST", an));
+                throw new ClientNotFoundException(format("CLIENT WITH ACCOUNT NUMBER: %s DOES NOT EXIST", an));
             }
         };
     }
@@ -96,7 +98,7 @@ public class AtmDAOImplementation implements AtmDAO {
         final var QUERY = "SELECT savings FROM clients WHERE account_number = ?";
         return accountNumber -> Double.parseDouble(
                 SecurityUtil.decrypt(
-                        Objects.requireNonNull(db.queryForObject(
+                        Objects.requireNonNull(jdbcTemplate.queryForObject(
                                 QUERY,
                                 String.class,
                                 SecurityUtil.encrypt(accountNumber)
@@ -115,7 +117,7 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public Function<String, Status> removeClientByAccountNumber() {
-        return an -> db.update("DELETE FROM clients WHERE account_number = ?", SecurityUtil.encrypt(an)) > 0 ? SUCCESS : ERROR;
+        return an -> jdbcTemplate.update("DELETE FROM clients WHERE account_number = ?", SecurityUtil.encrypt(an)) > 0 ? SUCCESS : ERROR;
     }
 
     /**
@@ -126,7 +128,7 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public Supplier<Status> removeAllClients() {
-        return () -> db.update("DELETE FROM clients") > 0 ? SUCCESS : ERROR;
+        return () -> jdbcTemplate.update("DELETE FROM clients WHERE TRUE") > 0 ? SUCCESS : ERROR;
     }
 
     /**
@@ -140,7 +142,7 @@ public class AtmDAOImplementation implements AtmDAO {
     @Override
     public BiFunction<String, Boolean, Status> updateClientStatusByAccountNumber() {
         final var QUERY = "UPDATE clients SET isLocked = ? WHERE account_number = ?";
-        return (an, status) -> db.update(QUERY, status, SecurityUtil.encrypt(an)) > 0 ? SUCCESS : ERROR;
+        return (an, status) -> jdbcTemplate.update(QUERY, status, SecurityUtil.encrypt(an)) > 0 ? SUCCESS : ERROR;
     }
 
     /**
@@ -154,7 +156,7 @@ public class AtmDAOImplementation implements AtmDAO {
     @Override
     public BiFunction<String, Double, Status> updateClientSavingsByAccountNumber() {
         final var QUERY = "UPDATE clients SET savings = ? WHERE account_number = ?";
-        return (an, newSavings) -> db.update(
+        return (an, newSavings) -> jdbcTemplate.update(
                 QUERY,
                 SecurityUtil.encrypt(String.valueOf(newSavings)),
                 SecurityUtil.encrypt(an)
@@ -173,7 +175,7 @@ public class AtmDAOImplementation implements AtmDAO {
     public Function<Client, Status> saveClient() {
         final var QUERY = "INSERT INTO clients (account_number, pin, first_name, last_name, gender, address, date_of_birth, savings, isLocked)" +
                 " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        return client -> db.update(
+        return client -> jdbcTemplate.update(
                 QUERY,
                 SecurityUtil.encrypt(client.accountNumber()),
                 SecurityUtil.encrypt(client.pin()),
@@ -201,7 +203,7 @@ public class AtmDAOImplementation implements AtmDAO {
                 " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         return clients -> {
             clients.forEach(
-                        client -> db.update(
+                        client -> jdbcTemplate.update(
                                 QUERY,
                                 SecurityUtil.encrypt(client.accountNumber()),
                                 SecurityUtil.encrypt(client.pin()),
@@ -229,7 +231,7 @@ public class AtmDAOImplementation implements AtmDAO {
     @Override
     public Function<Loan, Status> requestLoan() {
         final var QUERY = "INSERT INTO loans(loan_number, account_number, date_of_loan, amount, pending, declined) VALUES(?, ?, ?, ?, ?, ?)";
-        return loan ->  db.update(
+        return loan ->  jdbcTemplate.update(
                 QUERY,
                 getLoanCount().apply(loan.accountNumber()),
                 SecurityUtil.encrypt(loan.accountNumber()),
@@ -240,7 +242,7 @@ public class AtmDAOImplementation implements AtmDAO {
         ) > 0 ? SUCCESS : ERROR;
     }
 
-    /**s
+    /**
      * Function that returns a key value pair, a {@code Map<String, List<Loan>>} in particular.
      * <p>K - is a {@code String} containing the key, the key is the account number of the client who requested a loan.</p>
      * <p>V - is a {@code String} containing the value, the value is all the loans that the account requested. It is a {@code List<Loan>}</p>
@@ -252,7 +254,7 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public Supplier<Map<String, List<Loan>>> getAllLoans() {
-        return () -> db.query("SELECT * FROM loans", new LoanMapper())
+        return () -> jdbcTemplate.query("SELECT * FROM loans", new LoanMapper())
                 .stream()
                 .collect(Collectors.groupingBy(Loan::accountNumber));
     }
@@ -270,7 +272,7 @@ public class AtmDAOImplementation implements AtmDAO {
     public BiFunction<Integer, String, Optional<Loan>> getLoanByLoanNumberAndAccountNumber() {
         final var QUERY = "SELECT * FROM loans WHERE loan_number = ? AND account_number = ?";
         return (loanNumber, accountNumber) -> Optional.ofNullable(
-                db.queryForObject(
+                jdbcTemplate.queryForObject(
                         QUERY,
                         new LoanMapper(),
                         loanNumber,
@@ -289,7 +291,7 @@ public class AtmDAOImplementation implements AtmDAO {
         final var QUERY = "SELECT MAX(loan_number) FROM loans WHERE account_number = ?";
         return accountNumber ->  {
             int result = Optional.ofNullable(
-                    db.queryForObject(
+                    jdbcTemplate.queryForObject(
                             QUERY,
                             Integer.class,
                             SecurityUtil.encrypt(accountNumber))
@@ -313,7 +315,7 @@ public class AtmDAOImplementation implements AtmDAO {
         return (loan, c) -> {
             var client = getClientByAccountNumber().apply(c.accountNumber());
             var status = updateClientSavingsByAccountNumber().apply(client.accountNumber(), client.savings() + loan.amount());
-            return status == SUCCESS ? db.update(
+            return status == SUCCESS ? jdbcTemplate.update(
                     QUERY,
                     SecurityUtil.encrypt(Boolean.FALSE.toString()),
                     loan.loanNumber(),
@@ -333,7 +335,7 @@ public class AtmDAOImplementation implements AtmDAO {
     @Override
     public Function<Loan, Status> declineLoan() {
         final var QUERY = "UPDATE loans SET declined = ? WHERE loan_number = ? AND account_number = ?";
-        return loan -> db.update(
+        return loan -> jdbcTemplate.update(
                 QUERY,
                 SecurityUtil.encrypt(Boolean.TRUE.toString()),
                 loan.loanNumber(),
@@ -352,7 +354,7 @@ public class AtmDAOImplementation implements AtmDAO {
     @Override
     public Function<Loan, Status> removeLoan() {
         final var QUERY = "DELETE FROM loans WHERE loan_number = ? AND account_number = ? AND pending = ?";
-        return loan -> db.update(
+        return loan -> jdbcTemplate.update(
                 QUERY,
                 loan.loanNumber(),
                 loan.accountNumber(),
@@ -368,39 +370,7 @@ public class AtmDAOImplementation implements AtmDAO {
      */
     @Override
     public Supplier<Status> removeAllLoans() {
-        return () ->  db.update("DELETE FROM loans") > 0 ? SUCCESS : ERROR;
+        return () ->  jdbcTemplate.update("DELETE FROM loans WHERE TRUE") > 0 ? SUCCESS : ERROR;
     }
 
-    /**
-     * Function that gets the message of the loan request of a client to the database.
-     * The Function takes a {@code String}.
-     * The {@code String} contains the account number of the client.
-     * @return a {@code Message} object containing the message of the loan.
-     * @throws IllegalArgumentException if the account number does not belong to any client.
-     * @throws IllegalStateException if there are no messages for the client.
-     * @see Function
-     * @see Map
-     * @see List
-     * @see Message
-     */
-    @Override
-    public Function<String, Map<String, List<Message>>> getMessage() throws IllegalArgumentException, IllegalStateException {
-        return accountNumber -> {
-            var client = getClientByAccountNumber().apply(accountNumber);
-            var check = getAllLoans()
-                    .get()
-                    .values()
-                    .stream()
-                    .flatMap(Collection::stream)
-                    .allMatch(a -> a.accountNumber().equals(accountNumber) && ( a.pending() && !a.isDeclined() ));
-            if (check) throw new IllegalStateException("THERE ARE NO MESSAGES AT THE MOMENT");
-            return getAllLoans().get()
-                    .values()
-                    .stream()
-                    .flatMap(Collection::stream)
-                    .filter(l -> !l.pending() || l.isDeclined())
-                    .map(loan -> new Message(loan, client, loan.pending() && loan.isDeclined()))
-                    .collect(Collectors.groupingBy(message -> message.loan().accountNumber()));
-        };
-    }
 }

@@ -10,7 +10,7 @@ import io.github.pitzzahh.atm.dao.AtmDAO;
 import io.github.pitzzahh.atm.entity.Loan;
 import io.github.pitzzahh.atm.entity.Client;
 import io.github.pitzzahh.atm.entity.Message;
-import com.github.pitzzahh.utilities.classes.enums.Status;
+import io.github.pitzzahh.util.utilities.classes.enums.Status;
 
 /**
  * The service for overall functionality..

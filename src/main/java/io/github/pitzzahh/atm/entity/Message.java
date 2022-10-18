@@ -5,7 +5,7 @@ import java.util.Currency;
 import java.text.NumberFormat;
 import java.time.format.FormatStyle;
 import java.time.format.DateTimeFormatter;
-import static com.github.pitzzahh.utilities.classes.TextColors.*;
+import static io.github.pitzzahh.util.utilities.classes.Colors.*;
 
 /**
  * record used to generate message.

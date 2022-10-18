@@ -1,41 +1,34 @@
-package io.github.pitzzahh.service;
+package io.github.pitzzahh.atm.dao;
 
-import java.time.*;
-import java.util.Map;
-import java.util.List;
-import java.util.Collection;
-import org.junit.jupiter.api.*;
-import io.github.pitzzahh.atm.dao.AtmDAO;
-import io.github.pitzzahh.atm.entity.Loan;
-import com.github.pitzzahh.utilities.Print;
-import io.github.pitzzahh.atm.entity.Client;
+import static io.github.pitzzahh.util.utilities.classes.enums.Status.SUCCESS;
+import io.github.pitzzahh.atm.exceptions.ClientNotFoundException;
+import static io.github.pitzzahh.util.utilities.Print.println;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import io.github.pitzzahh.atm.exceptions.LoanDoesNotExist;
 import io.github.pitzzahh.atm.service.AtmService;
-import static org.junit.jupiter.api.Assertions.*;
-import com.github.pitzzahh.utilities.classes.Person;
-import com.github.pitzzahh.utilities.classes.enums.*;
-import io.github.pitzzahh.atm.dao.AtmDAOImplementation;
-import io.github.pitzzahh.atm.database.DatabaseConnection;
+import static io.github.pitzzahh.atm.dao.Util.*;
+import io.github.pitzzahh.util.utilities.Print;
+import io.github.pitzzahh.atm.entity.Client;
+import io.github.pitzzahh.atm.entity.Loan;
+import org.junit.jupiter.api.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class AtmServiceTest extends AtmDAOImplementation {
+class InMemoryTest {
 
+    private static AtmService atmService;
 
-    private AtmService atmService;
+    @BeforeAll
+    static void setUp() {
+        atmService = new AtmService(new InMemory());
+    }
 
-    private static final AtmDAO ATM_DAO = new AtmDAOImplementation();
-    private static final DatabaseConnection DATABASE_CONNECTION = new DatabaseConnection();
-
-    @BeforeEach
-    void setUp() {
-        atmService = new AtmService(ATM_DAO);
-        atmService.setDataSource().accept(
-                DATABASE_CONNECTION
-                        .setDriverClassName("org.postgresql.Driver")
-                        .setUrl("jdbc:postgresql://localhost/postgres")
-                        .setUsername("postgres")
-                        .setPassword("!P4ssW0rd@123")
-                        .getDataSource()
-        );
+    @AfterAll
+    static void afterAll() {
+        assertEquals(SUCCESS, atmService.removeAllLoans().get());
     }
 
     @Test
@@ -43,14 +36,19 @@ class AtmServiceTest extends AtmDAOImplementation {
     void A_shouldSaveAllClients() {
         var clients = List.of(
                 makePeter(),
-                makeZamira()
+                makeMark()
         );
         var result = atmService.saveAllClients().apply(clients);
-        assertEquals(Status.SUCCESS, result);
+        assertEquals(SUCCESS, result);
     }
-
-    @Test
     @Order(2)
+    @Test
+    void shouldGetClientByAccountNumber() {
+        Client apply = atmService.getClientByAccountNumber().apply(makePeter().accountNumber());
+        System.out.println("apply = " + apply);
+    }
+    @Test
+    @Order(3)
     void B_shouldPrintAllClientsBeforeLoanRequests() {
         atmService.getAllClients()
                 .get()
@@ -59,38 +57,35 @@ class AtmServiceTest extends AtmDAOImplementation {
     }
 
     @Test
-    @Order(3)
+    @Order(4)
     void C_shouldMakeALoan() {
         // given
-        var client = makeZamira();
-        for (int i = 10_000; i <= 20_000; i += 10_000) {
-            var loan = makeLoan(client, i);
-            // when
-            var result = atmService.requestLoan().apply(loan);
-            // then
-            assertEquals(Status.SUCCESS, result);
-        }
+        var client = makeMark();
+        var loan = makeLoan(client, 10_000);
+        // when
+        var result = atmService.requestLoan().apply(loan);
+        // then
+        assertEquals(SUCCESS, result);
     }
 
     @Test()
-    @Order(4)
+    @Order(5)
     void D_shouldMakeALoan() {
         // given
         var client = makePeter();
-        for (int i = 10_000; i <= 20_000; i += 10_000) {
-            var loan = makeLoan(client, i);
-            // when
-            var result = atmService.requestLoan().apply(loan);
-            // then
-            assertEquals(Status.SUCCESS, result);
-        }
+        var loan = makeLoan(client, 10_000);
+        // when
+        println(loan);
+        var result = atmService.requestLoan().apply(loan);
+        // then
+        assertEquals(SUCCESS, result);
     }
 
-    @RepeatedTest(2)
-    @Order(5)
+    @Test
+    @Order(6)
     void E_shouldApproveLoan() {
 
-        var client = makeZamira();
+        var client = makeMark();
         var loan = atmService.getAllLoans()
                 .get()
                 .values()
@@ -98,14 +93,14 @@ class AtmServiceTest extends AtmDAOImplementation {
                 .flatMap(Collection::stream)
                 .filter(l -> l.accountNumber().equals(client.accountNumber()) && l.pending())
                 .findAny()
-                .get();
+                .orElseThrow(LoanDoesNotExist::new);
 
         var result = atmService.approveLoan().apply(loan, client);
-        assertEquals(Status.SUCCESS, result);
+        assertEquals(SUCCESS, result);
     }
 
-    @RepeatedTest(2)
-    @Order(6)
+    @Test
+    @Order(7)
     void F_shouldApproveLoan() {
 
         var client = makePeter();
@@ -116,17 +111,18 @@ class AtmServiceTest extends AtmDAOImplementation {
                 .flatMap(Collection::stream)
                 .filter(l -> l.accountNumber().equals(client.accountNumber()) && l.pending())
                 .findAny()
-                .get();
+                .orElseThrow(LoanDoesNotExist::new);
+
 
         var result = atmService.approveLoan().apply(loan, client);
-        assertEquals(Status.SUCCESS, result);
+        assertEquals(SUCCESS, result);
     }
 
     @Test
-    @Order(7)
+    @Order(8)
     void J_shouldGetLoanMessage() {
         // given
-        var accountNumber = makeZamira().accountNumber();
+        var accountNumber = makeMark().accountNumber();
         // when
         var result = atmService.getMessage().apply(accountNumber)
                 .entrySet()
@@ -140,7 +136,7 @@ class AtmServiceTest extends AtmDAOImplementation {
     }
 
     @Test
-    @Order(8)
+    @Order(9)
     void K_shouldGetLoanMessage() {
         // given
         var accountNumber = makePeter().accountNumber();
@@ -157,7 +153,7 @@ class AtmServiceTest extends AtmDAOImplementation {
     }
 
     @Test
-    @Order(9)
+    @Order(10)
     void G_shouldPrintAllClientsAfterLoanRequests() {
         atmService.getAllClients()
                 .get()
@@ -166,7 +162,7 @@ class AtmServiceTest extends AtmDAOImplementation {
     }
 
     @Test
-    @Order(10)
+    @Order(11)
     void shouldDeclineLoan() {
         var client = makePeter();
         var loan = new Loan(
@@ -175,11 +171,11 @@ class AtmServiceTest extends AtmDAOImplementation {
                 true
         );
         var result = atmService.declineLoan().apply(loan);
-        assertEquals(Status.SUCCESS, result);
+        assertEquals(SUCCESS, result);
     }
 
     @Test
-    @Order(11)
+    @Order(12)
     void K_shouldGetLoanMessage2() {
         // given
         var accountNumber = "123123123";
@@ -196,7 +192,7 @@ class AtmServiceTest extends AtmDAOImplementation {
     }
 
     @Test
-    @Order(12)
+    @Order(13)
     void G_shouldPrintAllClientsAfterLoanRequests2() {
         atmService.getAllClients()
                 .get()
@@ -205,12 +201,12 @@ class AtmServiceTest extends AtmDAOImplementation {
     }
 
     @Test
-    @Order(13)
+    @Order(14)
     void shouldThrowExceptionWhenGettingLoanMessagesBecauseClientDoesNotExist() {
         // given
         var accountNumber = "321321321";
         // then
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(ClientNotFoundException.class, () -> {
             // when
             var result = atmService.getMessage().apply(accountNumber)
                     .entrySet()
@@ -225,15 +221,15 @@ class AtmServiceTest extends AtmDAOImplementation {
     }
 
     @Test
-    @Order(14)
+    @Order(15)
     void shouldGetSavingsByAccountNumber() {
-        var client = makeZamira();
+        var client = makeMark();
         var savings = atmService.getClientSavingsByAccountNumber().apply(client.accountNumber());
-        System.out.println("savings = " + savings);
+        println("savings = " + savings);
     }
 
     @Test
-    @Order(15)
+    @Order(16)
     void shouldGetAllLoans() {
         // given
         var loan = atmService.getAllLoans();
@@ -245,63 +241,11 @@ class AtmServiceTest extends AtmDAOImplementation {
     }
 
     @Test
-    @Order(16)
+    @Order(17)
     void shouldThrowExceptionBecauseClientDoesNotExist() {
         // given
         var accountNumber = "123456789";
-        assertThrows(IllegalArgumentException.class, () -> {
-            // when
-            var client = atmService.getClientByAccountNumber().apply(accountNumber);
-            // then
-            Print.println(client);
-        });
-    }
-    @Test
-    @Order(17)
-    void remove() {
-        assertEquals(Status.SUCCESS, atmService.removeAllClients().get());
-        assertEquals(Status.SUCCESS, atmService.removeAllLoans().get());
+        assertThrows(ClientNotFoundException.class, () -> atmService.getClientByAccountNumber().apply(accountNumber));
     }
 
-
-    private Client makePeter() {
-        return new Client(
-                "123123123",
-                "123123",
-                Person.builder()
-                        .firstName("Peter John")
-                        .lastName("Arao")
-                        .gender(Gender.MALE)
-                        .address("Earth")
-                        .birthDate(LocalDate.of(2002, Month.AUGUST, 24))
-                        .build(),
-                5_000_000,
-                false
-        );
-    }
-
-    private Client makeZamira() {
-        return new Client(
-                "143143143",
-                "143143",
-                Person.builder()
-                        .firstName("Zamira Alexis")
-                        .lastName("Morozuk")
-                        .gender(Gender.FEMALE)
-                        .address("Earth")
-                        .birthDate(LocalDate.of(2009, Month.APRIL, 29))
-                        .build(),
-                5_000_000,
-                false
-        );
-    }
-
-    private Loan makeLoan(Client client, double amount) {
-        return new Loan(
-                client.accountNumber(),
-                LocalDate.of(2022, Month.AUGUST, 6),
-                amount,
-                true
-        );
-    }
 }

@@ -1,40 +1,31 @@
 package io.github.pitzzahh.atm.dao;
 
-import java.util.Map;
-import java.util.List;
-import java.util.Optional;
-import javax.sql.DataSource;
-import java.util.Collection;
-import java.util.function.Consumer;
+import static io.github.pitzzahh.util.utilities.classes.enums.Status.ERROR;
+import static io.github.pitzzahh.util.utilities.classes.enums.Status.SUCCESS;
+import io.github.pitzzahh.atm.exceptions.ClientNotFoundException;
+import io.github.pitzzahh.util.utilities.classes.enums.Status;
+import io.github.pitzzahh.atm.entity.Client;
+import io.github.pitzzahh.atm.entity.Loan;
+import static java.lang.String.format;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.function.BiFunction;
-import io.github.pitzzahh.atm.entity.Loan;
-import io.github.pitzzahh.atm.entity.Client;
-import io.github.pitzzahh.atm.entity.Message;
-import io.github.pitzzahh.atm.service.AtmService;
-import io.github.pitzzahh.util.utilities.classes.enums.Status;
+import java.util.*;
 
-/**
- * interface used to access the database. Implemented by {@code InDatabase}.
- * Used in {@code AtmService}
- * @see InDatabase
- * @see AtmService
- */
-public interface AtmDAO {
+public class InMemory implements AtmDAO {
 
     /**
-     * Function that accepts a {@code DataSource} object.
-     * Object needed to connect to the database.
-     * @return nothing
-     * @throws RuntimeException if failed to connect to the database.
-     * @see Consumer
-     * @see DataSource
+     * Stores the {@code Client} objects.
+     * The {@code Map<String, Client>} object.
      */
-    default Consumer<DataSource> setDataSource() throws RuntimeException {
-        return null;
-    }
+    private final Map<String, Client> CLIENTS = new HashMap<>();
+
+    /**
+     * Stores the {@code Loan} objects.
+     * The {@code Map<String, Loan>} object.
+     */
+    private final Map<String, Loan> LOANS = new HashMap<>();
 
     /**
      * Function that supplies a {@code Map<String, Client>}.
@@ -45,7 +36,10 @@ public interface AtmDAO {
      * @see Supplier
      * @see Client
      */
-    Supplier<Map<String, Client>> getAllClients();
+    @Override
+    public Supplier<Map<String, Client>> getAllClients() {
+        return () -> CLIENTS;
+    }
 
     /**
      * Function that returns a {@code Optional<Client>} object based on the {@code String}
@@ -57,7 +51,15 @@ public interface AtmDAO {
      * @see Function
      * @see Client
      */
-    Function<String, Client> getClientByAccountNumber() throws IllegalArgumentException;
+    @Override
+    public Function<String, Client> getClientByAccountNumber() throws IllegalArgumentException {
+        return accountNumber -> CLIENTS.entrySet()
+                .stream()
+                .filter(e -> e.getKey().equals(accountNumber))
+                .findAny()
+                .map(Map.Entry::getValue)
+                .orElseThrow(() -> new ClientNotFoundException(format("Client with account number [%s] does not exist", accountNumber)));
+    }
 
     /**
      * Function that accepts a {@code String} containing the account number.
@@ -65,7 +67,10 @@ public interface AtmDAO {
      * @return a {@code Double} containing the savings of the client with the account number.
      * @see Function
      */
-    Function<String, Double> getClientSavingsByAccountNumber();
+    @Override
+    public Function<String, Double> getClientSavingsByAccountNumber() {
+        return accountNumber -> getClientByAccountNumber().apply(accountNumber).savings();
+    }
 
     /**
      * Function that removes a client in the database using the account number.
@@ -75,7 +80,15 @@ public interface AtmDAO {
      * @see Function
      * @see Status
      */
-    Function<String, Status> removeClientByAccountNumber();
+    @Override
+    public Function<String, Status> removeClientByAccountNumber() {
+        return accountNumber -> {
+            var isPresent = CLIENTS.containsKey(accountNumber);
+            if (isPresent) CLIENTS.remove(accountNumber);
+            else throw new ClientNotFoundException(format("Client with account number [%s] does not exist", accountNumber));
+            return SUCCESS;
+        };
+    }
 
     /**
      * Function that removes all the clients in the database.
@@ -83,7 +96,11 @@ public interface AtmDAO {
      * @see Supplier
      * @see Status
      */
-    Supplier<Status> removeAllClients();
+    @Override
+    public Supplier<Status> removeAllClients() {
+        CLIENTS.clear();
+        return () -> CLIENTS.isEmpty() ? SUCCESS : ERROR;
+    }
 
     /**
      * Function that accepts two values. A {@code String} and a {@code Boolean}.
@@ -93,7 +110,14 @@ public interface AtmDAO {
      * @see BiFunction
      * @see Status
      */
-    BiFunction<String, Boolean, Status> updateClientStatusByAccountNumber();
+    @Override
+    public BiFunction<String, Boolean, Status> updateClientStatusByAccountNumber() {
+        return (accountNumber, status) -> {
+            var client = getClientByAccountNumber().apply(accountNumber);
+            client.setLocked(status);
+            return client.isLocked() == status? SUCCESS : ERROR;
+        };
+    }
 
     /**
      * Function that accepts two values. A {@code String} and a {@code Double}.
@@ -103,7 +127,14 @@ public interface AtmDAO {
      * @see BiFunction
      * @see Status
      */
-    BiFunction<String, Double, Status> updateClientSavingsByAccountNumber();
+    @Override
+    public BiFunction<String, Double, Status> updateClientSavingsByAccountNumber() {
+        return (accountNumber, savings) -> {
+            var client = getClientByAccountNumber().apply(accountNumber);
+            client.setSavings(savings);
+            return client.savings() == savings ? SUCCESS : ERROR;
+        };
+    }
 
     /**
      * Function that save a client to the database. The function takes a {@code Client} object,
@@ -113,7 +144,10 @@ public interface AtmDAO {
      * @see Client
      * @see Status
      */
-    Function<Client, Status> saveClient();
+    @Override
+    public Function<Client, Status> saveClient() {
+        return client -> CLIENTS.put(client.accountNumber(), client) == client ? SUCCESS : ERROR;
+    }
 
     /**
      * Function that saves a {@code Collection<Client} to the database table.
@@ -123,7 +157,17 @@ public interface AtmDAO {
      * @see Client
      * @see Status
      */
-    Function<Collection<Client>, Status> saveAllClients();
+    @Override
+    public Function<Collection<Client>, Status> saveAllClients() {
+        return clients -> {
+            CLIENTS.putAll(
+                    clients.stream()
+                            .collect(Collectors.toMap(Client::accountNumber, Function.identity()))
+            );
+            System.out.println(CLIENTS);
+            return CLIENTS.size() == clients.size() ? SUCCESS : ERROR;
+        };
+    }
 
     /**
      * Function that submits a loan request.
@@ -133,7 +177,14 @@ public interface AtmDAO {
      * @see Loan
      * @see Status
      */
-    Function<Loan, Status> requestLoan();
+    @Override
+    public Function<Loan, Status> requestLoan() {
+        return loan -> {
+            var loanCount = getLoanCount().apply(loan.accountNumber());
+            LOANS.put(loan.accountNumber(), loan);
+            return Objects.equals(loanCount, getLoanCount().apply(loan.accountNumber())) ? SUCCESS : ERROR;
+        };
+    }
 
     /**
      * Function that returns a key value pair, a {@code Map<String, List<Loan>>} in particular.
@@ -145,7 +196,12 @@ public interface AtmDAO {
      * @see List
      * @see Loan
      */
-    Supplier<Map<String, List<Loan>>> getAllLoans();
+    @Override
+    public Supplier<Map<String, List<Loan>>> getAllLoans() {
+        return () -> LOANS.values()
+                .stream()
+                .collect(Collectors.groupingBy(Loan::accountNumber));
+    }
 
     /**
      * Function that gets the loan of a client using loan number and account number.
@@ -156,7 +212,13 @@ public interface AtmDAO {
      * @see Optional
      * @see Loan
      */
-    BiFunction<Integer, String, Optional<Loan>> getLoanByLoanNumberAndAccountNumber();
+    @Override
+    public BiFunction<Integer, String, Optional<Loan>> getLoanByLoanNumberAndAccountNumber() {
+        return (loanNumber, accountNumber) -> LOANS.values()
+                .stream()
+                .filter(loan -> loan.loanNumber() == loanNumber && loan.accountNumber().equals(accountNumber))
+                .findAny();
+    }
 
     /**
      * Function that gets the latest loan count of a client and returns the count.
@@ -164,7 +226,18 @@ public interface AtmDAO {
      * @return a {@code Integer} containing the loan count of a client.
      * @see Function
      */
-    Function<String, Integer> getLoanCount();
+    @Override
+    public Function<String, Integer> getLoanCount() {
+        return accountNumber -> {
+            int result = LOANS.values()
+                    .stream()
+                    .filter(loan -> loan.accountNumber().equals(accountNumber))
+                    .map(Loan::loanNumber)
+                    .max(Comparator.comparingInt(Integer::intValue))
+                    .orElse(0);
+            return result >= 1 ? result + 1 : 1;
+        };
+    }
 
     /**
      * Function that approves a loan request.
@@ -174,7 +247,16 @@ public interface AtmDAO {
      * @see Loan
      * @see Status
      */
-    BiFunction<Loan, Client, Status> approveLoan();
+    @Override
+    public BiFunction<Loan, Client, Status> approveLoan() {
+        return (loan, client) -> {
+            var c = getClientByAccountNumber().apply(client.accountNumber());
+            System.out.println("c = " + c);
+            var status = updateClientSavingsByAccountNumber().apply(c.accountNumber(), c.savings() + loan.amount());
+            LOANS.get(loan.accountNumber()).setPending(false);
+            return status;
+        };
+    }
 
     /**
      * Function that declines a loan request.
@@ -184,7 +266,13 @@ public interface AtmDAO {
      * @see Loan
      * @see Status
      */
-    Function<Loan, Status> declineLoan();
+    @Override
+    public Function<Loan, Status> declineLoan() {
+        return loan -> {
+            LOANS.get(loan.accountNumber()).setDeclined(true);
+            return LOANS.get(loan.accountNumber()).isDeclined() ? SUCCESS : ERROR;
+        };
+    }
 
     /**
      * Function that removes a loan.
@@ -194,7 +282,10 @@ public interface AtmDAO {
      * @see Loan
      * @see Status
      */
-    Function<Loan, Status> removeLoan();
+    @Override
+    public Function<Loan, Status> removeLoan() {
+        return loan -> loan.equals(LOANS.remove(loan.accountNumber())) ? SUCCESS : ERROR;
+    }
 
     /**
      * Function that removes all the loans from the database.
@@ -202,35 +293,10 @@ public interface AtmDAO {
      * @see Supplier
      * @see Status
      */
-    Supplier<Status> removeAllLoans();
-
-    /**
-     * Function that gets the message of the loan request of a client to the database.
-     * The Function takes a {@code String}.
-     * The {@code String} contains the account number of the client.
-     * @return a {@code Message} object containing the message of the loan.
-     * @see Function
-     * @see Map
-     * @see List
-     * @see Message
-     */
-    default Function<String, Map<String, List<Message>>> getMessage() {
-        return accountNumber -> {
-            var client = getClientByAccountNumber().apply(accountNumber);
-            var check = getAllLoans()
-                    .get()
-                    .values()
-                    .stream()
-                    .flatMap(Collection::stream)
-                    .allMatch(a -> a.accountNumber().equals(accountNumber) && ( a.pending() && !a.isDeclined() ));
-            if (check) throw new IllegalStateException("THERE ARE NO MESSAGES AT THE MOMENT");
-            return getAllLoans().get()
-                    .values()
-                    .stream()
-                    .flatMap(Collection::stream)
-                    .filter(l -> !l.pending() || l.isDeclined())
-                    .map(loan -> new Message(loan, client, loan.pending() && loan.isDeclined()))
-                    .collect(Collectors.groupingBy(message -> message.loan().accountNumber()));
-        };
+    @Override
+    public Supplier<Status> removeAllLoans() {
+        LOANS.clear();
+        return () -> LOANS.isEmpty() ? SUCCESS : ERROR;
     }
+
 }
