@@ -13,6 +13,10 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.*;
 
+/**
+ * Saves the data in memory.
+ * Class used to access the database. Implemented by {@code InDatabase}.
+ */
 public class InMemory implements AtmDAO {
 
     /**

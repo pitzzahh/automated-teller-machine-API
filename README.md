@@ -8,7 +8,7 @@ API used for making atm applications (none-web-app)
 ________________________________________
 ## Quickstart
 ### How to use the API
-* connecting to a database
+* With Database (can use any DBMS)
 
 ```java
 import io.github.pitzzahh.atm.database.DatabaseConnection;
@@ -21,92 +21,62 @@ public class App {
     private static final DatabaseConnection DATABASE_CONNECTION = new DatabaseConnection();
 
     public static void main(String[] args) {
-        AtmService atmService = new AtmService(ATM_DAO, DATABASE_CONNECTION);
+        AtmService atmService = new AtmService(ATM_DAO);
         atmService.setDataSource().accept(
                 DATABASE_CONNECTION
                         .setDriverClassName("org.postgresql.Driver")
-                        .setUrl("jdbc:postgresql://localhost/postgres")
-                        .setUsername("usernameHere")
-                        .setPassword("passwordHere")
+                        .setUrl("jdbc:postgresql://localhost/{database_name}")
+                        .setUsername("{username}")
+                        .setPassword("{password}")
                         .getDataSource()
         );
     }
 }
-
  ```
-* saving clients to the database
+
+---
+
+* Without Database (in-memory)
 
 ```java
-import com.github.pitzzahh.utilities.classes.enums.Gender;
-import io.github.pitzzahh.atm.database.DatabaseConnection;
-
-import static com.github.pitzzahh.utilities.Print.println;
-
-import io.github.pitzzahh.atm.dao.InDatabase;
-import com.github.pitzzahh.utilities.classes.Person;
 import io.github.pitzzahh.atm.service.AtmService;
-import io.github.pitzzahh.atm.entity.Client;
-import io.github.pitzzahh.atm.dao.AtmDAO;
-
-import java.time.LocalDate;
-import java.time.Month;
+import io.github.pitzzahh.atm.dao.InMemory;
 
 public class App {
-    private static final AtmDAO ATM_DAO = new InDatabase();
-    private static final DatabaseConnection DATABASE_CONNECTION = new DatabaseConnection();
 
     public static void main(String[] args) {
-        AtmService atmService = new AtmService(ATM_DAO, DATABASE_CONNECTION);
-        atmService.setDataSource().accept(DATABASE_CONNECTION
-                .setDriverClassName("org.postgresql.Driver")
-                .setUrl("jdbc:postgresql://localhost/postgres")
-                .setUsername("usernameHere")
-                .setPassword("passwordHere")
-                .getDataSource()
-        );
-
-        atmService.saveClient().apply(
-                new Client(
-                        "123123123",
-                        "123123",
-                        new Person(
-                                "Mark",
-                                "Silent",
-                                Gender.PREFER_NOT_TO_SAY,
-                                "Earth",
-                                LocalDate.of(2018, Month.AUGUST, 10)
-                        ),
-                        5555,
-                        false
-                )
-        );
-        // getting the client, returns a Client object, throws IllegalArgumentException if account number does not belong to any client.
-        Client client = atmService.getClientByAccountNumber().apply("123123123");
-        // prints the client (using Print class from util-classes-API)
-        println(client);
-        // removes the client by account number
-        atmService.removeClientByAccountNumber().apply("123123123");
+        AtmService atmService = new AtmService(new InMemory()); 
     }
 }
+ ```
 
-```
+## Saving clients
+
+
 To save a client object, a method called `saveClient()` in `AtmService` is used. It is a Function that accepts a Client Object.
 ```java
 atmService.saveClient().apply(
         new Client(
-                "123123123", // the account number
-                "123123", // the account pin
+                "123123123",
+                "123123",
                 new Person(
-                      "Mark", // the first name
-                      "Silent", // the last name
-                      Gender.PREFER_NOT_TO_SAY, // the gender
-                      "Earth", // the address
-                      LocalDate.of(2018, Month.AUGUST, 10) // the birth date
-                 ),
-                 5555, // the initial account balance
-                 false // false means the account is not locked, otherwise true if locked
+                        "Mark",
+                        "Silent",
+                        Gender.PREFER_NOT_TO_SAY,
+                        "Earth",
+                        LocalDate.of(2018, Month.AUGUST, 10)
+                ),
+                5555,
+                false
         )
 );
+// getting the client, returns a Client object, throws IllegalArgumentException if account number does not belong to any client.
+Client client = atmService.getClientByAccountNumber().apply("123123123");
+// prints the client (using Print class from util-classes-API)
+println(client);
+// removes the client by account number
+atmService.removeClientByAccountNumber().apply("123123123");
+
 ```
 To get the client from the database, there are two methods that can be used, first is `getClientByAccountNumber()` a method that accepts a
 `String` containing an account number, second is `getAllClients()` a method that get all the client
