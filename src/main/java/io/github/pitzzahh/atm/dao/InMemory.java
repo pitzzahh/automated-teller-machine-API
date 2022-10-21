@@ -2,6 +2,8 @@ package io.github.pitzzahh.atm.dao;
 
 import static io.github.pitzzahh.util.utilities.classes.enums.Status.ERROR;
 import static io.github.pitzzahh.util.utilities.classes.enums.Status.SUCCESS;
+import io.github.pitzzahh.atm.exceptions.ClientAlreadyExistException;
+import static io.github.pitzzahh.atm.validator.ServiceValidator.*;
 import io.github.pitzzahh.atm.exceptions.ClientNotFoundException;
 import io.github.pitzzahh.util.utilities.classes.enums.Status;
 import io.github.pitzzahh.atm.entity.Client;
@@ -134,17 +136,31 @@ public class InMemory implements AtmDAO {
      * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see BiFunction
      * @see Status
+     * @see Client
+     * @see Loan
      */
     @Override
     public BiFunction<String, Double, Status> updateClientSavingsByAccountNumber() {
-        return (accountNumber, savings) -> {
-            var status = getClientByAccountNumber().apply(accountNumber)
-                    .map(c -> {
-                        c.setSavings(savings);
-                        return c.savings() == savings ? SUCCESS : ERROR;
-                    });
-            return status.orElse(ERROR);
-        };
+        return this::updateClientSavingsByAccountNumber;
+    }
+
+    /**
+     * Internal implementation of the {@link #updateClientSavingsByAccountNumber()} function.
+     * @param accountNumber the account number of the client.
+     * @param savings the new savings balance of the client.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @see BiFunction
+     * @see Status
+     * @see Client
+     * @see #updateClientSavingsByAccountNumber()
+     */
+    private Status updateClientSavingsByAccountNumber(String accountNumber, Double savings) {
+        var status = getClientByAccountNumber().apply(accountNumber)
+                .map(c -> {
+                    c.setSavings(savings);
+                    return c.savings() == savings ? SUCCESS : ERROR;
+                });
+        return status.orElse(ERROR);
     }
 
     /**
@@ -157,7 +173,21 @@ public class InMemory implements AtmDAO {
      */
     @Override
     public Function<Client, Status> saveClient() {
-        return client -> CLIENTS.put(client.accountNumber(), client) == client ? SUCCESS : ERROR;
+        return this::save;
+    }
+
+    /**
+     * Internal implementation of saving clients.
+     * @param client the client to save.
+     * @return a {@code Status} if saved successfully or not.
+     * @see Status
+     * @see Client
+     */
+    private Status save(Client client) {
+        var exist = doesClientAlreadyExist().test(client.accountNumber());
+        if (exist) throw new ClientAlreadyExistException(format("Client with account number [%s] already exist", client.accountNumber()));
+        var result = CLIENTS.put(client.accountNumber(), client);
+        return result == client ? SUCCESS : result == null ? SUCCESS : ERROR;
     }
 
     /**
@@ -175,7 +205,6 @@ public class InMemory implements AtmDAO {
                     clients.stream()
                             .collect(Collectors.toMap(Client::accountNumber, Function.identity()))
             );
-            System.out.println(CLIENTS);
             return CLIENTS.size() == clients.size() ? SUCCESS : ERROR;
         };
     }
