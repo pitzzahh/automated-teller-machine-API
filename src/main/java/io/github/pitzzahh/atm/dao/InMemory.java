@@ -184,7 +184,7 @@ public class InMemory implements AtmDAO {
      * @see Client
      */
     private Status save(Client client) {
-        var exist = doesClientAlreadyExist().test(client.accountNumber());
+        var exist = doesClientAlreadyExist(this).test(client.accountNumber());
         if (exist) throw new ClientAlreadyExistException(format("Client with account number [%s] already exist", client.accountNumber()));
         var result = CLIENTS.put(client.accountNumber(), client);
         return result == client ? SUCCESS : result == null ? SUCCESS : ERROR;
