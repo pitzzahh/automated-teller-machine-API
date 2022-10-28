@@ -1,5 +1,6 @@
 io.github.pitzzahh.atm.dao
 io.github.pitzzahh.atm.database
 io.github.pitzzahh.atm.entity
+io.github.pitzzahh.atm.exceptions
 io.github.pitzzahh.atm.mapper
 io.github.pitzzahh.atm.service

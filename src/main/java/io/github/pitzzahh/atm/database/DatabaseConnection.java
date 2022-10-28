@@ -1,7 +1,7 @@
 package io.github.pitzzahh.atm.database;
 
+import io.github.pitzzahh.atm.dao.InDatabase;
 import io.github.pitzzahh.atm.service.AtmService;
-import io.github.pitzzahh.atm.dao.AtmDAOImplementation;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
@@ -21,7 +21,6 @@ public class DatabaseConnection {
      * <p>mysql: com.mysql.cj.jdbc.Driver</p>
      * @param driverClassName the driver class name
      * @return a {@code DatabaseConnection} object.
-     * @see org.postgresql.Driver
      */
     public DatabaseConnection setDriverClassName(String driverClassName) {
         this.driverClassName = driverClassName;
@@ -35,7 +34,6 @@ public class DatabaseConnection {
      * <p>mysql: jdbc:mysql://host1:33060/{@code <name of the database>}</p>
      * @param url the url to the database.
      * @return a {@code DatabaseConnection} object.
-     * @see org.postgresql.Driver
      */
     public DatabaseConnection setUrl(String url) {
         this.url = url;
@@ -66,7 +64,7 @@ public class DatabaseConnection {
      * Returns the complete data source.
      * @return the datasource.
      * @see AtmService
-     * @see AtmDAOImplementation
+     * @see InDatabase
      */
     public DriverManagerDataSource getDataSource() {
         var dataSource = new DriverManagerDataSource();

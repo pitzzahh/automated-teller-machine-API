@@ -8,17 +8,18 @@ import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.function.BiFunction;
 import io.github.pitzzahh.atm.entity.Loan;
 import io.github.pitzzahh.atm.entity.Client;
 import io.github.pitzzahh.atm.entity.Message;
 import io.github.pitzzahh.atm.service.AtmService;
-import com.github.pitzzahh.utilities.classes.enums.Status;
+import io.github.pitzzahh.util.utilities.classes.enums.Status;
 
 /**
- * interface used to access the database. Implemented by {@code AtmDAOImplementation}.
+ * interface used to access the database. Implemented by {@code InDatabase}.
  * Used in {@code AtmService}
- * @see AtmDAOImplementation
+ * @see InDatabase
  * @see AtmService
  */
 public interface AtmDAO {
@@ -31,10 +32,12 @@ public interface AtmDAO {
      * @see Consumer
      * @see DataSource
      */
-    Consumer<DataSource> setDataSource() throws RuntimeException;
+    default Consumer<DataSource> setDataSource() throws RuntimeException {
+        return null;
+    }
 
     /**
-     * Function that suppplies a {@code Map<String, Client>}.
+     * Function that supplies a {@code Map<String, Client>}.
      * <p>{@code String} - the key, the key is the account number of the client</p>
      * <p>{@code Client} - the value, the value is the client object</p>
      * @return a {@code Client} object
@@ -51,10 +54,11 @@ public interface AtmDAO {
      * <p>R - a {@code Optional<Client>} containing the result if the client is found or not.</p>
      * @return a {@code Optional<Client>} object.
      * @throws IllegalArgumentException if the account number does not belong to any client.
+     * @see Optional
      * @see Function
      * @see Client
      */
-    Function<String, Client> getClientByAccountNumber() throws IllegalArgumentException;
+    Function<String, Optional<Client>> getClientByAccountNumber() throws IllegalArgumentException;
 
     /**
      * Function that accepts a {@code String} containing the account number.
@@ -68,7 +72,7 @@ public interface AtmDAO {
      * Function that removes a client in the database using the account number.
      * <p>T - a {@code String} the account number of the client needed in order to remove the client.</p>
      * <p>R - the {@code Status} of the operation if {@link Status#SUCCESS} or {@link Status#ERROR}.</p>
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Status
      */
@@ -76,7 +80,7 @@ public interface AtmDAO {
 
     /**
      * Function that removes all the clients in the database.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Supplier
      * @see Status
      */
@@ -86,7 +90,7 @@ public interface AtmDAO {
      * Function that accepts two values. A {@code String} and a {@code Boolean}.
      * <p>First parameter is a {@code String} contains the account number of the client.</p>
      * <p>Second parameter is a {@code Boolean}, {@code true} if the client account should be locked, default is false.</p>
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see BiFunction
      * @see Status
      */
@@ -96,7 +100,7 @@ public interface AtmDAO {
      * Function that accepts two values. A {@code String} and a {@code Double}.
      * <p>First parameter is a {@code String} contains the account number of the client.</p>
      * <p>Second parameter is a {@code Double}, the new savings balance of the client.</p>
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see BiFunction
      * @see Status
      */
@@ -105,7 +109,7 @@ public interface AtmDAO {
     /**
      * Function that save a client to the database. The function takes a {@code Client} object,
      * the object to be saved in the database table.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Client
      * @see Status
@@ -114,7 +118,7 @@ public interface AtmDAO {
 
     /**
      * Function that saves a {@code Collection<Client} to the database table.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Collection
      * @see Client
@@ -125,7 +129,7 @@ public interface AtmDAO {
     /**
      * Function that submits a loan request.
      * The Function takes a {@code Loan} object containing the loan information.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Loan
      * @see Status
@@ -148,7 +152,7 @@ public interface AtmDAO {
      * Function that gets the loan of a client using loan number and account number.
      * The function takes an {@code Integer} and a {@code String}, the integer containing the loan number,
      * and the string containing the account number.
-     * @return an {@code Optional<Loan>} wether the loan exist or not.
+     * @return an {@code Optional<Loan>} whether the loan exist or not.
      * @see BiFunction
      * @see Optional
      * @see Loan
@@ -166,7 +170,7 @@ public interface AtmDAO {
     /**
      * Function that approves a loan request.
      * The function takes a {@code Loan} object containing the loan information to be approved.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see BiFunction
      * @see Loan
      * @see Status
@@ -176,7 +180,7 @@ public interface AtmDAO {
     /**
      * Function that declines a loan request.
      * The function takes a {@code Loan} object containing the loan information to be approved.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Loan
      * @see Status
@@ -186,7 +190,7 @@ public interface AtmDAO {
     /**
      * Function that removes a loan.
      * The function takes a {@code Loan} object containing the loan information to be removed.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Function
      * @see Loan
      * @see Status
@@ -195,21 +199,39 @@ public interface AtmDAO {
 
     /**
      * Function that removes all the loans from the database.
-     * @return a {@code Status} of the query wether {@link Status#SUCCESS} or {@link Status#ERROR}.
+     * @return a {@code Status} of the query whether {@link Status#SUCCESS} or {@link Status#ERROR}.
      * @see Supplier
      * @see Status
      */
     Supplier<Status> removeAllLoans();
 
     /**
-     * Function that gets the message of the loan requst of a client to the database.
+     * Function that gets the message of the loan request of a client to the database.
      * The Function takes a {@code String}.
      * The {@code String} contains the account number of the client.
-     * @return a {@code Message} object containg the message of the loan.
+     * @return a {@code Message} object containing the message of the loan.
      * @see Function
      * @see Map
      * @see List
      * @see Message
      */
-    Function<String, Map<String, List<Message>>> getMessage();
+    default Function<String, Map<String, List<Message>>> getMessage() {
+        return accountNumber -> {
+            var client = getClientByAccountNumber().apply(accountNumber).orElse(null);
+            var check = getAllLoans()
+                    .get()
+                    .values()
+                    .stream()
+                    .flatMap(Collection::stream)
+                    .allMatch(a -> a.accountNumber().equals(accountNumber) && ( a.pending() && !a.isDeclined() ));
+            if (check) throw new IllegalStateException("THERE ARE NO MESSAGES AT THE MOMENT");
+            return getAllLoans().get()
+                    .values()
+                    .stream()
+                    .flatMap(Collection::stream)
+                    .filter(l -> !l.pending() || l.isDeclined())
+                    .map(loan -> new Message(loan, client, loan.pending() && loan.isDeclined()))
+                    .collect(Collectors.groupingBy(message -> message.loan().accountNumber()));
+        };
+    }
 }
