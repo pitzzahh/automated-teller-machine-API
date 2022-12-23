@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static io.github.pitzzahh.atm.dao.Util.*;
 import io.github.pitzzahh.util.utilities.Print;
 import io.github.pitzzahh.atm.entity.Loan;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.*;
 import java.util.Collection;
 import java.util.List;
@@ -137,7 +138,7 @@ class InDatabaseTest extends InDatabase {
                 .filter(e -> e.getKey().equals(accountNumber))
                 .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
-                .toList();
+                .collect(Collectors.toList());
         // then
         result.forEach(Print::println);
     }
@@ -154,7 +155,7 @@ class InDatabaseTest extends InDatabase {
                 .filter(e -> e.getKey().equals(accountNumber))
                 .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
-                .toList();
+                .collect(Collectors.toList());
         // then
         result.forEach(Print::println);
     }
@@ -193,7 +194,7 @@ class InDatabaseTest extends InDatabase {
                 .filter(e -> e.getKey().equals(accountNumber))
                 .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
-                .toList();
+                .collect(Collectors.toList());
         // then
         result.forEach(Print::println);
     }
@@ -221,7 +222,7 @@ class InDatabaseTest extends InDatabase {
                     .filter(e -> e.getKey().equals(accountNumber))
                     .map(Map.Entry::getValue)
                     .flatMap(Collection::stream)
-                    .toList();
+                    .collect(Collectors.toList());
             // then
             result.forEach(Print::println);
         });

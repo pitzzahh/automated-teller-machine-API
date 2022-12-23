@@ -10,6 +10,7 @@ import io.github.pitzzahh.atm.service.AtmService;
 import static io.github.pitzzahh.atm.dao.Util.*;
 import io.github.pitzzahh.util.utilities.Print;
 import io.github.pitzzahh.atm.entity.Loan;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.*;
 import java.util.Collection;
 import java.util.List;
@@ -129,7 +130,7 @@ class InMemoryTest {
                 .filter(e -> e.getKey().equals(accountNumber))
                 .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
-                .toList();
+                .collect(Collectors.toList());
         // then
         result.forEach(Print::println);
     }
@@ -146,7 +147,7 @@ class InMemoryTest {
                 .filter(e -> e.getKey().equals(accountNumber))
                 .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
-                .toList();
+                .collect(Collectors.toList());
         // then
         result.forEach(Print::println);
     }
@@ -185,7 +186,7 @@ class InMemoryTest {
                 .filter(e -> e.getKey().equals(accountNumber))
                 .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
-                .toList();
+                .collect(Collectors.toList());
         // then
         result.forEach(Print::println);
     }
@@ -213,7 +214,7 @@ class InMemoryTest {
                     .filter(e -> e.getKey().equals(accountNumber))
                     .map(Map.Entry::getValue)
                     .flatMap(Collection::stream)
-                    .toList();
+                    .collect(Collectors.toList());
             // then
             result.forEach(Print::println);
         });
