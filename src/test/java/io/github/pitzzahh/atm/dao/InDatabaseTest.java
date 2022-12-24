@@ -29,8 +29,8 @@ class InDatabaseTest extends InDatabase {
                 DATABASE_CONNECTION
                         .setDriverClassName("org.postgresql.Driver")
                         .setUrl("jdbc:postgresql://localhost:5432/postgres")
-                        .setUsername("postgres")
-                        .setPassword("!P4ssW0rd@123")
+                        .setUsername("<username>>")
+                        .setPassword("<password>")
                         .getDataSource()
         );
     }
