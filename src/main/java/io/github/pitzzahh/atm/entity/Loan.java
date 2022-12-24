@@ -1,5 +1,6 @@
 package io.github.pitzzahh.atm.entity;
 
+import static io.github.pitzzahh.util.utilities.classes.Colors.*;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -99,10 +100,10 @@ public final class Loan {
      */
     @Override
     public String toString() {
-        return "LOAN NUMBER   : " + loanNumber + "\n" +
-               "ACCOUNT NUMBER: " + accountNumber + "\n" +
-               "DATE OF LOAN  : " + dateOfLoan + "\n" +
-               "AMOUNT        : " + NUMBER_FORMAT.format(amount) + "\n";
+        return "LOAN NUMBER   : " + BLUE_BOLD_BRIGHT + loanNumber + "\n" +
+               "ACCOUNT NUMBER: " + CYAN_BOLD_BRIGHT + accountNumber + "\n" +
+               "DATE OF LOAN  : " + YELLOW_BOLD_BRIGHT + dateOfLoan + "\n" +
+               "AMOUNT        : " + RED_BOLD_BRIGHT + NUMBER_FORMAT.format(amount) + RESET + "\n";
     }
 
     /**
